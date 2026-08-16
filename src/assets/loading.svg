@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <style>
+      .ring {
+        fill: none;
+        stroke: #00B4FF;
+        stroke-linecap: round;
+      }
+      .spin-slow {
+        animation: spin 8s linear infinite;
+        transform-origin: 200px 200px;
+      }
+      .spin-medium {
+        animation: spin 5s linear infinite reverse;
+        transform-origin: 200px 200px;
+      }
+      .spin-fast {
+        animation: spin 3s linear infinite;
+        transform-origin: 200px 200px;
+      }
+      .dash-anim {
+        animation: dash 2.5s ease-in-out infinite;
+      }
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      @keyframes dash {
+        0% { stroke-dashoffset: 0; }
+        50% { stroke-dashoffset: 40; }
+        100% { stroke-dashoffset: 0; }
+      }
+    </style>
+  </defs>
+
+  
+  
+  
+  <circle class="ring spin-slow" cx="200" cy="200" r="170" stroke-width="5" opacity="0.9"></circle>
+  
+  
+  <circle class="ring spin-medium dash-anim" cx="200" cy="200" r="150" stroke-width="2.5" stroke-dasharray="12 18" opacity="0.7"></circle>
+  
+  
+  <circle class="ring spin-fast" cx="200" cy="200" r="128" stroke-width="4" opacity="0.85"></circle>
+  
+  
+  <circle class="ring spin-slow dash-anim" cx="200" cy="200" r="108" stroke-width="2" stroke-dasharray="8 14" opacity="0.6"></circle>
+  
+  
+  <circle class="ring spin-medium" cx="200" cy="200" r="88" stroke-width="3.5" opacity="0.9"></circle>
+  
+  
+  <circle cx="200" cy="200" r="68" fill="#0A1628" stroke="#00B4FF" stroke-width="2.5"></circle>
+  
+  
+  <line x1="200" y1="25" x2="200" y2="48" stroke="#00B4FF" stroke-width="3" opacity="0.8"></line>
+  <line x1="200" y1="352" x2="200" y2="375" stroke="#00B4FF" stroke-width="3" opacity="0.8"></line>
+  <line x1="25" y1="200" x2="48" y2="200" stroke="#00B4FF" stroke-width="3" opacity="0.8"></line>
+  <line x1="352" y1="200" x2="375" y2="200" stroke="#00B4FF" stroke-width="3" opacity="0.8"></line>
+  
+  
+  <text x="200" y="210" text-anchor="middle" font-family="Orbitron, 'Segoe UI', system-ui, sans-serif" font-size="28" font-weight="600" fill="#E0F7FF" letter-spacing="3">
+    JARVIS
+  </text>
+</svg>
