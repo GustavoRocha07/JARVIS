@@ -7,13 +7,18 @@ import '@/styles/global.css';
 
 import { AppRouter } from './app/routes/AppRoutes';
 import { AppProviders } from './app/providers/AppProviders';
+import { GlobalProvider } from './styles/context/GlobalContext/GlobalContext';
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <BrowserRouter>
       <AppProviders>
-        <AppRouter />
+
+        <GlobalProvider>
+          <AppRouter />
+
+        </GlobalProvider>
       </AppProviders>
     </BrowserRouter>
   </React.StrictMode>,

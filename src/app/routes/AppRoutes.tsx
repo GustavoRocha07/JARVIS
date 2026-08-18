@@ -11,13 +11,14 @@ export function AppRouter() {
       <Route element={<AppLayout />}>
         <Route
           index
-          element={<Navigate to="/tasks" replace />}
+          element={<Navigate to="/" replace />}
         />
         <Route
           path="/tasks"
           element={<TasksPage />}
         />
-
+        <Route path="*" element={<Navigate to="/" replace />}
+        />
 
       </Route>
     </Routes>

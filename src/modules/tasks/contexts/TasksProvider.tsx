@@ -21,6 +21,7 @@ import {
     handleListTaskService,
     handleUpdateTaskService,
 } from "../services/tasks.service";
+import { useAlert } from "@/styles/context/AlertContext/useAlert";
 
 export const TasksProvider = ({
     children,
@@ -30,7 +31,7 @@ export const TasksProvider = ({
     );
 
     const [openModal, setOpenModal] = useState(false);
-
+    const { showAlert } = useAlert();
     const [selectedTask, setSelectedTask] =
         useState<Task | null>(null);
 
@@ -71,11 +72,19 @@ export const TasksProvider = ({
 
     const handleCreateTask = useCallback(
         (newTask: CreateTask) => {
-            handleCreateTaskService(newTask);
+            try {
+                handleCreateTaskService(newTask);
 
-            setTasks(handleListTaskService(filters));
+                setTasks(handleListTaskService(filters));
+                showAlert('success', 'Task Criada com Sucesso!')
+
+            } catch (error) {
+                if (typeof error === 'string') {
+                    showAlert('error', error)
+                }
+            }
         },
-        [filters]
+        [filters, showAlert]
     );
 
     const handleUpdateTask = useCallback(
@@ -83,17 +92,18 @@ export const TasksProvider = ({
             handleUpdateTaskService(task.id, task,);
 
             setTasks(handleListTaskService(filters));
+            showAlert('success', 'Task Atualizada com Sucesso!')
         },
-        [filters]
+        [filters, showAlert]
     );
 
     const handleDeleteTask = useCallback(
         (taskId: number) => {
             handleDeleteTaskService(taskId);
-
+            showAlert('success', 'Task Deletada  com Sucesso!')
             setTasks(handleListTaskService(filters));
         },
-        [filters]
+        [filters, showAlert]
     );
 
     /*
