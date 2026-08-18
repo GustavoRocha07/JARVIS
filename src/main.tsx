@@ -7,7 +7,7 @@ import '@/styles/global.css';
 
 import { AppRouter } from './app/routes/AppRoutes';
 import { AppProviders } from './app/providers/AppProviders';
-import { GlobalProvider } from './styles/context/GlobalContext/GlobalContext';
+import { GlobalProvider } from './context/GlobalContext/GlobalContext';
 
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

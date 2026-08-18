@@ -21,7 +21,7 @@ import {
     handleListTaskService,
     handleUpdateTaskService,
 } from "../services/tasks.service";
-import { useAlert } from "@/styles/context/AlertContext/useAlert";
+import { useAlert } from "@/context/AlertContext/useAlert";
 
 export const TasksProvider = ({
     children,
