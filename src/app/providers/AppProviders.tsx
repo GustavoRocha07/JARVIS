@@ -4,6 +4,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 
 
 import { theme } from '@/app/theme/theme';
+import { AlertProvider } from '@/context/AlertContext/AlertProvider';
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -14,9 +15,12 @@ export function AppProviders({ children }: AppProvidersProps) {
   return (
 
     <ThemeProvider theme={theme}>
-      <CssBaseline />
+      <AlertProvider>
 
-      {children}
+        <CssBaseline />
+        {children}
+      </AlertProvider>
+
     </ThemeProvider>
 
   );
