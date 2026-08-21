@@ -135,7 +135,7 @@ export const TaskModal = ({
         action: "CREATE",
         data: createTask,
       };
-      console.log(payload)
+
       onSubmit(payload);
     },
   });

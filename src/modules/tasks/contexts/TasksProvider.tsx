@@ -23,6 +23,8 @@ import {
 } from "../services/tasks.service";
 import { useAlert } from "@/context/AlertContext/useAlert";
 
+import { isApiError } from "../rules/isApiError";
+
 export const TasksProvider = ({
     children,
 }: PropsWithChildren) => {
@@ -78,10 +80,23 @@ export const TasksProvider = ({
                 setTasks(handleListTaskService(filters));
                 showAlert('success', 'Task Criada com Sucesso!')
 
-            } catch (error) {
-                if (typeof error === 'string') {
-                    showAlert('error', error)
+            } catch (error: unknown) {
+                if (isApiError(error)) {
+                    showAlert('error', error.message);
+                    return;
                 }
+
+                if (error instanceof Error) {
+                    showAlert('error', error.message);
+                    return;
+                }
+
+                if (typeof error === 'string') {
+                    showAlert('error', error);
+                    return;
+                }
+
+                showAlert('error', 'Ocorreu um erro inesperado.');
             }
         },
         [filters, showAlert]
@@ -89,19 +104,59 @@ export const TasksProvider = ({
 
     const handleUpdateTask = useCallback(
         (task: UpdateTask) => {
-            handleUpdateTaskService(task.id, task,);
 
-            setTasks(handleListTaskService(filters));
-            showAlert('success', 'Task Atualizada com Sucesso!')
+            try {
+                handleUpdateTaskService(task.id, task,);
+
+                setTasks(handleListTaskService(filters));
+                showAlert('success', 'Task Atualizada com Sucesso!')
+            } catch (error: unknown) {
+                if (isApiError(error)) {
+                    showAlert('error', error.message);
+                    return;
+                }
+
+                if (error instanceof Error) {
+                    showAlert('error', error.message);
+                    return;
+                }
+
+                if (typeof error === 'string') {
+                    showAlert('error', error);
+                    return;
+                }
+
+                showAlert('error', 'Ocorreu um erro inesperado.');
+            }
+
         },
         [filters, showAlert]
     );
 
     const handleDeleteTask = useCallback(
         (taskId: number) => {
-            handleDeleteTaskService(taskId);
-            showAlert('success', 'Task Deletada  com Sucesso!')
-            setTasks(handleListTaskService(filters));
+            try {
+                handleDeleteTaskService(taskId);
+                showAlert('success', 'Task Deletada  com Sucesso!')
+                setTasks(handleListTaskService(filters));
+            } catch (error: unknown) {
+                if (isApiError(error)) {
+                    showAlert('error', error.message);
+                    return;
+                }
+
+                if (error instanceof Error) {
+                    showAlert('error', error.message);
+                    return;
+                }
+
+                if (typeof error === 'string') {
+                    showAlert('error', error);
+                    return;
+                }
+
+                showAlert('error', 'Ocorreu um erro inesperado.');
+            }
         },
         [filters, showAlert]
     );
@@ -178,7 +233,7 @@ export const TasksProvider = ({
         ]
     );
 
-    console.log("TasksProvider render");
+
 
     return (
         <TasksDataContext.Provider value={dataValue}>
