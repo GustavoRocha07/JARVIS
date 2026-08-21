@@ -140,6 +140,7 @@ export const TaskModal = ({
     },
   });
 
+
   useEffect(() => {
     if (!open) {
       formik.resetForm();
@@ -186,7 +187,7 @@ export const TaskModal = ({
       title={
         title ||
         (isEditing
-          ? "Editar Tarefa"
+          ? `${initialData?.title}`
           : "Criar Nova Tarefa")
       }
       actions={renderActions}

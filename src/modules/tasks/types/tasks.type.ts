@@ -1,5 +1,8 @@
+import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 
 export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+
+export type TaskModalMode = 'view' | 'edit' | 'create';
 
 export type TaskPriority =
     | "LOW"
@@ -13,13 +16,10 @@ export interface Task {
     description: string;
     status: TaskStatus;
     priority: TaskPriority;
+    subTasks?: SubTask[];
     createdAt: Date;
     dueDate: Date;
 }
-
-
-
-
 
 export type CreateTask = Omit<Task, 'id' | 'createdAt'>
 export type UpdateTask = Omit<Task, 'createdAt'>
@@ -53,6 +53,8 @@ const isTaskStatus = (value: unknown): value is TaskStatus => {
         value === "CANCELLED"
     );
 };
+
+
 
 const isTaskPriority = (value: unknown): value is TaskPriority => {
     return (

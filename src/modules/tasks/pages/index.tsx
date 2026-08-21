@@ -1,25 +1,21 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
 
 import { HeaderComponent } from "@/shared/components/HeaderComponent";
-import { TableComponent } from "@/shared/components/TableComponent";
+import { PaginationComponent } from "@/shared/components/Pagination";
 
 import { TaskModal } from "../components/Modal/TaskModal";
 import { TaskSummary } from "../components/TaskSummary/TaskSummary";
+import { TaskCard } from "../components/TaskCard/TaskCard";
 
 import { TasksProvider } from "../contexts/TasksProvider";
 import { useTasksData } from "../contexts/useTasksData";
 import { useTasksUI } from "../contexts/useTasksUI";
 
-
-
-import type {
-  Task,
-  TaskSubmit,
-} from "../types/tasks.type";
-import { createTaskColumns } from "../hook/tasks.columns";
+import type { TaskSubmit } from "../types/tasks.type";
+import { ConfirmationModal } from "@/shared/components/ConfirmModal/ConfirmationModal";
 
 const TasksContent = () => {
   const {
@@ -32,26 +28,33 @@ const TasksContent = () => {
   const {
     openModal,
     selectedTask,
+    openConfirmDeletedModal,
     handleOpenModal,
     handleCloseModal,
+    handleConfirmDeletedTask,
+    handleCloseConfirmDeletedModal,
   } = useTasksUI();
 
-  const [page, setPage] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
 
-  const columns = useMemo(
-    () =>
-      createTaskColumns({
-        onEdit: handleOpenModal,
-        onDelete: handleDeleteTask,
-      }),
-    [handleOpenModal, handleDeleteTask]
-  );
+  const totalPages = Math.ceil(tasks.length / rowsPerPage);
 
   const paginatedTasks = tasks.slice(
-    page * rowsPerPage,
-    page * rowsPerPage + rowsPerPage
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
   );
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+
+    // Sempre volta para primeira página
+    setPage(1);
+  };
 
   const handleSubmitTask = (payload: TaskSubmit) => {
     if (payload.action === "CREATE") {
@@ -80,21 +83,28 @@ const TasksContent = () => {
         <TaskSummary />
       </Box>
 
-      <Box sx={{ mt: 3 }}>
-        <TableComponent<Task>
-          data={paginatedTasks}
-          columns={columns}
-          page={page}
-          rowsPerPage={rowsPerPage}
-          total={tasks.length}
-          onPageChange={(newPage) => setPage(newPage)}
-          onRowsPerPageChange={(newRowsPerPage) => {
-            setRowsPerPage(newRowsPerPage);
-            setPage(0);
-          }}
-          getRowId={(row) => row.id}
-        />
+      <Box sx={{ mt: 3, minHeight: '50vh' }}>
+        {paginatedTasks.map((task) => (
+          <TaskCard
+            key={task.id}
+            task={task}
+            onClick={(task) => console.log(task)}
+            onEdit={handleOpenModal}
+            handleConfirmDeletedTask={handleConfirmDeletedTask}
+          />
+        ))}
       </Box>
+
+      {tasks.length > 0 && (
+        <PaginationComponent
+          page={page}
+          count={totalPages}
+          rowsPerPage={rowsPerPage}
+          onPageChange={handlePageChange}
+          onRowsPerPageChange={handleRowsPerPageChange}
+
+        />
+      )}
 
       {openModal && (
         <TaskModal
@@ -102,13 +112,27 @@ const TasksContent = () => {
           onClose={handleCloseModal}
           title={
             selectedTask
-              ? "Editar Tarefa"
+              ? selectedTask.title.toUpperCase()
               : "Cadastrar Tarefa"
           }
           initialData={selectedTask}
           onSubmit={handleSubmitTask}
         />
       )}
+
+      {
+        openConfirmDeletedModal && (
+          <ConfirmationModal
+            open={openConfirmDeletedModal}
+            title={`Tem certeza que deseja excluir a tarefa ${selectedTask?.title}?`}
+            onConfirm={() => handleDeleteTask(selectedTask?.id ?? 0)}
+            onCancel={handleCloseConfirmDeletedModal}
+
+            message={selectedTask?.description}
+          />
+
+        )
+      }
     </Box>
   );
 };

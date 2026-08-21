@@ -37,6 +37,8 @@ export const TasksProvider = ({
     const [selectedTask, setSelectedTask] =
         useState<Task | null>(null);
 
+    const [openConfirmDeletedModal, setOpenConfirmDeletedModal] = useState(false)
+
     const [filters, setFilters] =
         useState<TasksParamsSearch>({});
 
@@ -133,6 +135,17 @@ export const TasksProvider = ({
         [filters, showAlert]
     );
 
+    const handleConfirmDeletedTask = useCallback((task: Task) => {
+        setSelectedTask(task)
+        setOpenConfirmDeletedModal(true)
+    }, [])
+
+
+    const handleCloseConfirmDeletedModal = useCallback(() => {
+        setOpenConfirmDeletedModal(false);
+        setSelectedTask(null);
+    }, []);
+
     const handleDeleteTask = useCallback(
         (taskId: number) => {
             try {
@@ -202,6 +215,7 @@ export const TasksProvider = ({
             handleCreateTask,
             handleUpdateTask,
             handleDeleteTask,
+
         }),
         [
             tasks,
@@ -209,27 +223,34 @@ export const TasksProvider = ({
             handleCreateTask,
             handleUpdateTask,
             handleDeleteTask,
+
         ]
     );
 
     const uiValue = useMemo(
         () => ({
+            filters,
             openModal,
             selectedTask,
-            filters,
+            openConfirmDeletedModal,
             handleOpenModal,
             handleCloseModal,
             handleSetFilters,
             handleClearFilters,
+            handleConfirmDeletedTask,
+            handleCloseConfirmDeletedModal
         }),
         [
+            filters,
             openModal,
             selectedTask,
-            filters,
+            openConfirmDeletedModal,
             handleOpenModal,
             handleCloseModal,
             handleSetFilters,
             handleClearFilters,
+            handleConfirmDeletedTask,
+            handleCloseConfirmDeletedModal
         ]
     );
 

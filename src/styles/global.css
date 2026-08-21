@@ -12,3 +12,15 @@ body {
   margin: 0;
   font-family: "Orbitron", sans-serif;
 }
+
+
+.cardContainer {
+  margin: 1rem 0rem;
+  border-radius: 1rem ;
+
+
+  &:hover {
+    background-color: #f0f0f0;
+    cursor: pointer;
+  }
+}

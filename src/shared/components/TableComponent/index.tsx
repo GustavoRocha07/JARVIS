@@ -23,6 +23,7 @@ type TableComponentProps<T> = {
   page: number;
   rowsPerPage: number;
   total: number;
+  onRowClick: (row: T) => void;
   getRowId: (row: T) => React.Key;
   onPageChange: (page: number) => void;
   onRowsPerPageChange: (rowsPerPage: number) => void;
@@ -35,6 +36,7 @@ export function TableComponent<T>({
   rowsPerPage,
   total,
   getRowId,
+  onRowClick,
   onPageChange,
   onRowsPerPageChange,
 }: TableComponentProps<T>) {
@@ -51,7 +53,7 @@ export function TableComponent<T>({
     onRowsPerPageChange(Number(event.target.value));
     onPageChange(0);
   };
-
+  const clickable = Boolean(onRowClick);
   return (
     <Paper>
       <TableContainer>
@@ -87,6 +89,10 @@ export function TableComponent<T>({
                 <TableRow
                   key={getRowId(row)}
                   hover
+                  sx={{
+                    cursor: clickable ? 'pointer' : 'auto'
+                  }}
+                  onClick={clickable ? () => onRowClick?.(row) : undefined}
                 >
                   {columns.map((column) => {
                     const value =
