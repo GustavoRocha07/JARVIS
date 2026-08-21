@@ -50,9 +50,12 @@ export const TaskCard = ({ task, onClick, onEdit, handleConfirmDeletedTask }: Ta
 
                     <Chip size="small" sx={statusStyles[task.status]} label={priorityLabels[task.priority]} />
 
-                    <Box sx={{
-                        minWidth: '10%'
-                    }}>
+                    <Box
+                        onClick={(event) => event.stopPropagation()}
+                        sx={{
+                            minWidth: '10%'
+
+                        }}>
 
                         <IconButton
                             aria-label="Editar Tarefa"
