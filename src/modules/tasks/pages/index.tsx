@@ -36,7 +36,7 @@ const TasksContent = () => {
   } = useTasksUI();
 
   const [page, setPage] = useState<number>(1);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [rowsPerPage] = useState<number>(10);
 
   const totalPages = Math.ceil(tasks.length / rowsPerPage);
 
@@ -49,12 +49,7 @@ const TasksContent = () => {
     setPage(newPage);
   };
 
-  const handleRowsPerPageChange = (newRowsPerPage: number) => {
-    setRowsPerPage(newRowsPerPage);
 
-    // Sempre volta para primeira página
-    setPage(1);
-  };
 
   const handleSubmitTask = (payload: TaskSubmit) => {
     if (payload.action === "CREATE") {
@@ -99,9 +94,9 @@ const TasksContent = () => {
         <PaginationComponent
           page={page}
           count={totalPages}
-          rowsPerPage={rowsPerPage}
+         
           onPageChange={handlePageChange}
-          onRowsPerPageChange={handleRowsPerPageChange}
+
 
         />
       )}

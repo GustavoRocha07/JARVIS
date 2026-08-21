@@ -3,12 +3,8 @@ import { Box, Pagination } from "@mui/material";
 interface PaginationComponentProps {
     page: number;
     count: number;
-    rowsPerPage: number;
 
     onPageChange: (page: number) => void;
-    onRowsPerPageChange: (rowsPerPage: number) => void;
-
-    rowsPerPageOptions?: number[];
 }
 
 export const PaginationComponent = ({
