@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { AddOutlined } from "@mui/icons-material";
-import { Box } from "@mui/material";
+import { Box, } from "@mui/material";
 
 import { HeaderComponent } from "@/shared/components/HeaderComponent";
 import { PaginationComponent } from "@/shared/components/Pagination";
@@ -16,6 +16,7 @@ import { useTasksUI } from "../contexts/useTasksUI";
 
 import type { TaskSubmit } from "../types/tasks.type";
 import { ConfirmationModal } from "@/shared/components/ConfirmModal/ConfirmationModal";
+import { EmptyCard } from "@/shared/components/EmptyCard/EmptyCard";
 
 const TasksContent = () => {
   const {
@@ -88,13 +89,18 @@ const TasksContent = () => {
             handleConfirmDeletedTask={handleConfirmDeletedTask}
           />
         ))}
+
+        {tasks.length === 0 && (
+          <EmptyCard />
+        )}
+
       </Box>
 
       {tasks.length > 0 && (
         <PaginationComponent
           page={page}
           count={totalPages}
-         
+
           onPageChange={handlePageChange}
 
 

@@ -152,6 +152,8 @@ export const TasksProvider = ({
                 handleDeleteTaskService(taskId);
                 showAlert('success', 'Task Deletada  com Sucesso!')
                 setTasks(handleListTaskService(filters));
+                setOpenConfirmDeletedModal(false);
+                setSelectedTask(null);
             } catch (error: unknown) {
                 if (isApiError(error)) {
                     showAlert('error', error.message);
