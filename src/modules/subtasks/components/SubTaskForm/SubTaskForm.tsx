@@ -4,6 +4,7 @@ import AddRoundedIcon from "@mui/icons-material/AddRounded";
 import {
     Box,
     Button,
+    Checkbox,
     IconButton,
     MenuItem,
     Stack,
@@ -91,12 +92,18 @@ export const SubTaskComponent = () => {
                                         borderRadius: 1,
                                     }}
                                 >
+                                    <Checkbox
+                                        name={`subTasks.${index}.completed`}
+                                        checked={subTask.status === 'COMPLETED'}
+                                        onChange={handleChange}
+                                    />
                                     <Stack
                                         spacing={1.5}
                                         sx={{
                                             flex: 1,
                                         }}
                                     >
+
                                         <TextField
                                             fullWidth
                                             size="small"
