@@ -1,37 +1,42 @@
 import { createContext } from "react";
 
 import type {
-    CreateTask,
-    Task,
-    UpdateTask,
+  CreateTask,
+  Task,
+  TaskSubmit,
+  UpdateTask,
 } from "../types/tasks.type";
 
 export type TaskSummary = {
-    total: number;
-    pending: number;
-    inProgress: number;
-    completed: number;
+  total: number;
+  pending: number;
+  inProgress: number;
+  completed: number;
 };
 
 export type TasksDataContextValue = {
-    tasks: Task[];
+  tasks: Task[];
 
-    summary: TaskSummary;
+  summary: TaskSummary;
 
-    handleCreateTask: (
-        task: CreateTask,
-    ) => Task | null;
+  handleSubmitTask: (
+    payload: TaskSubmit,
+  ) => boolean;
 
-    handleUpdateTask: (
-        task: UpdateTask,
-    ) => Task | null;
+  handleCreateTask: (
+    task: CreateTask,
+  ) => Task | null;
 
-    handleDeleteTask: (
-        taskId: number,
-    ) => boolean;
+  handleUpdateTask: (
+    task: UpdateTask,
+  ) => Task | null;
+
+  handleDeleteTask: (
+    taskId: number,
+  ) => boolean;
 };
 
 export const TasksDataContext =
-    createContext<
-        TasksDataContextValue | undefined
-    >(undefined);
+  createContext<
+    TasksDataContextValue | undefined
+  >(undefined);
