@@ -1,16 +1,22 @@
+import { handleListSubTasksByTaskIdService } from "@/modules/subtasks/services/subtasks.service";
 import { type Task, type CreateTask, type TasksParamsSearch, type UpdateTask, isTaskFromStorage } from "../types/tasks.type";
 
 const STORAGE_KEY = 'tasksMap';
 
 
 const getStoredTasks = (): Task[] => {
-    const rawData = localStorage.getItem(STORAGE_KEY);
+    const rawData =
+        localStorage.getItem(
+            STORAGE_KEY,
+        );
+
     if (!rawData) {
         return [];
     }
 
     try {
-        const parsed: unknown = JSON.parse(rawData);
+        const parsed: unknown =
+            JSON.parse(rawData);
 
         if (!Array.isArray(parsed)) {
             return [];
@@ -20,11 +26,21 @@ const getStoredTasks = (): Task[] => {
             .filter(isTaskFromStorage)
             .map((task) => ({
                 ...task,
-                createdAt: new Date(task.createdAt),
-                dueDate: new Date(task.dueDate),
+
+                createdAt: new Date(
+                    task.createdAt,
+                ),
+
+                dueDate: new Date(
+                    task.dueDate,
+                ),
+
+                subTasks:
+                    handleListSubTasksByTaskIdService(
+                        task.id,
+                    ),
             }));
     } catch {
-
         return [];
     }
 };

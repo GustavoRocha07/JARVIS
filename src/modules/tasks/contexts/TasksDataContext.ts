@@ -6,6 +6,10 @@ import type {
     UpdateTask,
 } from "../types/tasks.type";
 
+import type {
+    SubTaskFormValues,
+} from "../types/task-form.type";
+
 export type TaskSummary = {
     total: number;
     pending: number;
@@ -20,6 +24,7 @@ export type TasksDataContextValue = {
 
     handleCreateTask: (
         task: CreateTask,
+        subTasks?: SubTaskFormValues[],
     ) => Task | null;
 
     handleUpdateTask: (
