@@ -1,20 +1,19 @@
 import type {
-    TaskPriority,
-    TaskStatus,
-} from "@/modules/tasks/types/tasks.type";
+  TaskPriority,
+  TaskStatus,
+} from "@/shared/types/task-domain.type";
 
 export type SubTask = {
-    id: string;
-    taskId: number;
+  id: string;
+  taskId: number;
 
-    title: string;
-    description: string;
+  title: string;
+  description: string;
 
-    status: TaskStatus;
-    priority: TaskPriority;
+  status: TaskStatus;
+  priority: TaskPriority;
 
-    completed: boolean;
-    createdAt: Date;
+  createdAt: Date;
 };
 
 /**
@@ -24,26 +23,24 @@ export type SubTask = {
  * taskId só existe depois que a Task foi criada.
  */
 export type CreateSubTask = {
-    taskId: number;
+  taskId: number;
 
-    title: string;
-    description: string;
+  title: string;
+  description: string;
 
-    status: TaskStatus;
-    priority: TaskPriority;
+  status: TaskStatus;
+  priority: TaskPriority;
 };
 
 /**
  * Dados permitidos durante uma atualização.
  */
 export type UpdateSubTask = {
-    id: string;
+  id: string;
 
-    title: string;
-    description: string;
+  title: string;
+  description: string;
 
-    status: TaskStatus;
-    priority: TaskPriority;
-
-    completed: boolean;
+  status: TaskStatus;
+  priority: TaskPriority;
 };
