@@ -1,268 +1,401 @@
 import {
-    type PropsWithChildren,
-    useCallback,
-    useMemo,
-    useState,
+  type PropsWithChildren,
+  useCallback,
+  useMemo,
+  useState,
 } from "react";
 
 import { TasksDataContext } from "./TasksDataContext";
 import { TasksUIContext } from "./TasksUIContext";
 
 import type {
-    CreateTask,
-    Task,
-    TasksParamsSearch,
-    UpdateTask,
+  CreateTask,
+  Task,
+  TasksParamsSearch,
+  UpdateTask,
 } from "../types/tasks.type";
 
 import {
-    handleCreateTaskService,
-    handleDeleteTaskService,
-    handleListTaskService,
-    handleUpdateTaskService,
+  handleCreateTaskService,
+  handleDeleteTaskService,
+  handleListTaskService,
+  handleUpdateTaskService,
 } from "../services/tasks.service";
+
 import { useAlert } from "@/context/AlertContext/useAlert";
 
 import { isApiError } from "../rules/isApiError";
 
 export const TasksProvider = ({
-    children,
+  children,
 }: PropsWithChildren) => {
-    const [tasks, setTasks] = useState<Task[]>(() =>
-        handleListTaskService({})
+  const { showAlert } = useAlert();
+
+  const [tasks, setTasks] =
+    useState<Task[]>(() =>
+      handleListTaskService({}),
     );
 
-    const [openModal, setOpenModal] = useState(false);
-    const { showAlert } = useAlert();
-    const [selectedTask, setSelectedTask] =
-        useState<Task | null>(null);
+  const [filters, setFilters] =
+    useState<TasksParamsSearch>(
+      {},
+    );
 
-    const [openConfirmDeletedModal, setOpenConfirmDeletedModal] = useState(false)
+  const [
+    openModal,
+    setOpenModal,
+  ] = useState(false);
 
-    const [filters, setFilters] =
-        useState<TasksParamsSearch>({});
+  const [
+    selectedTask,
+    setSelectedTask,
+  ] = useState<Task | null>(
+    null,
+  );
 
-    /*
-     * DADOS
-     */
+  const [
+    openConfirmDeletedModal,
+    setOpenConfirmDeletedModal,
+  ] = useState(false);
 
-    const summary = useMemo(() => {
-        return tasks.reduce(
-            (acc, task) => {
-                acc.total += 1;
-
-                if (task.status === "PENDING") {
-                    acc.pending += 1;
-                }
-
-                if (task.status === "IN_PROGRESS") {
-                    acc.inProgress += 1;
-                }
-
-                if (task.status === "COMPLETED") {
-                    acc.completed += 1;
-                }
-
-                return acc;
-            },
-            {
-                total: 0,
-                pending: 0,
-                inProgress: 0,
-                completed: 0,
-            }
+  const refreshTasks =
+    useCallback(
+      (
+        params:
+          TasksParamsSearch =
+          filters,
+      ) => {
+        setTasks(
+          handleListTaskService(
+            params,
+          ),
         );
-    }, [tasks]);
-
-    const handleCreateTask = useCallback(
-        (newTask: CreateTask) => {
-            try {
-                handleCreateTaskService(newTask);
-
-                setTasks(handleListTaskService(filters));
-                showAlert('success', 'Task Criada com Sucesso!')
-
-            } catch (error: unknown) {
-                if (isApiError(error)) {
-                    showAlert('error', error.message);
-                    return;
-                }
-
-                if (error instanceof Error) {
-                    showAlert('error', error.message);
-                    return;
-                }
-
-                if (typeof error === 'string') {
-                    showAlert('error', error);
-                    return;
-                }
-
-                showAlert('error', 'Ocorreu um erro inesperado.');
-            }
-        },
-        [filters, showAlert]
+      },
+      [filters],
     );
 
-    const handleUpdateTask = useCallback(
-        (task: UpdateTask) => {
+  const handleError =
+    useCallback(
+      (error: unknown) => {
+        if (isApiError(error)) {
+          showAlert(
+            "error",
+            error.message,
+          );
 
-            try {
-                handleUpdateTaskService(task.id, task,);
+          return;
+        }
 
-                setTasks(handleListTaskService(filters));
-                showAlert('success', 'Task Atualizada com Sucesso!')
-            } catch (error: unknown) {
-                if (isApiError(error)) {
-                    showAlert('error', error.message);
-                    return;
-                }
+        if (
+          error instanceof Error
+        ) {
+          showAlert(
+            "error",
+            error.message,
+          );
 
-                if (error instanceof Error) {
-                    showAlert('error', error.message);
-                    return;
-                }
+          return;
+        }
 
-                if (typeof error === 'string') {
-                    showAlert('error', error);
-                    return;
-                }
+        if (
+          typeof error ===
+          "string"
+        ) {
+          showAlert(
+            "error",
+            error,
+          );
 
-                showAlert('error', 'Ocorreu um erro inesperado.');
-            }
+          return;
+        }
 
-        },
-        [filters, showAlert]
+        showAlert(
+          "error",
+          "Ocorreu um erro inesperado.",
+        );
+      },
+      [showAlert],
     );
 
-    const handleConfirmDeletedTask = useCallback((task: Task) => {
-        setSelectedTask(task)
-        setOpenConfirmDeletedModal(true)
-    }, [])
+  const summary = useMemo(
+    () =>
+      tasks.reduce(
+        (acc, task) => {
+          acc.total += 1;
 
+          if (
+            task.status ===
+            "PENDING"
+          ) {
+            acc.pending += 1;
+          }
 
-    const handleCloseConfirmDeletedModal = useCallback(() => {
-        setOpenConfirmDeletedModal(false);
-        setSelectedTask(null);
-    }, []);
+          if (
+            task.status ===
+            "IN_PROGRESS"
+          ) {
+            acc.inProgress += 1;
+          }
 
-    const handleDeleteTask = useCallback(
-        (taskId: number) => {
-            try {
-                handleDeleteTaskService(taskId);
-                showAlert('success', 'Task Deletada  com Sucesso!')
-                setTasks(handleListTaskService(filters));
-                setOpenConfirmDeletedModal(false);
-                setSelectedTask(null);
-            } catch (error: unknown) {
-                if (isApiError(error)) {
-                    showAlert('error', error.message);
-                    return;
-                }
+          if (
+            task.status ===
+            "COMPLETED"
+          ) {
+            acc.completed += 1;
+          }
 
-                if (error instanceof Error) {
-                    showAlert('error', error.message);
-                    return;
-                }
-
-                if (typeof error === 'string') {
-                    showAlert('error', error);
-                    return;
-                }
-
-                showAlert('error', 'Ocorreu um erro inesperado.');
-            }
+          return acc;
         },
-        [filters, showAlert]
-    );
+        {
+          total: 0,
+          pending: 0,
+          inProgress: 0,
+          completed: 0,
+        },
+      ),
+    [tasks],
+  );
 
-    /*
-     * UI
-     */
-
-    const handleOpenModal = useCallback((task?: Task) => {
-        setSelectedTask(task ?? null);
-        setOpenModal(true);
-    }, []);
-
-    const handleCloseModal = useCallback(() => {
-        setOpenModal(false);
-        setSelectedTask(null);
-    }, []);
-
-    const handleSetFilters = useCallback(
-        (newFilters: TasksParamsSearch) => {
-            setFilters(newFilters);
-
-            setTasks(
-                handleListTaskService(newFilters)
+  const handleCreateTask =
+    useCallback(
+      (
+        newTask: CreateTask,
+      ): Task | null => {
+        try {
+          const createdTask =
+            handleCreateTaskService(
+              newTask,
             );
-        },
-        []
+
+          refreshTasks();
+
+          showAlert(
+            "success",
+            "Task criada com sucesso!",
+          );
+
+          return createdTask;
+        } catch (
+          error: unknown
+        ) {
+          handleError(error);
+
+          return null;
+        }
+      },
+      [
+        refreshTasks,
+        showAlert,
+        handleError,
+      ],
     );
 
-    const handleClearFilters = useCallback(() => {
-        setFilters({});
-        setTasks(handleListTaskService({}));
+  const handleUpdateTask =
+    useCallback(
+      (
+        task: UpdateTask,
+      ): Task | null => {
+        try {
+          const updatedTask =
+            handleUpdateTaskService(
+              task.id,
+              task,
+            );
+
+          refreshTasks();
+
+          showAlert(
+            "success",
+            "Task atualizada com sucesso!",
+          );
+
+          return updatedTask;
+        } catch (
+          error: unknown
+        ) {
+          handleError(error);
+
+          return null;
+        }
+      },
+      [
+        refreshTasks,
+        showAlert,
+        handleError,
+      ],
+    );
+
+  const handleDeleteTask =
+    useCallback(
+      (
+        taskId: number,
+      ): boolean => {
+        try {
+          handleDeleteTaskService(
+            taskId,
+          );
+
+          refreshTasks();
+
+          setOpenConfirmDeletedModal(
+            false,
+          );
+
+          setSelectedTask(null);
+
+          showAlert(
+            "success",
+            "Task deletada com sucesso!",
+          );
+
+          return true;
+        } catch (
+          error: unknown
+        ) {
+          handleError(error);
+
+          return false;
+        }
+      },
+      [
+        refreshTasks,
+        showAlert,
+        handleError,
+      ],
+    );
+
+  const handleConfirmDeletedTask =
+    useCallback(
+      (task: Task) => {
+        setSelectedTask(task);
+
+        setOpenConfirmDeletedModal(
+          true,
+        );
+      },
+      [],
+    );
+
+  const handleCloseConfirmDeletedModal =
+    useCallback(() => {
+      setOpenConfirmDeletedModal(
+        false,
+      );
+
+      setSelectedTask(null);
     }, []);
 
-    /*
-     * CONTEXT VALUES
-     */
+  const handleOpenModal =
+    useCallback(
+      (task?: Task) => {
+        setSelectedTask(
+          task ?? null,
+        );
 
-    const dataValue = useMemo(
-        () => ({
-            tasks,
-            summary,
-            handleCreateTask,
-            handleUpdateTask,
-            handleDeleteTask,
-
-        }),
-        [
-            tasks,
-            summary,
-            handleCreateTask,
-            handleUpdateTask,
-            handleDeleteTask,
-
-        ]
+        setOpenModal(true);
+      },
+      [],
     );
 
-    const uiValue = useMemo(
-        () => ({
-            filters,
-            openModal,
-            selectedTask,
-            openConfirmDeletedModal,
-            handleOpenModal,
-            handleCloseModal,
-            handleSetFilters,
-            handleClearFilters,
-            handleConfirmDeletedTask,
-            handleCloseConfirmDeletedModal
-        }),
-        [
-            filters,
-            openModal,
-            selectedTask,
-            openConfirmDeletedModal,
-            handleOpenModal,
-            handleCloseModal,
-            handleSetFilters,
-            handleClearFilters,
-            handleConfirmDeletedTask,
-            handleCloseConfirmDeletedModal
-        ]
+  const handleCloseModal =
+    useCallback(() => {
+      setOpenModal(false);
+
+      setSelectedTask(null);
+    }, []);
+
+  const handleSetFilters =
+    useCallback(
+      (
+        newFilters:
+          TasksParamsSearch,
+      ) => {
+        setFilters(
+          newFilters,
+        );
+
+        refreshTasks(
+          newFilters,
+        );
+      },
+      [refreshTasks],
     );
 
+  const handleClearFilters =
+    useCallback(() => {
+      const emptyFilters:
+        TasksParamsSearch = {};
 
+      setFilters(
+        emptyFilters,
+      );
 
-    return (
-        <TasksDataContext.Provider value={dataValue}>
-            <TasksUIContext.Provider value={uiValue}>
-                {children}
-            </TasksUIContext.Provider>
-        </TasksDataContext.Provider>
-    );
+      refreshTasks(
+        emptyFilters,
+      );
+    }, [refreshTasks]);
+
+  const dataValue = useMemo(
+    () => ({
+      tasks,
+      summary,
+
+      handleCreateTask,
+      handleUpdateTask,
+      handleDeleteTask,
+    }),
+    [
+      tasks,
+      summary,
+      handleCreateTask,
+      handleUpdateTask,
+      handleDeleteTask,
+    ],
+  );
+
+  const uiValue = useMemo(
+    () => ({
+      filters,
+
+      openModal,
+      selectedTask,
+      openConfirmDeletedModal,
+
+      handleOpenModal,
+      handleCloseModal,
+
+      handleSetFilters,
+      handleClearFilters,
+
+      handleConfirmDeletedTask,
+      handleCloseConfirmDeletedModal,
+    }),
+    [
+      filters,
+      openModal,
+      selectedTask,
+      openConfirmDeletedModal,
+
+      handleOpenModal,
+      handleCloseModal,
+
+      handleSetFilters,
+      handleClearFilters,
+
+      handleConfirmDeletedTask,
+      handleCloseConfirmDeletedModal,
+    ],
+  );
+
+  return (
+    <TasksDataContext.Provider
+      value={dataValue}
+    >
+      <TasksUIContext.Provider
+        value={uiValue}
+      >
+        {children}
+      </TasksUIContext.Provider>
+    </TasksDataContext.Provider>
+  );
 };

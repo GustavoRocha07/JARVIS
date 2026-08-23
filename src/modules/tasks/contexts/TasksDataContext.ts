@@ -15,12 +15,23 @@ export type TaskSummary = {
 
 export type TasksDataContextValue = {
     tasks: Task[];
+
     summary: TaskSummary;
 
-    handleCreateTask: (task: CreateTask) => void;
-    handleUpdateTask: (task: UpdateTask) => void;
-    handleDeleteTask: (taskId: number) => void;
+    handleCreateTask: (
+        task: CreateTask,
+    ) => Task | null;
+
+    handleUpdateTask: (
+        task: UpdateTask,
+    ) => Task | null;
+
+    handleDeleteTask: (
+        taskId: number,
+    ) => boolean;
 };
 
 export const TasksDataContext =
-    createContext<TasksDataContextValue | undefined>(undefined);
+    createContext<
+        TasksDataContextValue | undefined
+    >(undefined);

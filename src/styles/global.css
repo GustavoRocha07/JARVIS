@@ -16,11 +16,27 @@ body {
 
 .cardContainer {
   margin: 1rem 0rem;
-  border-radius: 1rem ;
+  border-radius: 1rem;
 
 
   &:hover {
     background-color: #f0f0f0;
     cursor: pointer;
   }
+}
+
+input.redondo {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #555;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+}
+
+input.redondo:checked {
+  background-color: #007bff;
+  border-color: #007bff;
 }

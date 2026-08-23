@@ -1,6 +1,9 @@
-import { useEffect } from "react";
-import { useFormik } from "formik";
-import * as Yup from "yup";
+import { useMemo } from "react";
+
+import {
+  FormikProvider,
+  useFormik,
+} from "formik";
 
 import {
   Box,
@@ -10,396 +13,364 @@ import {
   TextField,
 } from "@mui/material";
 
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import { ptBR } from "date-fns/locale/pt-BR";
 
 import { ModalComponent } from "@/shared/components/ModalComponent";
 
+import { SubTaskComponent } from "@/modules/subtasks/components/SubTaskForm/SubTaskForm";
+
 import type {
-  CreateTask,
-  Task,
-  TaskSubmit,
-  UpdateTask,
+  TaskModalProps,
 } from "../../types/tasks.type";
 
-type TaskModalProps = {
-  open: boolean;
-  title: string;
-  onClose: () => void;
-};
+import type {
+  TaskFormValues,
+} from "../../types/task-form.type";
 
-export interface ExtendedTaskModalProps extends TaskModalProps {
-  initialData?: Task | null;
-  onSubmit: (values: TaskSubmit) => void;
-}
+import {
+  validationSchema,
+} from "../../schema/TaskValidation.schema";
 
-const validationSchema = Yup.object({
-  title: Yup.string().required("O título é obrigatório"),
-
-  description: Yup.string().required(
-    "A descrição é obrigatória",
-  ),
-
-  status: Yup.string().required(
-    "Selecione o status",
-  ),
-
-  priority: Yup.string().required(
-    "Selecione a prioridade",
-  ),
-
-  createdAt: Yup.date()
-    .nullable()
-    .optional(),
-
-  dueDate: Yup.date()
-    .nullable()
-    .required("Data de entrega é obrigatória")
-    .test(
-      "is-after-created",
-      "A data de entrega deve ser posterior à criação",
-      function (dueDate) {
-        const { createdAt } = this.parent;
-
-        if (!dueDate || !createdAt) {
-          return true;
-        }
-
-        return (
-          new Date(dueDate) >=
-          new Date(createdAt)
-        );
-      },
-    ),
-});
-
-const defaultValues: CreateTask = {
-  title: "",
-  description: "",
-  status: "PENDING",
-  priority: "MEDIUM",
-  dueDate: new Date(),
-};
+import {
+  formValuesToCreateTask,
+  formValuesToUpdateTask,
+  taskToFormValues,
+} from "../../mappers/task.mapper";
 
 export const TaskModal = ({
   open,
-  onClose,
   title,
   initialData,
+  onClose,
   onSubmit,
-}: ExtendedTaskModalProps) => {
-  const isEditing = Boolean(initialData?.id);
-
+}: TaskModalProps) => {
   const formId = "task-form";
 
-  const formik = useFormik<Task | CreateTask>({
-    initialValues: initialData ?? defaultValues,
+  const isEditing =
+    initialData !== null &&
+    initialData !== undefined;
 
-    validationSchema,
+  const initialValues =
+    useMemo<TaskFormValues>(
+      () =>
+        taskToFormValues(
+          initialData,
+        ),
+      [initialData],
+    );
 
-    enableReinitialize: true,
+  const formik =
+    useFormik<TaskFormValues>({
+      initialValues,
 
-    onSubmit: (values) => {
-      if (isEditing && initialData) {
-        const updateTask: UpdateTask = {
-          id: initialData.id,
-          title: values.title,
-          description: values.description,
-          status: values.status,
-          priority: values.priority,
-          dueDate: values.dueDate,
+      validationSchema,
 
-        };
+      enableReinitialize: true,
 
-        const payload: TaskSubmit = {
-          action: "UPDATE",
-          data: updateTask,
-        };
+      onSubmit: (values) => {
+        if (
+          isEditing &&
+          initialData
+        ) {
+          onSubmit({
+            action: "UPDATE",
 
-        onSubmit(payload);
-        return;
-      }
+            task:
+              formValuesToUpdateTask(
+                initialData.id,
+                values,
+              ),
 
-      const createTask: CreateTask = {
-        title: values.title,
-        description: values.description,
-        status: values.status,
-        priority: values.priority,
-        dueDate: values.dueDate,
-      };
+            subTasks:
+              values.subTasks,
+          });
 
-      const payload: TaskSubmit = {
-        action: "CREATE",
-        data: createTask,
-      };
+          return;
+        }
 
-      onSubmit(payload);
-    },
-  });
+        onSubmit({
+          action: "CREATE",
 
+          task:
+            formValuesToCreateTask(
+              values,
+            ),
 
-  useEffect(() => {
-    if (!open) {
-      formik.resetForm();
-    }
-  }, [formik, open]);
+          subTasks:
+            values.subTasks,
+        });
+      },
+    });
 
   const handleClose = () => {
     formik.resetForm();
+
     onClose();
   };
 
-  const renderActions = (
-    <Stack
-      direction="row"
-      spacing={2}
-      sx={{
-        justifyContent: "flex-end",
-        width: "100%",
-      }}
-    >
-      <Button
-        variant="outlined"
-        onClick={handleClose}
-      >
-        Cancelar
-      </Button>
-
-      <Button
-        type="submit"
-        form={formId}
-        variant="contained"
-      >
-        {isEditing
-          ? "Salvar Alterações"
-          : "Criar Tarefa"}
-      </Button>
-    </Stack>
-  );
-
   return (
-    <ModalComponent
-      open={open}
-      onClose={handleClose}
-      title={
-        title ||
-        (isEditing
-          ? `${initialData?.title}`
-          : "Criar Nova Tarefa")
-      }
-      actions={renderActions}
-      fullWidth
-    >
-      <LocalizationProvider
-        dateAdapter={AdapterDateFns}
-        adapterLocale={ptBR}
-      >
-        <Box
-          id={formId}
-          component="form"
-          onSubmit={formik.handleSubmit}
-          noValidate
-          sx={{ mt: 1 }}
-        >
-          <Stack spacing={2}>
-            <TextField
-              fullWidth
-              id="title"
-              name="title"
-              label="Título"
-              value={formik.values.title}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={
-                formik.touched.title &&
-                Boolean(formik.errors.title)
-              }
-              helperText={
-                formik.touched.title &&
-                formik.errors.title
-              }
-            />
-
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              id="description"
-              name="description"
-              label="Descrição"
-              value={formik.values.description}
-              onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
-              error={
-                formik.touched.description &&
-                Boolean(
-                  formik.errors.description,
-                )
-              }
-              helperText={
-                formik.touched.description &&
-                formik.errors.description
-              }
-            />
-
-            <Stack
-              direction={{
-                xs: "column",
-                sm: "row",
-              }}
-              spacing={2}
+    <FormikProvider value={formik}>
+      <ModalComponent
+        open={open}
+        onClose={handleClose}
+        title={
+          title ||
+          (isEditing
+            ? initialData?.title
+            : "Cadastrar Tarefa")
+        }
+        fullWidth
+        maxWidth="md"
+        actions={
+          <Stack
+          
+          >
+            <Button
+              type="button"
+              variant="outlined"
+              onClick={handleClose}
             >
+              Cancelar
+            </Button>
+
+            <Button
+              type="submit"
+              form={formId}
+              variant="contained"
+              disabled={formik.isSubmitting}
+            >
+              {isEditing
+                ? "Salvar alterações"
+                : "Criar tarefa"}
+            </Button>
+          </Stack>
+        }
+      >
+        <LocalizationProvider
+          dateAdapter={AdapterDateFns}
+          adapterLocale={ptBR}
+        >
+          <Box
+            id={formId}
+            component="form"
+            onSubmit={formik.handleSubmit}
+            noValidate
+          >
+            <Stack spacing={2}>
               <TextField
-                select
                 fullWidth
-                id="status"
-                name="status"
-                label="Status"
-                value={formik.values.status}
+                name="title"
+                label="Título"
+                value={formik.values.title}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 error={
-                  formik.touched.status &&
-                  Boolean(formik.errors.status)
-                }
-                helperText={
-                  formik.touched.status &&
-                  formik.errors.status
-                }
-              >
-                <MenuItem value="PENDING">
-                  Pendente
-                </MenuItem>
-
-                <MenuItem value="IN_PROGRESS">
-                  Em Andamento
-                </MenuItem>
-
-                <MenuItem value="COMPLETED">
-                  Concluída
-                </MenuItem>
-
-                <MenuItem value="CANCELLED">
-                  Cancelada
-                </MenuItem>
-              </TextField>
-
-              <TextField
-                select
-                fullWidth
-                id="priority"
-                name="priority"
-                label="Prioridade"
-                value={formik.values.priority}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={
-                  formik.touched.priority &&
                   Boolean(
-                    formik.errors.priority,
+                    formik.touched.title,
+                  ) &&
+                  Boolean(
+                    formik.errors.title,
                   )
                 }
                 helperText={
-                  formik.touched.priority &&
-                  formik.errors.priority
+                  formik.touched.title
+                    ? formik.errors.title
+                    : undefined
                 }
-              >
-                <MenuItem value="LOW">
-                  Baixa
-                </MenuItem>
-
-                <MenuItem value="MEDIUM">
-                  Média
-                </MenuItem>
-
-                <MenuItem value="HIGH">
-                  Alta
-                </MenuItem>
-
-                <MenuItem value="URGENT">
-                  Urgente
-                </MenuItem>
-              </TextField>
-            </Stack>
-
-            <Stack
-              direction={{
-                xs: "column",
-                sm: "row",
-              }}
-              spacing={2}
-            >
-              {isEditing &&
-                "createdAt" in formik.values && (
-                  <DatePicker
-                    label="Data de Criação"
-                    format="dd/MM/yyyy"
-                    value={
-                      formik.values.createdAt
-                        ? new Date(
-                          formik.values
-                            .createdAt,
-                        )
-                        : null
-                    }
-                    disabled
-                    slotProps={{
-                      textField: {
-                        fullWidth: true,
-                      },
-                    }}
-                  />
-                )}
-
-              <DatePicker
-                label="Data de Vencimento"
-                format="dd/MM/yyyy"
-                value={
-                  formik.values.dueDate
-                    ? new Date(
-                      formik.values.dueDate,
-                    )
-                    : null
-                }
-                onChange={(value) => {
-                  formik.setFieldValue(
-                    "dueDate",
-                    value,
-                  );
-                }}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-
-                    onBlur: () => {
-                      formik.setFieldTouched(
-                        "dueDate",
-                        true,
-                      );
-                    },
-
-                    error:
-                      formik.touched.dueDate &&
-                      Boolean(
-                        formik.errors.dueDate,
-                      ),
-
-                    helperText:
-                      formik.touched.dueDate &&
-                        typeof formik.errors
-                          .dueDate === "string"
-                        ? formik.errors.dueDate
-                        : "",
-                  },
-                }}
               />
+
+              <TextField
+                fullWidth
+                multiline
+                rows={3}
+                name="description"
+                label="Descrição"
+                value={
+                  formik.values.description
+                }
+                onChange={
+                  formik.handleChange
+                }
+                onBlur={
+                  formik.handleBlur
+                }
+                error={
+                  Boolean(
+                    formik.touched
+                      .description,
+                  ) &&
+                  Boolean(
+                    formik.errors
+                      .description,
+                  )
+                }
+                helperText={
+                  formik.touched
+                    .description
+                    ? formik.errors
+                      .description
+                    : undefined
+                }
+              />
+
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={2}
+              >
+                <TextField
+                  select
+                  fullWidth
+                  name="status"
+                  label="Status"
+                  value={
+                    formik.values.status
+                  }
+                  onChange={
+                    formik.handleChange
+                  }
+                  onBlur={
+                    formik.handleBlur
+                  }
+                >
+                  <MenuItem value="PENDING">
+                    Pendente
+                  </MenuItem>
+
+                  <MenuItem value="IN_PROGRESS">
+                    Em andamento
+                  </MenuItem>
+
+                  <MenuItem value="COMPLETED">
+                    Concluída
+                  </MenuItem>
+
+                  <MenuItem value="CANCELLED">
+                    Cancelada
+                  </MenuItem>
+                </TextField>
+
+                <TextField
+                  select
+                  fullWidth
+                  name="priority"
+                  label="Prioridade"
+                  value={
+                    formik.values.priority
+                  }
+                  onChange={
+                    formik.handleChange
+                  }
+                  onBlur={
+                    formik.handleBlur
+                  }
+                >
+                  <MenuItem value="LOW">
+                    Baixa
+                  </MenuItem>
+
+                  <MenuItem value="MEDIUM">
+                    Média
+                  </MenuItem>
+
+                  <MenuItem value="HIGH">
+                    Alta
+                  </MenuItem>
+
+                  <MenuItem value="URGENT">
+                    Urgente
+                  </MenuItem>
+                </TextField>
+              </Stack>
+
+              <Stack
+                direction={{
+                  xs: "column",
+                  sm: "row",
+                }}
+                spacing={2}
+              >
+                {isEditing &&
+                  initialData?.createdAt && (
+                    <DatePicker
+                      label="Data de Criação"
+                      format="dd/MM/yyyy"
+                      value={
+                        initialData.createdAt
+                      }
+                      disabled
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                        },
+                      }}
+                    />
+                  )}
+
+                <DatePicker
+                  label="Data de Vencimento"
+                  format="dd/MM/yyyy"
+                  value={
+                    formik.values.dueDate
+                  }
+                  onChange={(value) => {
+                    if (!value) {
+                      return;
+                    }
+
+                    formik.setFieldValue(
+                      "dueDate",
+                      value,
+                    );
+                  }}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+
+                      onBlur: () => {
+                        formik.setFieldTouched(
+                          "dueDate",
+                          true,
+                        );
+                      },
+
+                      error:
+                        Boolean(
+                          formik.touched
+                            .dueDate,
+                        ) &&
+                        Boolean(
+                          formik.errors
+                            .dueDate,
+                        ),
+
+                      helperText:
+                        formik.touched
+                          .dueDate &&
+                          typeof formik
+                            .errors
+                            .dueDate ===
+                          "string"
+                          ? formik
+                            .errors
+                            .dueDate
+                          : undefined,
+                    },
+                  }}
+                />
+              </Stack>
+
+              <SubTaskComponent />
             </Stack>
-          </Stack>
-        </Box>
-      </LocalizationProvider>
-    </ModalComponent>
+          </Box>
+        </LocalizationProvider>
+      </ModalComponent>
+    </FormikProvider>
   );
 };

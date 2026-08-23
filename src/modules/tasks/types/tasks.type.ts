@@ -1,8 +1,21 @@
-import type { SubTask } from "@/modules/subtasks/types/subtask.type";
+import type {
+    SubTask,
+} from "@/modules/subtasks/types/subtask.type";
 
-export type TaskStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+import type {
+    SubTaskFormValues,
+} from "./task-form.type";
 
-export type TaskModalMode = 'view' | 'edit' | 'create';
+export type TaskStatus =
+    | "PENDING"
+    | "IN_PROGRESS"
+    | "COMPLETED"
+    | "CANCELLED";
+
+export type TaskModalMode =
+    | "view"
+    | "edit"
+    | "create";
 
 export type TaskPriority =
     | "LOW"
@@ -16,13 +29,29 @@ export interface Task {
     description: string;
     status: TaskStatus;
     priority: TaskPriority;
+
     subTasks?: SubTask[];
+
     createdAt: Date;
     dueDate: Date;
 }
 
-export type CreateTask = Omit<Task, 'id' | 'createdAt'>
-export type UpdateTask = Omit<Task, 'createdAt'>
+export type CreateTask = {
+    title: string;
+    description: string;
+    status: TaskStatus;
+    priority: TaskPriority;
+    dueDate: Date;
+};
+
+export type UpdateTask = {
+    id: number;
+    title: string;
+    description: string;
+    status: TaskStatus;
+    priority: TaskPriority;
+    dueDate: Date;
+};
 
 export type TasksParamsSearch = {
     name?: string;
@@ -31,21 +60,39 @@ export type TasksParamsSearch = {
     endDate?: string;
     priority?: TaskPriority;
     status?: TaskStatus;
-}
+};
+
 export type TaskSubmit =
     | {
         action: "CREATE";
-        data: CreateTask;
+        task: CreateTask;
+        subTasks: SubTaskFormValues[];
     }
     | {
         action: "UPDATE";
-        data: UpdateTask;
+        task: UpdateTask;
+        subTasks: SubTaskFormValues[];
     };
 
+export type TaskModalProps = {
+    open: boolean;
+    title: string;
+    initialData?: Task | null;
 
+    onClose: () => void;
 
+    onSubmit: (
+        values: TaskSubmit,
+    ) => void;
+};
 
-const isTaskStatus = (value: unknown): value is TaskStatus => {
+/* ----------------------------------
+ * Type Guards
+ * ---------------------------------- */
+
+const isTaskStatus = (
+    value: unknown,
+): value is TaskStatus => {
     return (
         value === "PENDING" ||
         value === "IN_PROGRESS" ||
@@ -54,9 +101,9 @@ const isTaskStatus = (value: unknown): value is TaskStatus => {
     );
 };
 
-
-
-const isTaskPriority = (value: unknown): value is TaskPriority => {
+const isTaskPriority = (
+    value: unknown,
+): value is TaskPriority => {
     return (
         value === "LOW" ||
         value === "MEDIUM" ||
@@ -65,33 +112,67 @@ const isTaskPriority = (value: unknown): value is TaskPriority => {
     );
 };
 
-const isValidDate = (value: unknown): value is string => {
+const isValidDate = (
+    value: unknown,
+): value is string => {
     if (typeof value !== "string") {
         return false;
     }
 
     const date = new Date(value);
 
-    return !Number.isNaN(date.getTime());
+    return !Number.isNaN(
+        date.getTime(),
+    );
 };
 
-export function isTaskFromStorage(value: unknown): value is Omit<Task, "createdAt" | "dueDate"> & {
+export type StoredTask = Omit<
+    Task,
+    "createdAt" | "dueDate" | "subTasks"
+> & {
     createdAt: string;
     dueDate: string;
-} {
 
+    subTasks?: unknown[];
+};
 
-    if (typeof value !== "object" || value === null) {
+export const isTaskFromStorage = (
+    value: unknown,
+): value is StoredTask => {
+    if (
+        typeof value !== "object" ||
+        value === null
+    ) {
         return false;
     }
 
-    if (!("id" in value)) return false;
-    if (!("title" in value)) return false;
-    if (!("description" in value)) return false;
-    if (!("status" in value)) return false;
-    if (!("priority" in value)) return false;
-    if (!("createdAt" in value)) return false;
-    if (!("dueDate" in value)) return false;
+    if (!("id" in value)) {
+        return false;
+    }
+
+    if (!("title" in value)) {
+        return false;
+    }
+
+    if (!("description" in value)) {
+        return false;
+    }
+
+    if (!("status" in value)) {
+        return false;
+    }
+
+    if (!("priority" in value)) {
+        return false;
+    }
+
+    if (!("createdAt" in value)) {
+        return false;
+    }
+
+    if (!("dueDate" in value)) {
+        return false;
+    }
 
     return (
         typeof value.id === "number" &&
@@ -102,4 +183,4 @@ export function isTaskFromStorage(value: unknown): value is Omit<Task, "createdA
         isValidDate(value.createdAt) &&
         isValidDate(value.dueDate)
     );
-}
+};
