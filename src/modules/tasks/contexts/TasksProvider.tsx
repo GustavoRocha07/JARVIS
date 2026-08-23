@@ -16,6 +16,7 @@ import type {
   TasksParamsSearch,
   UpdateTask,
 } from "../types/tasks.type";
+import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 
 import {
   handleCreateTaskService,
@@ -30,6 +31,7 @@ import {
 import {
   handleCreateSubTaskService,
   handleSyncTaskSubTasksService,
+  handleUpdateSubTaskService,
 } from "@/modules/subtasks/services/subtasks.service";
 
 import { useAlert } from "@/context/AlertContext/useAlert";
@@ -166,6 +168,44 @@ export const TasksProvider = ({
     [handleError, refreshTasks, showAlert],
   );
 
+  const handleSubTaskComplete = useCallback(
+    (subTask: SubTask, completed: boolean): boolean => {
+      try {
+        const updatedSubTask = handleUpdateSubTaskService({
+          id: subTask.id,
+          title: subTask.title,
+          description: subTask.description,
+          status: completed ? "COMPLETED" : "PENDING",
+          priority: subTask.priority,
+          completed,
+        });
+
+        refreshTasks();
+
+        setSelectedTask((currentTask) => {
+          if (!currentTask || currentTask.id !== subTask.taskId) {
+            return currentTask;
+          }
+
+          return {
+            ...currentTask,
+            subTasks: currentTask.subTasks?.map((item) =>
+              item.id === updatedSubTask.id
+                ? updatedSubTask
+                : item,
+            ),
+          };
+        });
+
+        return true;
+      } catch (error: unknown) {
+        handleError(error);
+        return false;
+      }
+    },
+    [handleError, refreshTasks],
+  );
+
   const handleDeleteTask = useCallback(
     (taskId: number): boolean => {
       try {
@@ -241,6 +281,7 @@ export const TasksProvider = ({
       handleCreateTask,
       handleUpdateTask,
       handleDeleteTask,
+      handleSubTaskComplete,
     }),
     [
       tasks,
@@ -249,6 +290,7 @@ export const TasksProvider = ({
       handleCreateTask,
       handleUpdateTask,
       handleDeleteTask,
+      handleSubTaskComplete,
     ],
   );
 
