@@ -454,7 +454,7 @@ export const TaskModal = ({
                           Boolean(formik.errors.dueDate),
                         helperText:
                           formik.touched.dueDate &&
-                          typeof formik.errors.dueDate ===
+                            typeof formik.errors.dueDate ===
                             "string"
                             ? formik.errors.dueDate
                             : undefined,
@@ -463,7 +463,7 @@ export const TaskModal = ({
                   />
                 </Stack>
 
-                {isCreate && <SubTaskComponent />}
+                <SubTaskComponent />
               </Stack>
             </Box>
           </LocalizationProvider>

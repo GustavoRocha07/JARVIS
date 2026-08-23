@@ -23,6 +23,7 @@ import {
     statusStyles,
 } from "@/shared/utils/getColorsAlert";
 
+
 type TaskCardProps = {
     task: Task;
     onClick: (task: Task) => void;
@@ -61,8 +62,8 @@ export const TaskCard = ({
     const progress =
         totalSubtasks > 0
             ? (completedSubtasks /
-                  totalSubtasks) *
-              100
+                totalSubtasks) *
+            100
             : 0;
 
     const isCompleted =
@@ -186,12 +187,12 @@ export const TaskCard = ({
                                 size="small"
                                 label={
                                     priorityLabels[
-                                        task.priority
+                                    task.priority
                                     ]
                                 }
                                 sx={{
                                     ...statusStyles[
-                                        task.status
+                                    task.status
                                     ],
                                     height: 20,
                                     fontSize: 11,
