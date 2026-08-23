@@ -6,6 +6,7 @@ import type {
   TaskSubmit,
   UpdateTask,
 } from "../types/tasks.type";
+import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 
 export type TaskSummary = {
   total: number;
@@ -33,6 +34,11 @@ export type TasksDataContextValue = {
 
   handleDeleteTask: (
     taskId: number,
+  ) => boolean;
+
+  handleSubTaskComplete: (
+    subTask: SubTask,
+    completed: boolean,
   ) => boolean;
 };
 
