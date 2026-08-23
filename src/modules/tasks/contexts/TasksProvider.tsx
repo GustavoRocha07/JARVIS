@@ -11,6 +11,7 @@ import { TasksUIContext } from "./TasksUIContext";
 import type {
   CreateTask,
   Task,
+  TaskModalMode,
   TaskSubmit,
   TasksParamsSearch,
   UpdateTask,
@@ -45,6 +46,7 @@ export const TasksProvider = ({
 
   const [filters, setFilters] = useState<TasksParamsSearch>({});
   const [openModal, setOpenModal] = useState(false);
+  const [modalMode, setModalMode] = useState<TaskModalMode>("create");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [openConfirmDeletedModal, setOpenConfirmDeletedModal] = useState(false);
 
@@ -194,14 +196,26 @@ export const TasksProvider = ({
     setSelectedTask(null);
   }, []);
 
-  const handleOpenModal = useCallback((task?: Task) => {
-    setSelectedTask(task ?? null);
-    setOpenModal(true);
+  const handleOpenModal = useCallback(
+    (
+      task?: Task,
+      mode: TaskModalMode = task ? "view" : "create",
+    ) => {
+      setSelectedTask(task ?? null);
+      setModalMode(mode);
+      setOpenModal(true);
+    },
+    [],
+  );
+
+  const handleSetModalMode = useCallback((mode: TaskModalMode) => {
+    setModalMode(mode);
   }, []);
 
   const handleCloseModal = useCallback(() => {
     setOpenModal(false);
     setSelectedTask(null);
+    setModalMode("create");
   }, []);
 
   const handleSetFilters = useCallback(
@@ -242,9 +256,11 @@ export const TasksProvider = ({
     () => ({
       filters,
       openModal,
+      modalMode,
       selectedTask,
       openConfirmDeletedModal,
       handleOpenModal,
+      handleSetModalMode,
       handleCloseModal,
       handleSetFilters,
       handleClearFilters,
@@ -254,9 +270,11 @@ export const TasksProvider = ({
     [
       filters,
       openModal,
+      modalMode,
       selectedTask,
       openConfirmDeletedModal,
       handleOpenModal,
+      handleSetModalMode,
       handleCloseModal,
       handleSetFilters,
       handleClearFilters,
