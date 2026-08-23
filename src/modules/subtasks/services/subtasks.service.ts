@@ -148,32 +148,55 @@ export const handleDeleteSubTasksByTaskIdService = (taskId: number): void => {
   saveSubTasks(subTasks.filter((subTask) => subTask.taskId !== taskId));
 };
 
-export const handleReplaceTaskSubTasksService = (
+export const handleSyncTaskSubTasksService = (
   taskId: number,
   values: Array<{
+    id?: string;
     title: string;
     description: string;
     status: SubTask["status"];
     priority: SubTask["priority"];
   }>,
 ): SubTask[] => {
-  const currentSubTasks = getStoredSubTasks();
-  const unrelatedSubTasks = currentSubTasks.filter(
+  const allSubTasks = getStoredSubTasks();
+  const currentTaskSubTasks = allSubTasks.filter(
+    (subTask) => subTask.taskId === taskId,
+  );
+  const unrelatedSubTasks = allSubTasks.filter(
     (subTask) => subTask.taskId !== taskId,
   );
 
-  const replacementSubTasks: SubTask[] = values.map((value) => ({
-    id: crypto.randomUUID(),
-    taskId,
-    title: value.title.trim(),
-    description: value.description.trim(),
-    status: value.status,
-    priority: value.priority,
-    completed: value.status === "COMPLETED",
-    createdAt: new Date(),
-  }));
+  const currentById = new Map(
+    currentTaskSubTasks.map((subTask) => [subTask.id, subTask]),
+  );
 
-  saveSubTasks([...unrelatedSubTasks, ...replacementSubTasks]);
+  const syncedSubTasks = values.map((value): SubTask => {
+    const current = value.id ? currentById.get(value.id) : undefined;
 
-  return replacementSubTasks;
+    if (current) {
+      return {
+        ...current,
+        title: value.title.trim(),
+        description: value.description.trim(),
+        status: value.status,
+        priority: value.priority,
+        completed: value.status === "COMPLETED",
+      };
+    }
+
+    return {
+      id: crypto.randomUUID(),
+      taskId,
+      title: value.title.trim(),
+      description: value.description.trim(),
+      status: value.status,
+      priority: value.priority,
+      completed: value.status === "COMPLETED",
+      createdAt: new Date(),
+    };
+  });
+
+  saveSubTasks([...unrelatedSubTasks, ...syncedSubTasks]);
+
+  return syncedSubTasks;
 };
