@@ -76,26 +76,12 @@ export const AppLayout = () => {
         }}
       >
         <Box sx={{ px: 3, py: 3 }}>
-          <img
-            src={Logo}
-            width="200"
-            alt="Jarvis"
-          />
+          <img src={Logo} width="200" alt="Jarvis" />
         </Box>
 
-        <Divider
-          sx={{
-            borderColor: "rgba(255, 255, 255, 0.12)",
-          }}
-        />
+        <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.12)" }} />
 
-        <List
-          sx={{
-            flex: 1,
-            px: 1.5,
-            py: 2,
-          }}
-        >
+        <List sx={{ flex: 1, px: 1.5, py: 2 }}>
           {menuItems.map((item) => (
             <ListItemButton
               key={item.path}
@@ -107,9 +93,7 @@ export const AppLayout = () => {
                 mb: 0.5,
                 borderRadius: 2,
                 color: "rgba(255, 255, 255, 0.8)",
-                "& .MuiListItemIcon-root": {
-                  color: "inherit",
-                },
+                "& .MuiListItemIcon-root": { color: "inherit" },
                 "&:hover": {
                   backgroundColor: "rgba(255, 255, 255, 0.08)",
                   color: "#FFFFFF",
@@ -130,12 +114,7 @@ export const AppLayout = () => {
                 },
               }}
             >
-              <ListItemIcon
-                sx={{
-                  minWidth: 40,
-                  color: "inherit",
-                }}
-              >
+              <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
                 {item.icon}
               </ListItemIcon>
 
@@ -156,11 +135,7 @@ export const AppLayout = () => {
           ))}
         </List>
 
-        <Divider
-          sx={{
-            borderColor: "rgba(255, 255, 255, 0.12)",
-          }}
-        />
+        <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.12)" }} />
 
         <Box sx={{ px: 1.5, pt: 1.5 }}>
           <Box
@@ -182,11 +157,7 @@ export const AppLayout = () => {
                 minWidth: 40,
               }}
             >
-              {isDarkMode ? (
-                <DarkModeOutlined />
-              ) : (
-                <LightModeOutlined />
-              )}
+              {isDarkMode ? <DarkModeOutlined /> : <LightModeOutlined />}
             </Box>
 
             <Typography
@@ -196,24 +167,20 @@ export const AppLayout = () => {
                 fontWeight: 500,
               }}
             >
-              {isDarkMode
-                ? "Modo escuro"
-                : "Modo claro"}
+              {isDarkMode ? "Modo escuro" : "Modo claro"}
             </Typography>
 
             <Switch
               checked={isDarkMode}
               onChange={toggleTheme}
-              inputProps={{
-                "aria-label": "Alternar entre tema claro e escuro",
+              slotProps={{
+                input: {
+                  "aria-label": "Alternar entre tema claro e escuro",
+                },
               }}
               sx={{
-                "& .MuiSwitch-switchBase": {
-                  color: "#FFFFFF",
-                },
-                "& .MuiSwitch-switchBase.Mui-checked": {
-                  color: "#FFFFFF",
-                },
+                "& .MuiSwitch-switchBase": { color: "#FFFFFF" },
+                "& .MuiSwitch-switchBase.Mui-checked": { color: "#FFFFFF" },
                 "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                   backgroundColor: "rgba(255, 255, 255, 0.7)",
                 },
@@ -237,12 +204,7 @@ export const AppLayout = () => {
               },
             }}
           >
-            <ListItemIcon
-              sx={{
-                minWidth: 40,
-                color: "inherit",
-              }}
-            >
+            <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
               <LogoutOutlined />
             </ListItemIcon>
 
