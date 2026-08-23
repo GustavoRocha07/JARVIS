@@ -24,13 +24,10 @@ import {
   handleListTaskService,
   handleUpdateTaskService,
 } from "../services/tasks.service";
-
-import { formValuesToCreateSubTask } from "@/modules/subtasks/mappers/subtask.mapper";
 import {
-  handleCreateSubTaskService,
-  handleSyncTaskSubTasksService,
-  handleUpdateSubTaskService,
-} from "@/modules/subtasks/services/subtasks.service";
+  handleSetSubTaskCompletionWorkflow,
+  handleSubmitTaskWorkflow,
+} from "../services/task-workflow.service";
 
 import { useAlert } from "@/context/AlertContext/useAlert";
 import { isApiError } from "../rules/isApiError";
@@ -99,30 +96,14 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   const handleSubmitTask = useCallback(
     (payload: TaskSubmit): boolean => {
       try {
-        if (payload.action === "CREATE") {
-          const createdTask = handleCreateTaskService(payload.task);
-
-          try {
-            payload.subTasks.forEach((subTask) => {
-              handleCreateSubTaskService(
-                formValuesToCreateSubTask(createdTask.id, subTask),
-              );
-            });
-          } catch (error) {
-            handleDeleteTaskService(createdTask.id);
-            throw error;
-          }
-
-          refreshTasks();
-          showAlert("success", "Task criada com sucesso!");
-          return true;
-        }
-
-        handleUpdateTaskService(payload.task.id, payload.task);
-        handleSyncTaskSubTasksService(payload.task.id, payload.subTasks);
-
+        handleSubmitTaskWorkflow(payload);
         refreshTasks();
-        showAlert("success", "Task atualizada com sucesso!");
+        showAlert(
+          "success",
+          payload.action === "CREATE"
+            ? "Task criada com sucesso!"
+            : "Task atualizada com sucesso!",
+        );
         return true;
       } catch (error: unknown) {
         handleError(error);
@@ -165,13 +146,10 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   const handleSubTaskComplete = useCallback(
     (subTask: SubTask, completed: boolean): boolean => {
       try {
-        const updatedSubTask = handleUpdateSubTaskService({
-          id: subTask.id,
-          title: subTask.title,
-          description: subTask.description,
-          status: completed ? "COMPLETED" : "PENDING",
-          priority: subTask.priority,
-        });
+        const updatedSubTask = handleSetSubTaskCompletionWorkflow(
+          subTask,
+          completed,
+        );
 
         refreshTasks();
 
