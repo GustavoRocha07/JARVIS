@@ -30,13 +30,16 @@ const TasksContent = () => {
     handleSubmitTask,
     handleUpdateTask,
     handleDeleteTask,
+    handleSubTaskComplete,
   } = useTasksData();
 
   const {
     openModal,
+    modalMode,
     selectedTask,
     openConfirmDeletedModal,
     handleOpenModal,
+    handleSetModalMode,
     handleCloseModal,
     handleConfirmDeletedTask,
     handleCloseConfirmDeletedModal,
@@ -72,16 +75,16 @@ const TasksContent = () => {
 
   const handleCompleteTask = (
     task: Task,
+    completed: boolean,
   ) => {
     const data: UpdateTask = {
       id: task.id,
       title: task.title,
       description: task.description,
       priority: task.priority,
-      status:
-        task.status === "COMPLETED"
-          ? "PENDING"
-          : "COMPLETED",
+      status: completed
+        ? "COMPLETED"
+        : "PENDING",
       dueDate: task.dueDate,
     };
 
@@ -107,7 +110,10 @@ const TasksContent = () => {
         buttonText="Cadastrar Tarefa"
         buttonIcon={<AddOutlined />}
         action={() =>
-          handleOpenModal()
+          handleOpenModal(
+            undefined,
+            "create",
+          )
         }
       />
 
@@ -127,13 +133,22 @@ const TasksContent = () => {
               key={task.id}
               task={task}
               onClick={(task) =>
-                console.log(task)
+                handleOpenModal(
+                  task,
+                  "view",
+                )
               }
-              onEdit={
-                handleOpenModal
+              onEdit={(task) =>
+                handleOpenModal(
+                  task,
+                  "edit",
+                )
               }
               onComplete={
                 handleCompleteTask
+              }
+              onSubTaskComplete={
+                handleSubTaskComplete
               }
               onDelete={
                 handleConfirmDeletedTask
@@ -161,8 +176,15 @@ const TasksContent = () => {
       {openModal && (
         <TaskModal
           open={openModal}
+          mode={modalMode}
           onClose={
             handleCloseModal
+          }
+          onModeChange={
+            handleSetModalMode
+          }
+          onSubTaskComplete={
+            handleSubTaskComplete
           }
           title={
             selectedTask
