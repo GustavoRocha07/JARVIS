@@ -1,9 +1,6 @@
 import { useMemo } from "react";
 
-import {
-  FormikProvider,
-  useFormik,
-} from "formik";
+import { FormikProvider, useFormik } from "formik";
 
 import {
   Box,
@@ -28,17 +25,10 @@ import { ptBR } from "date-fns/locale/pt-BR";
 import { ModalComponent } from "@/shared/components/ModalComponent";
 import { SubTaskComponent } from "@/modules/subtasks/components/SubTaskForm/SubTaskForm";
 
-import type {
-  TaskModalProps,
-} from "../../types/tasks.type";
+import type { TaskModalProps } from "../../types/tasks.type";
+import type { TaskFormValues } from "../../types/task-form.type";
 
-import type {
-  TaskFormValues,
-} from "../../types/task-form.type";
-
-import {
-  validationSchema,
-} from "../../schema/TaskValidation.schema";
+import { validationSchema } from "../../schema/TaskValidation.schema";
 
 import {
   formValuesToCreateTask,
@@ -79,13 +69,9 @@ export const TaskModal = ({
       if (isEdit && initialData) {
         onSubmit({
           action: "UPDATE",
-          task: formValuesToUpdateTask(
-            initialData.id,
-            values,
-          ),
+          task: formValuesToUpdateTask(initialData.id, values),
           subTasks: values.subTasks,
         });
-
         return;
       }
 
@@ -115,11 +101,7 @@ export const TaskModal = ({
 
   const actions = isView ? (
     <Stack direction="row" spacing={1}>
-      <Button
-        type="button"
-        variant="outlined"
-        onClick={handleClose}
-      >
+      <Button type="button" variant="outlined" onClick={handleClose}>
         Fechar
       </Button>
 
@@ -133,11 +115,7 @@ export const TaskModal = ({
     </Stack>
   ) : (
     <Stack direction="row" spacing={1}>
-      <Button
-        type="button"
-        variant="outlined"
-        onClick={handleCancel}
-      >
+      <Button type="button" variant="outlined" onClick={handleCancel}>
         Cancelar
       </Button>
 
@@ -147,9 +125,7 @@ export const TaskModal = ({
         variant="contained"
         disabled={formik.isSubmitting}
       >
-        {isCreate
-          ? "Criar tarefa"
-          : "Salvar alterações"}
+        {isCreate ? "Criar tarefa" : "Salvar alterações"}
       </Button>
     </Stack>
   );
@@ -159,11 +135,7 @@ export const TaskModal = ({
       <ModalComponent
         open={open}
         onClose={handleClose}
-        title={
-          title ||
-          initialData?.title ||
-          "Cadastrar Tarefa"
-        }
+        title={title || initialData?.title || "Cadastrar Tarefa"}
         fullWidth
         maxWidth="md"
         actions={actions}
@@ -171,22 +143,14 @@ export const TaskModal = ({
         {isView && initialData ? (
           <Stack spacing={2.5}>
             <Box>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-              >
+              <Typography variant="caption" color="text.secondary">
                 Título
               </Typography>
-              <Typography variant="h6">
-                {initialData.title}
-              </Typography>
+              <Typography variant="h6">{initialData.title}</Typography>
             </Box>
 
             <Box>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-              >
+              <Typography variant="caption" color="text.secondary">
                 Descrição
               </Typography>
               <Typography variant="body1">
@@ -199,34 +163,21 @@ export const TaskModal = ({
               spacing={3}
             >
               <Box>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                >
+                <Typography variant="caption" color="text.secondary">
                   Status
                 </Typography>
-                <Typography variant="body2">
-                  {initialData.status}
-                </Typography>
+                <Typography variant="body2">{initialData.status}</Typography>
               </Box>
 
               <Box>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                >
+                <Typography variant="caption" color="text.secondary">
                   Prioridade
                 </Typography>
-                <Typography variant="body2">
-                  {initialData.priority}
-                </Typography>
+                <Typography variant="body2">{initialData.priority}</Typography>
               </Box>
 
               <Box>
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                >
+                <Typography variant="caption" color="text.secondary">
                   Vencimento
                 </Typography>
                 <Typography variant="body2">
@@ -238,79 +189,73 @@ export const TaskModal = ({
             <Divider />
 
             <Box>
-              <Typography
-                variant="subtitle1"
-                sx={{ mb: 1 }}
-              >
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
                 Subtarefas
               </Typography>
 
               {initialData.subTasks?.length ? (
                 <Stack spacing={0.75}>
-                  {initialData.subTasks.map((subTask) => (
-                    <Box
-                      key={subTask.id}
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        px: 1,
-                        py: 0.75,
-                        border: "1px solid",
-                        borderColor: "divider",
-                        borderRadius: 1.5,
-                      }}
-                    >
-                      <Checkbox
-                        size="small"
-                        checked={subTask.completed}
-                        onChange={(event) =>
-                          onSubTaskComplete(
-                            subTask,
-                            event.target.checked,
-                          )
-                        }
-                        icon={
-                          <RadioButtonUncheckedIcon fontSize="small" />
-                        }
-                        checkedIcon={
-                          <CheckCircleIcon fontSize="small" />
-                        }
-                      />
+                  {initialData.subTasks.map((subTask) => {
+                    const completed = subTask.status === "COMPLETED";
 
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography
-                          variant="body2"
-                          sx={{
-                            fontWeight: 600,
-                            textDecoration: subTask.completed
-                              ? "line-through"
-                              : "none",
-                            opacity: subTask.completed
-                              ? 0.65
-                              : 1,
-                          }}
-                        >
-                          {subTask.title}
-                        </Typography>
+                    return (
+                      <Box
+                        key={subTask.id}
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1,
+                          px: 1,
+                          py: 0.75,
+                          border: "1px solid",
+                          borderColor: "divider",
+                          borderRadius: 1.5,
+                        }}
+                      >
+                        <Checkbox
+                          size="small"
+                          checked={completed}
+                          onChange={(event) =>
+                            onSubTaskComplete(
+                              subTask,
+                              event.target.checked,
+                            )
+                          }
+                          icon={
+                            <RadioButtonUncheckedIcon fontSize="small" />
+                          }
+                          checkedIcon={<CheckCircleIcon fontSize="small" />}
+                        />
 
-                        {subTask.description && (
+                        <Box sx={{ minWidth: 0 }}>
                           <Typography
-                            variant="caption"
-                            color="text.secondary"
+                            variant="body2"
+                            sx={{
+                              fontWeight: 600,
+                              textDecoration: completed
+                                ? "line-through"
+                                : "none",
+                              opacity: completed ? 0.65 : 1,
+                            }}
                           >
-                            {subTask.description}
+                            {subTask.title}
                           </Typography>
-                        )}
+
+                          {subTask.description && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {subTask.description}
+                            </Typography>
+                          )}
+                        </Box>
                       </Box>
-                    </Box>
-                  ))}
+                    );
+                  })}
                 </Stack>
               ) : (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                >
+                <Typography variant="body2" color="text.secondary">
                   Nenhuma subtarefa cadastrada.
                 </Typography>
               )}
@@ -379,18 +324,10 @@ export const TaskModal = ({
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                   >
-                    <MenuItem value="PENDING">
-                      Pendente
-                    </MenuItem>
-                    <MenuItem value="IN_PROGRESS">
-                      Em andamento
-                    </MenuItem>
-                    <MenuItem value="COMPLETED">
-                      Concluída
-                    </MenuItem>
-                    <MenuItem value="CANCELLED">
-                      Cancelada
-                    </MenuItem>
+                    <MenuItem value="PENDING">Pendente</MenuItem>
+                    <MenuItem value="IN_PROGRESS">Em andamento</MenuItem>
+                    <MenuItem value="COMPLETED">Concluída</MenuItem>
+                    <MenuItem value="CANCELLED">Cancelada</MenuItem>
                   </TextField>
 
                   <TextField
@@ -413,20 +350,19 @@ export const TaskModal = ({
                   direction={{ xs: "column", sm: "row" }}
                   spacing={2}
                 >
-                  {!isCreate &&
-                    initialData?.createdAt && (
-                      <DatePicker
-                        label="Data de Criação"
-                        format="dd/MM/yyyy"
-                        value={initialData.createdAt}
-                        disabled
-                        slotProps={{
-                          textField: {
-                            fullWidth: true,
-                          },
-                        }}
-                      />
-                    )}
+                  {!isCreate && initialData?.createdAt && (
+                    <DatePicker
+                      label="Data de Criação"
+                      format="dd/MM/yyyy"
+                      value={initialData.createdAt}
+                      disabled
+                      slotProps={{
+                        textField: {
+                          fullWidth: true,
+                        },
+                      }}
+                    />
+                  )}
 
                   <DatePicker
                     label="Data de Vencimento"
@@ -434,28 +370,20 @@ export const TaskModal = ({
                     value={formik.values.dueDate}
                     onChange={(value) => {
                       if (!value) return;
-
-                      formik.setFieldValue(
-                        "dueDate",
-                        value,
-                      );
+                      formik.setFieldValue("dueDate", value);
                     }}
                     slotProps={{
                       textField: {
                         fullWidth: true,
                         onBlur: () => {
-                          formik.setFieldTouched(
-                            "dueDate",
-                            true,
-                          );
+                          formik.setFieldTouched("dueDate", true);
                         },
                         error:
                           Boolean(formik.touched.dueDate) &&
                           Boolean(formik.errors.dueDate),
                         helperText:
                           formik.touched.dueDate &&
-                            typeof formik.errors.dueDate ===
-                            "string"
+                          typeof formik.errors.dueDate === "string"
                             ? formik.errors.dueDate
                             : undefined,
                       },

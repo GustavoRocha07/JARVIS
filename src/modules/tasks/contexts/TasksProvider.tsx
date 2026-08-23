@@ -24,28 +24,18 @@ import {
   handleListTaskService,
   handleUpdateTaskService,
 } from "../services/tasks.service";
-
 import {
-  formValuesToCreateSubTask,
-} from "@/modules/subtasks/mappers/subtask.mapper";
-import {
-  handleCreateSubTaskService,
-  handleSyncTaskSubTasksService,
-  handleUpdateSubTaskService,
-} from "@/modules/subtasks/services/subtasks.service";
+  handleSetSubTaskCompletionWorkflow,
+  handleSubmitTaskWorkflow,
+} from "../services/task-workflow.service";
 
 import { useAlert } from "@/context/AlertContext/useAlert";
 import { isApiError } from "../rules/isApiError";
 
-export const TasksProvider = ({
-  children,
-}: PropsWithChildren) => {
+export const TasksProvider = ({ children }: PropsWithChildren) => {
   const { showAlert } = useAlert();
 
-  const [tasks, setTasks] = useState<Task[]>(() =>
-    handleListTaskService({}),
-  );
-
+  const [tasks, setTasks] = useState<Task[]>(() => handleListTaskService({}));
   const [filters, setFilters] = useState<TasksParamsSearch>({});
   const [openModal, setOpenModal] = useState(false);
   const [modalMode, setModalMode] = useState<TaskModalMode>("create");
@@ -106,27 +96,14 @@ export const TasksProvider = ({
   const handleSubmitTask = useCallback(
     (payload: TaskSubmit): boolean => {
       try {
-        if (payload.action === "CREATE") {
-          const createdTask = handleCreateTaskService(payload.task);
-
-          payload.subTasks.forEach((subTask) => {
-            handleCreateSubTaskService(
-              formValuesToCreateSubTask(createdTask.id, subTask),
-            );
-          });
-
-          refreshTasks();
-          showAlert("success", "Task criada com sucesso!");
-
-          return true;
-        }
-
-        handleUpdateTaskService(payload.task.id, payload.task);
-        handleSyncTaskSubTasksService(payload.task.id, payload.subTasks);
-
+        handleSubmitTaskWorkflow(payload);
         refreshTasks();
-        showAlert("success", "Task atualizada com sucesso!");
-
+        showAlert(
+          "success",
+          payload.action === "CREATE"
+            ? "Task criada com sucesso!"
+            : "Task atualizada com sucesso!",
+        );
         return true;
       } catch (error: unknown) {
         handleError(error);
@@ -142,7 +119,6 @@ export const TasksProvider = ({
         const createdTask = handleCreateTaskService(newTask);
         refreshTasks();
         showAlert("success", "Task criada com sucesso!");
-
         return createdTask;
       } catch (error: unknown) {
         handleError(error);
@@ -158,7 +134,6 @@ export const TasksProvider = ({
         const updatedTask = handleUpdateTaskService(task.id, task);
         refreshTasks();
         showAlert("success", "Task atualizada com sucesso!");
-
         return updatedTask;
       } catch (error: unknown) {
         handleError(error);
@@ -171,14 +146,10 @@ export const TasksProvider = ({
   const handleSubTaskComplete = useCallback(
     (subTask: SubTask, completed: boolean): boolean => {
       try {
-        const updatedSubTask = handleUpdateSubTaskService({
-          id: subTask.id,
-          title: subTask.title,
-          description: subTask.description,
-          status: completed ? "COMPLETED" : "PENDING",
-          priority: subTask.priority,
+        const updatedSubTask = handleSetSubTaskCompletionWorkflow(
+          subTask,
           completed,
-        });
+        );
 
         refreshTasks();
 
@@ -190,9 +161,7 @@ export const TasksProvider = ({
           return {
             ...currentTask,
             subTasks: currentTask.subTasks?.map((item) =>
-              item.id === updatedSubTask.id
-                ? updatedSubTask
-                : item,
+              item.id === updatedSubTask.id ? updatedSubTask : item,
             ),
           };
         });
@@ -211,12 +180,9 @@ export const TasksProvider = ({
       try {
         handleDeleteTaskService(taskId);
         refreshTasks();
-
         setOpenConfirmDeletedModal(false);
         setSelectedTask(null);
-
         showAlert("success", "Task deletada com sucesso!");
-
         return true;
       } catch (error: unknown) {
         handleError(error);
@@ -237,10 +203,7 @@ export const TasksProvider = ({
   }, []);
 
   const handleOpenModal = useCallback(
-    (
-      task?: Task,
-      mode: TaskModalMode = task ? "view" : "create",
-    ) => {
+    (task?: Task, mode: TaskModalMode = task ? "view" : "create") => {
       setSelectedTask(task ?? null);
       setModalMode(mode);
       setOpenModal(true);
@@ -268,7 +231,6 @@ export const TasksProvider = ({
 
   const handleClearFilters = useCallback(() => {
     const emptyFilters: TasksParamsSearch = {};
-
     setFilters(emptyFilters);
     refreshTasks(emptyFilters);
   }, [refreshTasks]);

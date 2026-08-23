@@ -3,17 +3,20 @@ import type {
   SubTask,
   UpdateSubTask,
 } from "../types/subtask.type";
+import {
+  isTaskPriority,
+  isTaskStatus,
+} from "@/shared/types/task-domain.type";
 
 const STORAGE_KEY = "jarvis:subtasks";
 
 type StoredSubTask = Omit<SubTask, "createdAt"> & {
   createdAt: string;
+  completed?: boolean;
 };
 
 const isStoredSubTask = (value: unknown): value is StoredSubTask => {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
+  if (typeof value !== "object" || value === null) return false;
 
   if (!("id" in value)) return false;
   if (!("taskId" in value)) return false;
@@ -21,58 +24,39 @@ const isStoredSubTask = (value: unknown): value is StoredSubTask => {
   if (!("description" in value)) return false;
   if (!("status" in value)) return false;
   if (!("priority" in value)) return false;
-  if (!("completed" in value)) return false;
   if (!("createdAt" in value)) return false;
-
-  const status = value.status;
-  const priority = value.priority;
-  const createdAt = value.createdAt;
-
-  const validStatus =
-    status === "PENDING" ||
-    status === "IN_PROGRESS" ||
-    status === "COMPLETED" ||
-    status === "CANCELLED";
-
-  const validPriority =
-    priority === "LOW" ||
-    priority === "MEDIUM" ||
-    priority === "HIGH" ||
-    priority === "URGENT";
 
   return (
     typeof value.id === "string" &&
     typeof value.taskId === "number" &&
     typeof value.title === "string" &&
     typeof value.description === "string" &&
-    validStatus &&
-    validPriority &&
-    typeof value.completed === "boolean" &&
-    typeof createdAt === "string" &&
-    !Number.isNaN(new Date(createdAt).getTime())
+    isTaskStatus(value.status) &&
+    isTaskPriority(value.priority) &&
+    typeof value.createdAt === "string" &&
+    !Number.isNaN(new Date(value.createdAt).getTime())
   );
 };
 
 const getStoredSubTasks = (): SubTask[] => {
   const rawData = localStorage.getItem(STORAGE_KEY);
 
-  if (!rawData) {
-    return [];
-  }
+  if (!rawData) return [];
 
   try {
     const parsed: unknown = JSON.parse(rawData);
 
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
+    if (!Array.isArray(parsed)) return [];
 
-    return parsed
-      .filter(isStoredSubTask)
-      .map((subTask) => ({
-        ...subTask,
-        createdAt: new Date(subTask.createdAt),
-      }));
+    return parsed.filter(isStoredSubTask).map((subTask) => ({
+      id: subTask.id,
+      taskId: subTask.taskId,
+      title: subTask.title,
+      description: subTask.description,
+      status: subTask.status,
+      priority: subTask.priority,
+      createdAt: new Date(subTask.createdAt),
+    }));
   } catch {
     return [];
   }
@@ -85,26 +69,21 @@ const saveSubTasks = (subTasks: SubTask[]): void => {
 export const handleListSubTasksService = (taskId?: number): SubTask[] => {
   const subTasks = getStoredSubTasks();
 
-  if (taskId === undefined) {
-    return subTasks;
-  }
+  if (taskId === undefined) return subTasks;
 
   return subTasks.filter((subTask) => subTask.taskId === taskId);
 };
 
-export const handleCreateSubTaskService = (
-  data: CreateSubTask,
-): SubTask => {
+export const handleCreateSubTaskService = (data: CreateSubTask): SubTask => {
   const subTasks = getStoredSubTasks();
 
   const newSubTask: SubTask = {
     id: crypto.randomUUID(),
     taskId: data.taskId,
-    title: data.title,
-    description: data.description,
+    title: data.title.trim(),
+    description: data.description.trim(),
     status: data.status,
     priority: data.priority,
-    completed: data.status === "COMPLETED",
     createdAt: new Date(),
   };
 
@@ -113,9 +92,7 @@ export const handleCreateSubTaskService = (
   return newSubTask;
 };
 
-export const handleUpdateSubTaskService = (
-  data: UpdateSubTask,
-): SubTask => {
+export const handleUpdateSubTaskService = (data: UpdateSubTask): SubTask => {
   const subTasks = getStoredSubTasks();
   const index = subTasks.findIndex((subTask) => subTask.id === data.id);
 
@@ -125,11 +102,10 @@ export const handleUpdateSubTaskService = (
 
   const updatedSubTask: SubTask = {
     ...subTasks[index],
-    title: data.title,
-    description: data.description,
+    title: data.title.trim(),
+    description: data.description.trim(),
     status: data.status,
     priority: data.priority,
-    completed: data.completed,
   };
 
   subTasks[index] = updatedSubTask;
@@ -180,7 +156,6 @@ export const handleSyncTaskSubTasksService = (
         description: value.description.trim(),
         status: value.status,
         priority: value.priority,
-        completed: value.status === "COMPLETED",
       };
     }
 
@@ -191,7 +166,6 @@ export const handleSyncTaskSubTasksService = (
       description: value.description.trim(),
       status: value.status,
       priority: value.priority,
-      completed: value.status === "COMPLETED",
       createdAt: new Date(),
     };
   });
