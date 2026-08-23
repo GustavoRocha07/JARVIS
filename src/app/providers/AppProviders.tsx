@@ -1,27 +1,26 @@
-import { type ReactNode } from 'react';
+import {
+  type ReactNode,
+} from "react";
 
-import { CssBaseline, ThemeProvider } from '@mui/material';
-
-
-import { theme } from '@/app/theme/theme';
-import { AlertProvider } from '@/context/AlertContext/AlertProvider';
+import {
+  AlertProvider,
+} from "@/context/AlertContext/AlertProvider";
+import {
+  ThemeProvider,
+} from "@/context/ThemeContext/ThemeProvider";
 
 type AppProvidersProps = {
   children: ReactNode;
 };
 
-export function AppProviders({ children }: AppProvidersProps) {
-
+export function AppProviders({
+  children,
+}: AppProvidersProps) {
   return (
-
-    <ThemeProvider theme={theme}>
+    <ThemeProvider>
       <AlertProvider>
-
-        <CssBaseline />
         {children}
       </AlertProvider>
-
     </ThemeProvider>
-
   );
 }

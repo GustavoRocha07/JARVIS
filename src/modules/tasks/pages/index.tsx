@@ -22,20 +22,12 @@ import type {
   UpdateTask,
 } from "../types/tasks.type";
 
-import {
-  formValuesToCreateSubTask,
-} from "@/modules/subtasks/mappers/subtask.mapper";
-
-import {
-  handleCreateSubTaskService,
-} from "@/modules/subtasks/services/subtasks.service";
-
 const ROWS_PER_PAGE = 10;
 
 const TasksContent = () => {
   const {
     tasks,
-    handleCreateTask,
+    handleSubmitTask,
     handleUpdateTask,
     handleDeleteTask,
   } = useTasksData();
@@ -67,39 +59,15 @@ const TasksContent = () => {
     setPage(newPage);
   };
 
-  const handleSubmitTask = (
+  const handleSubmit = (
     payload: TaskSubmit,
   ) => {
-    if (payload.action === "CREATE") {
-      const createdTask =
-        handleCreateTask(payload.task);
+    const success =
+      handleSubmitTask(payload);
 
-      if (!createdTask) {
-        return;
-      }
-
-      payload.subTasks.forEach(
-        (subTask) => {
-          const createSubTask =
-            formValuesToCreateSubTask(
-              createdTask.id,
-              subTask,
-            );
-
-          handleCreateSubTaskService(
-            createSubTask,
-          );
-        },
-      );
-
+    if (success) {
       handleCloseModal();
-
-      return;
     }
-
-    handleUpdateTask(payload.task);
-
-    handleCloseModal();
   };
 
   const handleCompleteTask = (
@@ -107,17 +75,13 @@ const TasksContent = () => {
   ) => {
     const data: UpdateTask = {
       id: task.id,
-
       title: task.title,
       description: task.description,
-
       priority: task.priority,
-
       status:
         task.status === "COMPLETED"
           ? "PENDING"
           : "COMPLETED",
-
       dueDate: task.dueDate,
     };
 
@@ -209,7 +173,7 @@ const TasksContent = () => {
             selectedTask
           }
           onSubmit={
-            handleSubmitTask
+            handleSubmit
           }
         />
       )}

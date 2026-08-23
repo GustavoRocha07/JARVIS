@@ -77,18 +77,16 @@ export type TaskSubmit =
 export type TaskModalProps = {
     open: boolean;
     title: string;
+    mode: TaskModalMode;
     initialData?: Task | null;
 
     onClose: () => void;
+    onModeChange: (mode: TaskModalMode) => void;
 
     onSubmit: (
         values: TaskSubmit,
     ) => void;
 };
-
-/* ----------------------------------
- * Type Guards
- * ---------------------------------- */
 
 const isTaskStatus = (
     value: unknown,

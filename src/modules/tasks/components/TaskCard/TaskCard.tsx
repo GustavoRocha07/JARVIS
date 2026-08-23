@@ -6,35 +6,49 @@ import {
     Chip,
     IconButton,
     LinearProgress,
+    Stack,
     Typography,
-} from '@mui/material';
-import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ModeIcon from '@mui/icons-material/Mode';
-import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded';
-import DescriptionIcon from '@mui/icons-material/Description';
+} from "@mui/material";
 
-import type { Task } from '../../types/tasks.type';
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+
+import type { SubTask } from "@/modules/subtasks/types/subtask.type";
+import type { Task } from "../../types/tasks.type";
 
 import {
     priorityLabels,
     statusStyles,
-} from '@/shared/utils/getColorsAlert';
+} from "@/shared/utils/getColorsAlert";
 
 type TaskCardProps = {
     task: Task;
     onClick: (task: Task) => void;
     onEdit: (task: Task) => void;
     onDelete: (task: Task) => void;
-    onComplete: (task: Task, completed: boolean) => void;
+    onComplete: (
+        task: Task,
+        completed: boolean,
+    ) => void;
+    onSubTaskComplete?: (
+        subTask: SubTask,
+        completed: boolean,
+    ) => void;
 };
+
+const formatDate = (date: Date) =>
+    new Intl.DateTimeFormat("pt-BR").format(
+        date,
+    );
 
 export const TaskCard = ({
     task,
     onClick,
     onEdit,
-    onDelete,
     onComplete,
+    onSubTaskComplete,
 }: TaskCardProps) => {
     const subtasks = task.subTasks ?? [];
 
@@ -46,189 +60,320 @@ export const TaskCard = ({
 
     const progress =
         totalSubtasks > 0
-            ? (completedSubtasks / totalSubtasks) * 100
+            ? (completedSubtasks /
+                  totalSubtasks) *
+              100
             : 0;
 
-    const hasSubtasks = totalSubtasks > 0;
-
-    const isCompleted = task.status === 'COMPLETED';
+    const isCompleted =
+        task.status === "COMPLETED";
 
     const handleCompleteChange = (
         event: React.ChangeEvent<HTMLInputElement>,
     ) => {
         event.stopPropagation();
 
-        onComplete(task, event.target.checked);
+        onComplete(
+            task,
+            event.target.checked,
+        );
     };
 
-    const handleEdit = (
+    const handleMenuClick = (
         event: React.MouseEvent<HTMLButtonElement>,
     ) => {
         event.stopPropagation();
-
         onEdit(task);
     };
 
-    const handleDelete = (
-        event: React.MouseEvent<HTMLButtonElement>,
+    const handleSubTaskChange = (
+        event: React.ChangeEvent<HTMLInputElement>,
+        subTask: SubTask,
     ) => {
         event.stopPropagation();
 
-        onDelete(task);
+        onSubTaskComplete?.(
+            subTask,
+            event.target.checked,
+        );
     };
 
     return (
         <Card
-            className="cardContainer"
             onClick={() => onClick(task)}
             sx={{
-                cursor: 'pointer',
+                mb: 1.5,
+                border: "1px solid",
+                borderColor: "divider",
+                borderRadius: 2,
+                boxShadow: "none",
+                overflow: "hidden",
+                cursor: "pointer",
             }}
         >
-            <CardContent sx={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-            }}>
+            <CardContent
+                sx={{
+                    p: 1.5,
+                    "&:last-child": {
+                        pb: 1.5,
+                    },
+                }}
+            >
                 <Box
                     sx={{
-                        width: '5%',
-                        display: 'flex',
-                        alignItems: 'center',
+                        display: "flex",
+                        alignItems: "flex-start",
                         gap: 1,
-                        mb: 1,
                     }}
                 >
                     <Checkbox
+                        size="small"
                         checked={isCompleted}
                         onChange={handleCompleteChange}
-                        onClick={(event) => event.stopPropagation()}
-                        icon={<RadioButtonUncheckedIcon />}
-                        checkedIcon={<CheckCircleIcon />}
+                        onClick={(event) =>
+                            event.stopPropagation()
+                        }
+                        icon={
+                            <RadioButtonUncheckedIcon fontSize="small" />
+                        }
+                        checkedIcon={
+                            <CheckCircleIcon fontSize="small" />
+                        }
+                        sx={{
+                            p: 0.25,
+                            mt: 0.1,
+                        }}
                     />
 
-                </Box>
-
-                <Box
-                    sx={{
-                        width: '85%',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 1.5,
-                    }}
-                >
                     <Box
                         sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 1,
+                            flex: 1,
+                            minWidth: 0,
                         }}
                     >
-                        <Typography
-                            variant="h6"
+                        <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={1}
                             sx={{
-                                flex: 1,
                                 minWidth: 0,
-                                fontFamily: 'Roboto',
-                                overflow: 'hidden',
-                                textOverflow: 'ellipsis',
-                                whiteSpace: 'nowrap',
                             }}
                         >
-                            {task.title}
-                        </Typography>
-
-                        <Chip
-                            size="small"
-                            sx={statusStyles[task.status]}
-                            label={priorityLabels[task.priority]}
-                        />
-
-
-                    </Box>
-
-                    {task.description && (
-                        <Box
-                            sx={{
-                                width: '80%',
-                                display: 'flex',
-                                alignItems: 'flex-start',
-                                gap: 0.5,
-                            }}
-                        >
-                            <DescriptionIcon fontSize="small" />
-
                             <Typography
-                                variant="body2"
+                                variant="subtitle2"
                                 sx={{
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 2,
-                                    WebkitBoxOrient: 'vertical',
+                                    minWidth: 0,
+                                    fontWeight: 700,
+                                    overflow: "hidden",
+                                    textOverflow:
+                                        "ellipsis",
+                                    whiteSpace:
+                                        "nowrap",
+                                    textDecoration:
+                                        isCompleted
+                                            ? "line-through"
+                                            : "none",
+                                    opacity:
+                                        isCompleted
+                                            ? 0.65
+                                            : 1,
+                                }}
+                            >
+                                {task.title}
+                            </Typography>
+
+                            <Chip
+                                size="small"
+                                label={
+                                    priorityLabels[
+                                        task.priority
+                                    ]
+                                }
+                                sx={{
+                                    ...statusStyles[
+                                        task.status
+                                    ],
+                                    height: 20,
+                                    fontSize: 11,
+                                }}
+                            />
+                        </Stack>
+
+                        {task.description && (
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                    display: "block",
+                                    mt: 0.35,
+                                    overflow: "hidden",
+                                    textOverflow:
+                                        "ellipsis",
+                                    whiteSpace:
+                                        "nowrap",
                                 }}
                             >
                                 {task.description}
                             </Typography>
-                        </Box>
-                    )}
+                        )}
 
-                    {hasSubtasks && (
+                        <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={0.5}
+                            sx={{
+                                mt: 0.65,
+                                color: "text.secondary",
+                            }}
+                        >
+                            <CalendarTodayOutlinedIcon
+                                sx={{
+                                    fontSize: 13,
+                                }}
+                            />
+
+                            <Typography variant="caption">
+                                {formatDate(
+                                    task.dueDate,
+                                )}
+                            </Typography>
+                        </Stack>
+                    </Box>
+
+                    {totalSubtasks > 0 && (
                         <Box
                             sx={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 2,
-                                pl: 3,
+                                width: 72,
+                                pt: 0.2,
                             }}
                         >
                             <Typography
-                                variant="body2"
+                                variant="caption"
+                                color="text.secondary"
                                 sx={{
-                                    whiteSpace: 'nowrap',
+                                    display: "block",
+                                    textAlign: "center",
+                                    mb: 0.5,
                                 }}
                             >
-                                {completedSubtasks}/{totalSubtasks} subtarefas
+                                {completedSubtasks}/
+                                {totalSubtasks}
                             </Typography>
 
-                            <Box
+                            <LinearProgress
+                                variant="determinate"
+                                value={progress}
                                 sx={{
-                                    width: 150,
+                                    height: 3,
+                                    borderRadius: 99,
                                 }}
-                            >
-                                <LinearProgress
-                                    variant="determinate"
-                                    value={progress}
-                                />
-                            </Box>
+                            />
                         </Box>
                     )}
-                </Box>
-                <Box
-                    sx={{
-                        width: '10%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}
-                >
-                    <IconButton
-                        aria-label="Editar tarefa"
-                        title="Editar tarefa"
-                        onClick={handleEdit}
-                    >
-                        <ModeIcon />
-                    </IconButton>
 
                     <IconButton
-                        aria-label="Deletar tarefa"
-                        title="Deletar tarefa"
-                        onClick={handleDelete}
+                        size="small"
+                        aria-label="Ações da tarefa"
+                        title="Editar tarefa"
+                        onClick={handleMenuClick}
+                        sx={{
+                            mt: -0.35,
+                        }}
                     >
-                        <DeleteRoundedIcon />
+                        <MoreHorizIcon fontSize="small" />
                     </IconButton>
                 </Box>
+
+                {subtasks.length > 0 && (
+                    <Stack
+                        spacing={0.35}
+                        sx={{
+                            mt: 1.1,
+                            ml: 3.7,
+                        }}
+                    >
+                        {subtasks.map((subTask) => (
+                            <Box
+                                key={subTask.id}
+                                onClick={(event) =>
+                                    event.stopPropagation()
+                                }
+                                sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    minHeight: 34,
+                                    px: 0.75,
+                                    borderRadius: 1.25,
+                                    backgroundColor:
+                                        "action.hover",
+                                }}
+                            >
+                                <Checkbox
+                                    size="small"
+                                    checked={
+                                        subTask.completed
+                                    }
+                                    disabled={
+                                        !onSubTaskComplete
+                                    }
+                                    onChange={(event) =>
+                                        handleSubTaskChange(
+                                            event,
+                                            subTask,
+                                        )
+                                    }
+                                    icon={
+                                        <RadioButtonUncheckedIcon fontSize="small" />
+                                    }
+                                    checkedIcon={
+                                        <CheckCircleIcon fontSize="small" />
+                                    }
+                                    sx={{
+                                        p: 0.3,
+                                        mr: 0.6,
+                                    }}
+                                />
+
+                                <Typography
+                                    variant="body2"
+                                    sx={{
+                                        flex: 1,
+                                        minWidth: 0,
+                                        overflow: "hidden",
+                                        textOverflow:
+                                            "ellipsis",
+                                        whiteSpace:
+                                            "nowrap",
+                                        textDecoration:
+                                            subTask.completed
+                                                ? "line-through"
+                                                : "none",
+                                        opacity:
+                                            subTask.completed
+                                                ? 0.65
+                                                : 1,
+                                    }}
+                                >
+                                    {subTask.title}
+                                </Typography>
+
+                                <IconButton
+                                    size="small"
+                                    aria-label="Ações da subtarefa"
+                                    onClick={(event) =>
+                                        event.stopPropagation()
+                                    }
+                                >
+                                    <MoreHorizIcon
+                                        sx={{
+                                            fontSize: 17,
+                                        }}
+                                    />
+                                </IconButton>
+                            </Box>
+                        ))}
+                    </Stack>
+                )}
             </CardContent>
         </Card>
     );
