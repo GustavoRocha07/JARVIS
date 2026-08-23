@@ -47,7 +47,6 @@ export const TaskCard = ({
     task,
     onClick,
     onEdit,
-    onDelete,
     onComplete,
     onSubTaskComplete,
 }: TaskCardProps) => {
