@@ -1,16 +1,18 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import {
   DashboardOutlined,
   DarkModeOutlined,
   LightModeOutlined,
   LogoutOutlined,
+  MenuOutlined,
   TaskOutlined,
 } from "@mui/icons-material";
 
 import {
   Box,
   Divider,
+  IconButton,
   List,
   ListItemButton,
   ListItemIcon,
@@ -46,10 +48,16 @@ const menuItems: MenuItem[] = [
 ];
 
 export const AppLayout = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const {
     isDarkMode,
     toggleTheme,
   } = useThemeMode();
+
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
 
   return (
     <Box
@@ -58,25 +66,72 @@ export const AppLayout = () => {
         minHeight: "100vh",
         bgcolor: "background.default",
         color: "text.primary",
+        overflowX: "hidden",
       }}
     >
+      {mobileMenuOpen && (
+        <Box
+          onClick={closeMobileMenu}
+          sx={{
+            display: { xs: "block", md: "none" },
+            position: "fixed",
+            inset: 0,
+            zIndex: 1199,
+            bgcolor: "rgba(0, 0, 0, 0.48)",
+          }}
+        />
+      )}
+
       <Box
         component="aside"
         sx={{
           position: "fixed",
           top: 0,
           left: 0,
+          zIndex: 1200,
           display: "flex",
           flexDirection: "column",
-          width: SIDEBAR_WIDTH,
-          minWidth: SIDEBAR_WIDTH,
+          width: {
+            xs: "min(82vw, 260px)",
+            md: SIDEBAR_WIDTH,
+          },
+          minWidth: { md: SIDEBAR_WIDTH },
           height: "100vh",
           bgcolor: "primary.main",
           color: "primary.contrastText",
+          transform: {
+            xs: mobileMenuOpen
+              ? "translateX(0)"
+              : "translateX(-100%)",
+            md: "translateX(0)",
+          },
+          transition: (theme) =>
+            theme.transitions.create("transform", {
+              duration: theme.transitions.duration.shorter,
+            }),
+          boxShadow: {
+            xs: mobileMenuOpen ? 8 : 0,
+            md: 0,
+          },
         }}
       >
-        <Box sx={{ px: 3, py: 3 }}>
-          <img src={Logo} width="200" alt="Jarvis" />
+        <Box
+          sx={{
+            px: { xs: 2, md: 3 },
+            py: { xs: 2, md: 3 },
+          }}
+        >
+          <Box
+            component="img"
+            src={Logo}
+            alt="Jarvis"
+            sx={{
+              display: "block",
+              width: "100%",
+              maxWidth: 200,
+              height: "auto",
+            }}
+          />
         </Box>
 
         <Divider sx={{ borderColor: "rgba(255, 255, 255, 0.12)" }} />
@@ -87,6 +142,7 @@ export const AppLayout = () => {
               key={item.path}
               component={NavLink}
               to={item.path}
+              onClick={closeMobileMenu}
               sx={{
                 position: "relative",
                 minHeight: 48,
@@ -163,6 +219,7 @@ export const AppLayout = () => {
             <Typography
               sx={{
                 flex: 1,
+                minWidth: 0,
                 fontSize: "0.875rem",
                 fontWeight: 500,
               }}
@@ -179,6 +236,7 @@ export const AppLayout = () => {
                 },
               }}
               sx={{
+                flexShrink: 0,
                 "& .MuiSwitch-switchBase": { color: "#FFFFFF" },
                 "& .MuiSwitch-switchBase.Mui-checked": { color: "#FFFFFF" },
                 "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
@@ -228,9 +286,16 @@ export const AppLayout = () => {
       <Box
         component="main"
         sx={{
-          width: `calc(100% - ${SIDEBAR_WIDTH}px)`,
+          width: {
+            xs: "100%",
+            md: `calc(100% - ${SIDEBAR_WIDTH}px)`,
+          },
+          minWidth: 0,
           minHeight: "100vh",
-          ml: `${SIDEBAR_WIDTH}px`,
+          ml: {
+            xs: 0,
+            md: `${SIDEBAR_WIDTH}px`,
+          },
         }}
       >
         <Box
@@ -238,14 +303,27 @@ export const AppLayout = () => {
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end",
+            justifyContent: {
+              xs: "space-between",
+              md: "flex-end",
+            },
             height: 64,
-            px: 3,
+            px: { xs: 1.5, sm: 2, md: 3 },
             bgcolor: "background.paper",
             borderBottom: 1,
             borderColor: "divider",
           }}
         >
+          <IconButton
+            aria-label="Abrir menu"
+            onClick={() => setMobileMenuOpen(true)}
+            sx={{
+              display: { xs: "inline-flex", md: "none" },
+            }}
+          >
+            <MenuOutlined />
+          </IconButton>
+
           <Typography
             sx={{
               fontSize: "0.875rem",
@@ -257,7 +335,17 @@ export const AppLayout = () => {
           </Typography>
         </Box>
 
-        <Box sx={{ p: 3 }}>
+        <Box
+          sx={{
+            width: "100%",
+            minWidth: 0,
+            p: {
+              xs: 1.5,
+              sm: 2,
+              md: 3,
+            },
+          }}
+        >
           <Outlet />
         </Box>
       </Box>
