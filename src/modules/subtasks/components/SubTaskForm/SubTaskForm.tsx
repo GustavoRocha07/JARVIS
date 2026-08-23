@@ -27,6 +27,7 @@ export const SubTaskComponent = () => {
         values,
         handleChange,
         handleBlur,
+        setFieldValue,
         touched,
         errors,
     } =
@@ -37,10 +38,7 @@ export const SubTaskComponent = () => {
             {({ push, remove }) => (
                 <Stack spacing={2}>
                     {values.subTasks.length > 0 && (
-                        <Typography
-                            variant="subtitle1"
-
-                        >
+                        <Typography variant="subtitle1">
                             Subtarefas
                         </Typography>
                     )}
@@ -79,7 +77,7 @@ export const SubTaskComponent = () => {
 
                             return (
                                 <Box
-                                    key={index}
+                                    key={subTask.id ?? index}
                                     sx={{
                                         display: "flex",
                                         alignItems:
@@ -93,17 +91,26 @@ export const SubTaskComponent = () => {
                                     }}
                                 >
                                     <Checkbox
-                                        name={`subTasks.${index}.completed`}
-                                        checked={subTask.status === 'COMPLETED'}
-                                        onChange={handleChange}
+                                        checked={
+                                            subTask.status ===
+                                            "COMPLETED"
+                                        }
+                                        onChange={(event) =>
+                                            setFieldValue(
+                                                `subTasks.${index}.status`,
+                                                event.target.checked
+                                                    ? "COMPLETED"
+                                                    : "PENDING",
+                                            )
+                                        }
                                     />
+
                                     <Stack
                                         spacing={1.5}
                                         sx={{
                                             flex: 1,
                                         }}
                                     >
-
                                         <TextField
                                             fullWidth
                                             size="small"
