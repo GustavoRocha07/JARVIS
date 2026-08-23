@@ -82,6 +82,10 @@ export type TaskModalProps = {
 
     onClose: () => void;
     onModeChange: (mode: TaskModalMode) => void;
+    onSubTaskComplete: (
+        subTask: SubTask,
+        completed: boolean,
+    ) => void;
 
     onSubmit: (
         values: TaskSubmit,
