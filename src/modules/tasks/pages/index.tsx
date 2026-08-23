@@ -102,7 +102,7 @@ const TasksContent = () => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ width: "100%", minWidth: 0 }}>
       <HeaderComponent
         title="Tasks"
         subtitle="Gerenciamento de tarefas"
@@ -117,14 +117,15 @@ const TasksContent = () => {
         }
       />
 
-      <Box sx={{ mt: 3 }}>
+      <Box sx={{ mt: { xs: 2, md: 3 } }}>
         <TaskSummary />
       </Box>
 
       <Box
         sx={{
-          mt: 3,
+          mt: { xs: 2, md: 3 },
           minHeight: "50vh",
+          minWidth: 0,
         }}
       >
         {paginatedTasks.map(
