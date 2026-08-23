@@ -153,10 +153,10 @@ export const TaskCard = ({
                     >
                         <Stack
                             direction="row"
-                            alignItems="center"
                             spacing={1}
                             sx={{
                                 minWidth: 0,
+                                alignItems: "center",
                             }}
                         >
                             <Typography
@@ -219,11 +219,11 @@ export const TaskCard = ({
 
                         <Stack
                             direction="row"
-                            alignItems="center"
                             spacing={0.5}
                             sx={{
                                 mt: 0.65,
                                 color: "text.secondary",
+                                alignItems: "center",
                             }}
                         >
                             <CalendarTodayOutlinedIcon
