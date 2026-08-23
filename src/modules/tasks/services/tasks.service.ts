@@ -41,7 +41,16 @@ const getStoredTasks = (): Task[] => {
 };
 
 const saveTasks = (tasks: Task[]): void => {
-  const tasksWithoutSubTasks = tasks.map(({ subTasks: _subTasks, ...task }) => task);
+  const tasksWithoutSubTasks = tasks.map((task) => ({
+    id: task.id,
+    title: task.title,
+    description: task.description,
+    status: task.status,
+    priority: task.priority,
+    createdAt: task.createdAt,
+    dueDate: task.dueDate,
+  }));
+
   localStorage.setItem(STORAGE_KEY, JSON.stringify(tasksWithoutSubTasks));
 };
 
