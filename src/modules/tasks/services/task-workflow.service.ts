@@ -10,8 +10,34 @@ import type { TaskSubmit } from "../types/tasks.type";
 import {
   handleCreateTaskService,
   handleDeleteTaskService,
+  handleListTaskService,
   handleUpdateTaskService,
 } from "./tasks.service";
+
+const restoreTaskSnapshot = (
+  taskId: number,
+  snapshot: ReturnType<typeof handleListTaskService>[number],
+) => {
+  handleUpdateTaskService(taskId, {
+    id: snapshot.id,
+    title: snapshot.title,
+    description: snapshot.description,
+    status: snapshot.status,
+    priority: snapshot.priority,
+    dueDate: snapshot.dueDate,
+  });
+
+  handleSyncTaskSubTasksService(
+    taskId,
+    (snapshot.subTasks ?? []).map((subTask) => ({
+      id: subTask.id,
+      title: subTask.title,
+      description: subTask.description,
+      status: subTask.status,
+      priority: subTask.priority,
+    })),
+  );
+};
 
 export const handleSubmitTaskWorkflow = (payload: TaskSubmit): void => {
   if (payload.action === "CREATE") {
@@ -31,8 +57,28 @@ export const handleSubmitTaskWorkflow = (payload: TaskSubmit): void => {
     return;
   }
 
-  handleUpdateTaskService(payload.task.id, payload.task);
-  handleSyncTaskSubTasksService(payload.task.id, payload.subTasks);
+  const currentTask = handleListTaskService({}).find(
+    (task) => task.id === payload.task.id,
+  );
+
+  if (!currentTask) {
+    throw new Error(
+      `Tarefa com o ID ${payload.task.id} não foi encontrada.`,
+    );
+  }
+
+  try {
+    handleUpdateTaskService(payload.task.id, payload.task);
+    handleSyncTaskSubTasksService(payload.task.id, payload.subTasks);
+  } catch (error) {
+    try {
+      restoreTaskSnapshot(payload.task.id, currentTask);
+    } catch {
+      // Mantém o erro original como causa principal da operação.
+    }
+
+    throw error;
+  }
 };
 
 export const handleSetSubTaskCompletionWorkflow = (
