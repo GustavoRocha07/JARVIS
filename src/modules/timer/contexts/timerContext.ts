@@ -12,6 +12,10 @@ export type TimerContextData = {
 
     resumeTimer: () => void;
 
+    skipBreak: () => void;
+
+    finishTimer: () => void;
+
     resetTimer: () => void;
     isTimerOwner: (target: TimerTarget) => boolean;
 };

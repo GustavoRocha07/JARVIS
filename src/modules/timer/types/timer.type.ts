@@ -4,6 +4,10 @@ export type TimerStatus =
     | 'PAUSED'
     | 'FINISHED';
 
+export type TimerPhase =
+    | 'FOCUS'
+    | 'BREAK';
+
 export type TimerTargetType =
     | 'TASK'
     | 'SUBTASK';
@@ -16,10 +20,14 @@ export type TimerTarget = {
 export type TimerState = {
     target: TimerTarget | null;
     status: TimerStatus;
+    phase: TimerPhase;
 
     duration: number;
     remainingSeconds: number;
+    workedSeconds: number;
+    completedFocus: boolean;
 
     startedAt: number | null;
     pausedAt: number | null;
+    finishedAt: number | null;
 };

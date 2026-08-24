@@ -39,6 +39,7 @@ const TasksContent = () => {
     modalMode,
     selectedTask,
     timerTarget,
+    timerParentTitle,
     openTimerModal,
     openConfirmDeletedModal,
     handleOpenModal,
@@ -234,6 +235,7 @@ const TasksContent = () => {
         <TimerComponent
           open={openTimerModal}
           data={timerTarget}
+          parentTitle={timerParentTitle ?? undefined}
           onCloseTimerModal={handleCloseTimerModal}
         />
       )}

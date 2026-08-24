@@ -1,6 +1,7 @@
 import {
     useEffect,
     useReducer,
+    useRef,
     type ReactNode,
 } from 'react';
 
@@ -12,6 +13,7 @@ import {
 import type { TimerTarget } from '../types/timer.type';
 import { TimerContext } from './timerContext';
 import { canInitTimer } from '../rules/timer.rules';
+import { handleCreateTimerSessionService } from '../services/timer-session.service';
 
 
 
@@ -26,6 +28,7 @@ export const TimerProvider = ({
         timerReducer,
         initialTimerState,
     );
+    const savedSessionKeyRef = useRef<string | null>(null);
 
     const startTimer = (
         target: TimerTarget,
@@ -50,6 +53,18 @@ export const TimerProvider = ({
     const resumeTimer = () => {
         dispatch({
             type: 'RESUME',
+        });
+    };
+
+    const skipBreak = () => {
+        dispatch({
+            type: 'SKIP_BREAK',
+        });
+    };
+
+    const finishTimer = () => {
+        dispatch({
+            type: 'FINISH',
         });
     };
 
@@ -82,6 +97,37 @@ export const TimerProvider = ({
         };
     }, [timer.status]);
 
+    useEffect(() => {
+        if (
+            timer.status !== 'FINISHED' ||
+            !timer.target ||
+            timer.startedAt === null ||
+            timer.finishedAt === null
+        ) {
+            return;
+        }
+
+        const sessionKey = [
+            timer.target.type,
+            timer.target.id,
+            timer.startedAt,
+        ].join(':');
+
+        if (savedSessionKeyRef.current === sessionKey) {
+            return;
+        }
+
+        handleCreateTimerSessionService({
+            target: timer.target,
+            startedAt: new Date(timer.startedAt),
+            finishedAt: new Date(timer.finishedAt),
+            workedSeconds: timer.workedSeconds,
+            completedFocus: timer.completedFocus,
+        });
+
+        savedSessionKeyRef.current = sessionKey;
+    }, [timer]);
+
     return (
         <TimerContext.Provider
             value={{
@@ -89,6 +135,8 @@ export const TimerProvider = ({
                 startTimer,
                 pauseTimer,
                 resumeTimer,
+                skipBreak,
+                finishTimer,
                 resetTimer,
                 isTimerOwner,
             }

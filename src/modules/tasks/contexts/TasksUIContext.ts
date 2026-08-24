@@ -14,6 +14,7 @@ export type TasksUIContextValue = {
     openConfirmDeletedModal: boolean;
     selectedTask: Task | null;
     timerTarget: Task | SubTask | null;
+    timerParentTitle: string | null;
     filters: TasksParamsSearch;
 
     handleOpenModal: (
@@ -24,7 +25,10 @@ export type TasksUIContextValue = {
         mode: TaskModalMode,
     ) => void;
     handleConfirmDeletedTask: (task: Task) => void;
-    handleOpenTimerModal: (target: Task | SubTask) => void;
+    handleOpenTimerModal: (
+        target: Task | SubTask,
+        parentTitle?: string,
+    ) => void;
     handleCloseModal: () => void;
     handleCloseConfirmDeletedModal: () => void;
     handleCloseTimerModal: () => void;
