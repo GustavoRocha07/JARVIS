@@ -33,22 +33,22 @@ const isStoredTimerSession = (
         return false;
     }
 
-    if (!("id" in value.target) || !("type" in value.target)) {
+    if (!("type" in value.target) || !("taskId" in value.target)) {
         return false;
     }
 
-    const hasValidTargetId =
-        typeof value.target.id === "number" ||
-        typeof value.target.id === "string";
+    const hasValidTaskId = typeof value.target.taskId === "number";
 
-    const hasValidTargetType =
-        value.target.type === "TASK" ||
-        value.target.type === "SUBTASK";
+    const hasValidTarget = value.target.type === "TASK"
+        ? hasValidTaskId
+        : value.target.type === "SUBTASK" &&
+          hasValidTaskId &&
+          "subTaskId" in value.target &&
+          typeof value.target.subTaskId === "string";
 
     return (
         typeof value.id === "string" &&
-        hasValidTargetId &&
-        hasValidTargetType &&
+        hasValidTarget &&
         isValidDate(value.startedAt) &&
         isValidDate(value.finishedAt) &&
         typeof value.workedSeconds === "number" &&
