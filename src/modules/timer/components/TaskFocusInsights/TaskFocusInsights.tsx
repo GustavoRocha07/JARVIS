@@ -85,7 +85,7 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
 
       <Stack direction={{ xs: "column", sm: "row" }} spacing={1.5}>
         <Paper variant="outlined" sx={{ flex: 1, p: 1.5 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <AccessTimeOutlined color="primary" fontSize="small" />
             <Box>
               <Typography variant="caption" color="text.secondary">
@@ -99,7 +99,7 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
         </Paper>
 
         <Paper variant="outlined" sx={{ flex: 1, p: 1.5 }}>
-          <Stack direction="row" spacing={1} alignItems="center">
+          <Stack direction="row" spacing={1} sx={{ alignItems: "center" }}>
             <LocalFireDepartmentOutlined color="warning" fontSize="small" />
             <Box>
               <Typography variant="caption" color="text.secondary">
@@ -151,7 +151,7 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     spacing={1}
-                    justifyContent="space-between"
+                    sx={{ justifyContent: "space-between" }}
                   >
                     <Typography variant="body2" sx={{ fontWeight: 600 }}>
                       {subTask.title}
@@ -179,7 +179,11 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
       <Divider />
 
       <Box>
-        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{ alignItems: "center", mb: 1 }}
+        >
           <HistoryOutlined fontSize="small" />
           <Typography variant="subtitle2">Histórico de foco</Typography>
         </Stack>
@@ -198,7 +202,7 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
                   <Stack
                     direction={{ xs: "column", sm: "row" }}
                     spacing={1}
-                    justifyContent="space-between"
+                    sx={{ justifyContent: "space-between" }}
                   >
                     <Box>
                       <Typography variant="body2" sx={{ fontWeight: 700 }}>
@@ -208,13 +212,21 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
                         {dateFormatter.format(session.startedAt)} · {timeFormatter.format(session.startedAt)} → {timeFormatter.format(session.finishedAt)}
                       </Typography>
                       {isSubTask && (
-                        <Typography display="block" variant="caption" color="text.secondary">
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ display: "block" }}
+                        >
                           Subtarefa de: {task.title}
                         </Typography>
                       )}
                     </Box>
 
-                    <Stack direction="row" spacing={0.75} alignItems="center">
+                    <Stack
+                      direction="row"
+                      spacing={0.75}
+                      sx={{ alignItems: "center" }}
+                    >
                       <Chip
                         size="small"
                         label={formatWorkedDuration(session.workedSeconds)}
