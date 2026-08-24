@@ -45,13 +45,17 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
 });
 
 const getSessionActivityLabel = (session: TimerSession, task: Task) => {
-  if (session.target.type === "TASK") {
+  const target = session.target;
+
+  if (target.type === "TASK") {
     return task.title;
   }
 
+  const subTaskId = target.subTaskId;
+
   return (
     task.subTasks?.find(
-      (subTask) => subTask.id === session.target.subTaskId,
+      (subTask) => subTask.id === subTaskId,
     )?.title ?? "Subtarefa removida"
   );
 };
@@ -179,11 +183,7 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
       <Divider />
 
       <Box>
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{ alignItems: "center", mb: 1 }}
-        >
+        <Stack direction="row" spacing={1} sx={{ alignItems: "center", mb: 1 }}>
           <HistoryOutlined fontSize="small" />
           <Typography variant="subtitle2">Histórico de foco</Typography>
         </Stack>
@@ -212,21 +212,13 @@ export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
                         {dateFormatter.format(session.startedAt)} · {timeFormatter.format(session.startedAt)} → {timeFormatter.format(session.finishedAt)}
                       </Typography>
                       {isSubTask && (
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          sx={{ display: "block" }}
-                        >
+                        <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
                           Subtarefa de: {task.title}
                         </Typography>
                       )}
                     </Box>
 
-                    <Stack
-                      direction="row"
-                      spacing={0.75}
-                      sx={{ alignItems: "center" }}
-                    >
+                    <Stack direction="row" spacing={0.75} sx={{ alignItems: "center" }}>
                       <Chip
                         size="small"
                         label={formatWorkedDuration(session.workedSeconds)}
