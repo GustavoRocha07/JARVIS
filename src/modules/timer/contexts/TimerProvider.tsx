@@ -22,15 +22,19 @@ const isSameTarget = (
     currentTarget: TimerTarget | null,
     target: TimerTarget,
 ) => {
-    if (!currentTarget || currentTarget.type !== target.type) {
+    if (!currentTarget) {
         return false;
     }
 
     if (target.type === 'TASK') {
-        return currentTarget.taskId === target.taskId;
+        return (
+            currentTarget.type === 'TASK' &&
+            currentTarget.taskId === target.taskId
+        );
     }
 
     return (
+        currentTarget.type === 'SUBTASK' &&
         currentTarget.taskId === target.taskId &&
         currentTarget.subTaskId === target.subTaskId
     );
