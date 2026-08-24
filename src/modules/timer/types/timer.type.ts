@@ -9,7 +9,7 @@ export type TimerTargetType =
     | 'SUBTASK';
 
 export type TimerTarget = {
-    id: number;
+    id: number | string;
     type: TimerTargetType;
 };
 

@@ -5,6 +5,7 @@ import type {
     TaskModalMode,
     TasksParamsSearch,
 } from "../types/tasks.type";
+import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 
 export type TasksUIContextValue = {
     openModal: boolean;
@@ -12,6 +13,7 @@ export type TasksUIContextValue = {
     modalMode: TaskModalMode;
     openConfirmDeletedModal: boolean;
     selectedTask: Task | null;
+    timerTarget: Task | SubTask | null;
     filters: TasksParamsSearch;
 
     handleOpenModal: (
@@ -22,7 +24,7 @@ export type TasksUIContextValue = {
         mode: TaskModalMode,
     ) => void;
     handleConfirmDeletedTask: (task: Task) => void;
-    handleOpenTimerModal: (task: Task) => void;
+    handleOpenTimerModal: (target: Task | SubTask) => void;
     handleCloseModal: () => void;
     handleCloseConfirmDeletedModal: () => void;
     handleCloseTimerModal: () => void;

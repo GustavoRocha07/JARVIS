@@ -1,1 +1,1 @@
-export const TOMATO_DURATION_SECONDS = 1 * 60;
+export const TOMATO_DURATION_SECONDS = 25 * 60;
