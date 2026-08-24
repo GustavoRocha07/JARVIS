@@ -7,6 +7,7 @@ import {
   isTaskPriority,
   isTaskStatus,
 } from "@/shared/types/task-domain.type";
+import { handleDeleteTimerSessionsBySubTaskIdService } from "@/modules/timer/services/timer-session.service";
 
 const STORAGE_KEY = "jarvis:subtasks";
 
@@ -116,7 +117,13 @@ export const handleUpdateSubTaskService = (data: UpdateSubTask): SubTask => {
 
 export const handleDeleteSubTaskService = (subTaskId: string): void => {
   const subTasks = getStoredSubTasks();
-  saveSubTasks(subTasks.filter((subTask) => subTask.id !== subTaskId));
+  const subTask = subTasks.find((item) => item.id === subTaskId);
+
+  saveSubTasks(subTasks.filter((item) => item.id !== subTaskId));
+
+  if (subTask) {
+    handleDeleteTimerSessionsBySubTaskIdService(subTask.taskId, subTask.id);
+  }
 };
 
 export const handleDeleteSubTasksByTaskIdService = (taskId: number): void => {
@@ -145,6 +152,15 @@ export const handleSyncTaskSubTasksService = (
   const currentById = new Map(
     currentTaskSubTasks.map((subTask) => [subTask.id, subTask]),
   );
+  const keptIds = new Set(
+    values.flatMap((value) => (value.id ? [value.id] : [])),
+  );
+
+  currentTaskSubTasks
+    .filter((subTask) => !keptIds.has(subTask.id))
+    .forEach((subTask) => {
+      handleDeleteTimerSessionsBySubTaskIdService(taskId, subTask.id);
+    });
 
   const syncedSubTasks = values.map((value): SubTask => {
     const current = value.id ? currentById.get(value.id) : undefined;
