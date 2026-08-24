@@ -21,6 +21,7 @@ import type {
   TaskSubmit,
   UpdateTask,
 } from "../types/tasks.type";
+import { TimerComponent } from "@/modules/timer/components/TimerComponent/TimerComponent";
 
 const ROWS_PER_PAGE = 10;
 
@@ -37,10 +38,13 @@ const TasksContent = () => {
     openModal,
     modalMode,
     selectedTask,
+    openTimerModal,
     openConfirmDeletedModal,
     handleOpenModal,
-    handleSetModalMode,
     handleCloseModal,
+    handleSetModalMode,
+    handleOpenTimerModal,
+    handleCloseTimerModal,
     handleConfirmDeletedTask,
     handleCloseConfirmDeletedModal,
   } = useTasksUI();
@@ -222,6 +226,20 @@ const TasksContent = () => {
           }
         />
       )}
+      {
+        openTimerModal && (
+          <TimerComponent open={false} data={timer.target} onCloseTimerModal={function (): void {
+            throw new Error("Function not implemented.");
+          }} timer={{
+            target: null,
+            status: "IDLE",
+            duration: 0,
+            remainingSeconds: 0,
+            startedAt: null,
+            pausedAt: null
+          }} />
+        )
+      }
     </Box>
   );
 };

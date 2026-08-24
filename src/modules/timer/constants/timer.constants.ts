@@ -1,0 +1,1 @@
+export const TOMATO_DURATION_SECONDS = 1 * 60;

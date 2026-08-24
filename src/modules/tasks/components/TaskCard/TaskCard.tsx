@@ -22,6 +22,13 @@ import {
   priorityLabels,
   statusStyles,
 } from "@/shared/utils/getColorsAlert";
+import { Pause, PlayArrow, TimerOutlined, RemoveRedEye, DeleteForeverOutlined } from "@mui/icons-material";
+import EditIcon from '@mui/icons-material/Edit';
+import { useTimer } from "@/modules/timer/contexts/useTimer";
+
+import { formatTimer } from "@/modules/timer/utils/formatTimer";
+import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
+import { useEffect } from "react";
 
 
 type TaskCardProps = {
@@ -41,8 +48,8 @@ const isSubTaskCompleted = (subTask: SubTask) =>
 
 export const TaskCard = ({
   task,
-  onClick,
   onEdit,
+  onDelete,
   onComplete,
   onSubTaskComplete,
 }: TaskCardProps) => {
@@ -53,7 +60,17 @@ export const TaskCard = ({
   const progress =
     totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
+  const { timer, pauseTimer, resumeTimer, startTimer, isTimerOwner } = useTimer()
+
   const isCompleted = task.status === "COMPLETED";
+
+  const isCurrentTaskTimer = isTimerOwner({
+    id: task.id,
+    type: 'TASK'
+  });
+  const hasAnotherTimerActive =
+    timer.status !== 'IDLE' &&
+    !isCurrentTaskTimer;
 
   const handleCompleteChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -62,12 +79,6 @@ export const TaskCard = ({
     onComplete(task, event.target.checked);
   };
 
-  const handleMenuClick = (
-    event: React.MouseEvent<HTMLButtonElement>,
-  ) => {
-    event.stopPropagation();
-    onEdit(task);
-  };
 
   const handleSubTaskChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -76,10 +87,45 @@ export const TaskCard = ({
     event.stopPropagation();
     onSubTaskComplete?.(subTask, event.target.checked);
   };
+  const handleChangeTimer = (
+
+    task: Task,
+  ) => {
+
+
+    console.log("Timer", timer.status)
+
+    if (timer.status === 'IDLE') {
+      startTimer({
+        id: task.id,
+        type: 'TASK',
+      });
+
+      return;
+    }
+
+    if (
+      isCurrentTaskTimer &&
+      timer.status === 'RUNNING'
+    ) {
+      pauseTimer();
+      return;
+    }
+
+    if (
+      isCurrentTaskTimer &&
+      timer.status === 'PAUSED'
+    ) {
+      resumeTimer();
+    }
+  };
+
+  // useEffect(() => {
+  //   console.log({ task: task.id, duration: timer.remainingSeconds, status: timer.status })
+  // }, [])
 
   return (
     <Card
-      onClick={() => onClick(task)}
       sx={{
         mb: 1.5,
         border: "1px solid",
@@ -129,6 +175,7 @@ export const TaskCard = ({
                 {task.title}
               </Typography>
 
+
               <Chip
                 size="small"
                 label={priorityLabels[task.priority]}
@@ -139,6 +186,12 @@ export const TaskCard = ({
                 }}
               />
             </Stack>
+
+            {isCurrentTaskTimer && (
+              <Typography variant="body2">
+                {formatTimer(timer.remainingSeconds)}
+              </Typography>
+            )}
 
             {task.description && (
               <Typography
@@ -186,15 +239,32 @@ export const TaskCard = ({
             </Box>
           )}
 
-          <IconButton
-            size="small"
-            aria-label="Ações da tarefa"
-            title="Editar tarefa"
-            onClick={handleMenuClick}
-            sx={{ mt: -0.35 }}
-          >
-            <MoreHorizIcon fontSize="small" />
-          </IconButton>
+          <ActionsMenu
+            actions={[
+              {
+                label: isCurrentTaskTimer && (timer.status === 'IDLE' || timer.status === 'PAUSED') ? 'Iniciar Tarefa' : 'Pausar Tarefa',
+                onClick: () => handleChangeTimer(task),
+                icon: <TimerOutlined />
+              },
+              {
+                label: 'Editar Tarefa',
+                onClick: () => onEdit(task),
+                icon: <EditIcon />
+              },
+              {
+                label: 'Visualizar Tarefa',
+                onClick: () => console.log(task),
+                icon: <RemoveRedEye />
+              },
+              {
+                label: 'Deletar Tarefa',
+                onClick: () => onDelete(task),
+                icon: <DeleteForeverOutlined />
+              },
+
+            ]}
+
+          />
         </Box>
 
         {subtasks.length > 0 && (
@@ -209,7 +279,8 @@ export const TaskCard = ({
                   sx={{
                     display: "flex",
                     alignItems: "center",
-                    minHeight: 34,
+                    minHeight: 40,
+                    marginY: '1rem',
                     px: 0.75,
                     borderRadius: 1.25,
                     backgroundColor: "action.hover",

@@ -38,6 +38,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   const [tasks, setTasks] = useState<Task[]>(() => handleListTaskService({}));
   const [filters, setFilters] = useState<TasksParamsSearch>({});
   const [openModal, setOpenModal] = useState(false);
+  const [openTimerModal, setOpenTimerModal] = useState(false);
   const [modalMode, setModalMode] = useState<TaskModalMode>("create");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [openConfirmDeletedModal, setOpenConfirmDeletedModal] = useState(false);
@@ -210,6 +211,13 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
     },
     [],
   );
+  const handleOpenTimerModal = useCallback(
+    (task?: Task) => {
+      setSelectedTask(task ?? null);
+      setOpenTimerModal(true);
+    },
+    [],
+  );
 
   const handleSetModalMode = useCallback((mode: TaskModalMode) => {
     setModalMode(mode);
@@ -219,6 +227,11 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
     setOpenModal(false);
     setSelectedTask(null);
     setModalMode("create");
+  }, []);
+  const handleCloseTimerModal = useCallback(() => {
+    setOpenTimerModal(false);
+    setSelectedTask(null);
+
   }, []);
 
   const handleSetFilters = useCallback(
@@ -260,31 +273,21 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
     () => ({
       filters,
       openModal,
+      openTimerModal,
       modalMode,
       selectedTask,
       openConfirmDeletedModal,
       handleOpenModal,
+      handleOpenTimerModal,
       handleSetModalMode,
       handleCloseModal,
       handleSetFilters,
       handleClearFilters,
+      handleCloseTimerModal,
       handleConfirmDeletedTask,
       handleCloseConfirmDeletedModal,
     }),
-    [
-      filters,
-      openModal,
-      modalMode,
-      selectedTask,
-      openConfirmDeletedModal,
-      handleOpenModal,
-      handleSetModalMode,
-      handleCloseModal,
-      handleSetFilters,
-      handleClearFilters,
-      handleConfirmDeletedTask,
-      handleCloseConfirmDeletedModal,
-    ],
+    [filters, openModal, openTimerModal, modalMode, selectedTask, openConfirmDeletedModal, handleOpenModal, handleOpenTimerModal, handleSetModalMode, handleCloseModal, handleSetFilters, handleClearFilters, handleCloseTimerModal, handleConfirmDeletedTask, handleCloseConfirmDeletedModal],
   );
 
   return (

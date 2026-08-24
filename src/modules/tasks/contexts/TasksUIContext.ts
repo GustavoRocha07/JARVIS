@@ -8,6 +8,7 @@ import type {
 
 export type TasksUIContextValue = {
     openModal: boolean;
+    openTimerModal: boolean;
     modalMode: TaskModalMode;
     openConfirmDeletedModal: boolean;
     selectedTask: Task | null;
@@ -21,8 +22,10 @@ export type TasksUIContextValue = {
         mode: TaskModalMode,
     ) => void;
     handleConfirmDeletedTask: (task: Task) => void;
+    handleOpenTimerModal: (task: Task) => void;
     handleCloseModal: () => void;
     handleCloseConfirmDeletedModal: () => void;
+    handleCloseTimerModal: () => void;
 
     handleSetFilters: (filters: TasksParamsSearch) => void;
     handleClearFilters: () => void;
