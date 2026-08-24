@@ -10,6 +10,7 @@ import {
   handleDeleteSubTasksByTaskIdService,
   handleListSubTasksService,
 } from "@/modules/subtasks/services/subtasks.service";
+import { handleDeleteTimerSessionsByTaskIdService } from "@/modules/timer/services/timer-session.service";
 
 const STORAGE_KEY = "tasksMap";
 
@@ -121,6 +122,7 @@ export const handleDeleteTaskService = (taskId: number): void => {
 
   saveTasks(updatedTasks);
   handleDeleteSubTasksByTaskIdService(taskId);
+  handleDeleteTimerSessionsByTaskIdService(taskId);
 };
 
 export const handleUpdateTaskService = (
