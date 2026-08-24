@@ -4,7 +4,6 @@ import {
   CardContent,
   Checkbox,
   Chip,
-  IconButton,
   LinearProgress,
   Stack,
   Typography,
@@ -12,7 +11,6 @@ import {
 
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
 
 import type { SubTask } from "@/modules/subtasks/types/subtask.type";
@@ -22,13 +20,11 @@ import {
   priorityLabels,
   statusStyles,
 } from "@/shared/utils/getColorsAlert";
-import { Pause, PlayArrow, TimerOutlined, RemoveRedEye, DeleteForeverOutlined } from "@mui/icons-material";
+import { TimerOutlined, RemoveRedEye, DeleteForeverOutlined } from "@mui/icons-material";
 import EditIcon from '@mui/icons-material/Edit';
 import { useTimer } from "@/modules/timer/contexts/useTimer";
-
 import { formatTimer } from "@/modules/timer/utils/formatTimer";
 import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
-import { useEffect } from "react";
 
 
 type TaskCardProps = {
@@ -37,6 +33,7 @@ type TaskCardProps = {
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
   onComplete: (task: Task, completed: boolean) => void;
+  onOpenTimer: (target: Task | SubTask) => void;
   onSubTaskComplete?: (subTask: SubTask, completed: boolean) => void;
 };
 
@@ -48,9 +45,11 @@ const isSubTaskCompleted = (subTask: SubTask) =>
 
 export const TaskCard = ({
   task,
+  onClick,
   onEdit,
   onDelete,
   onComplete,
+  onOpenTimer,
   onSubTaskComplete,
 }: TaskCardProps) => {
   const subtasks = task.subTasks ?? [];
@@ -60,17 +59,9 @@ export const TaskCard = ({
   const progress =
     totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
-  const { timer, pauseTimer, resumeTimer, startTimer, isTimerOwner } = useTimer()
-
+  const { timer, isTimerOwner } = useTimer();
   const isCompleted = task.status === "COMPLETED";
-
-  const isCurrentTaskTimer = isTimerOwner({
-    id: task.id,
-    type: 'TASK'
-  });
-  const hasAnotherTimerActive =
-    timer.status !== 'IDLE' &&
-    !isCurrentTaskTimer;
+  const ownsTaskTimer = isTimerOwner({ id: task.id, type: "TASK" });
 
   const handleCompleteChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -87,45 +78,9 @@ export const TaskCard = ({
     event.stopPropagation();
     onSubTaskComplete?.(subTask, event.target.checked);
   };
-  const handleChangeTimer = (
-
-    task: Task,
-  ) => {
-
-
-    console.log("Timer", timer.status)
-
-    if (timer.status === 'IDLE') {
-      startTimer({
-        id: task.id,
-        type: 'TASK',
-      });
-
-      return;
-    }
-
-    if (
-      isCurrentTaskTimer &&
-      timer.status === 'RUNNING'
-    ) {
-      pauseTimer();
-      return;
-    }
-
-    if (
-      isCurrentTaskTimer &&
-      timer.status === 'PAUSED'
-    ) {
-      resumeTimer();
-    }
-  };
-
-  // useEffect(() => {
-  //   console.log({ task: task.id, duration: timer.remainingSeconds, status: timer.status })
-  // }, [])
-
   return (
     <Card
+      onClick={() => onClick(task)}
       sx={{
         mb: 1.5,
         border: "1px solid",
@@ -187,9 +142,17 @@ export const TaskCard = ({
               />
             </Stack>
 
-            {isCurrentTaskTimer && (
-              <Typography variant="body2">
-                {formatTimer(timer.remainingSeconds)}
+            {ownsTaskTimer && (
+              <Typography
+                variant="body2"
+                color={timer.status === "FINISHED" ? "success.main" : "primary.main"}
+                sx={{ mt: 0.5, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
+              >
+                {formatTimer(timer.remainingSeconds)} · {timer.status === "PAUSED"
+                  ? "Pausado"
+                  : timer.status === "FINISHED"
+                    ? "Finalizado"
+                    : "Em foco"}
               </Typography>
             )}
 
@@ -242,8 +205,8 @@ export const TaskCard = ({
           <ActionsMenu
             actions={[
               {
-                label: isCurrentTaskTimer && (timer.status === 'IDLE' || timer.status === 'PAUSED') ? 'Iniciar Tarefa' : 'Pausar Tarefa',
-                onClick: () => handleChangeTimer(task),
+                label: 'Abrir timer',
+                onClick: () => onOpenTimer(task),
                 icon: <TimerOutlined />
               },
               {
@@ -253,7 +216,7 @@ export const TaskCard = ({
               },
               {
                 label: 'Visualizar Tarefa',
-                onClick: () => console.log(task),
+                onClick: () => onClick(task),
                 icon: <RemoveRedEye />
               },
               {
@@ -271,6 +234,10 @@ export const TaskCard = ({
           <Stack spacing={0.35} sx={{ mt: 1.1, ml: 3.7 }}>
             {subtasks.map((subTask) => {
               const completed = isSubTaskCompleted(subTask);
+              const ownsSubTaskTimer = isTimerOwner({
+                id: subTask.id,
+                type: "SUBTASK",
+              });
 
               return (
                 <Box
@@ -313,13 +280,26 @@ export const TaskCard = ({
                     {subTask.title}
                   </Typography>
 
-                  <IconButton
-                    size="small"
-                    aria-label="Ações da subtarefa"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <MoreHorizIcon sx={{ fontSize: 17 }} />
-                  </IconButton>
+                  {ownsSubTaskTimer && (
+                    <Typography
+                      variant="caption"
+                      color={timer.status === "FINISHED" ? "success.main" : "primary.main"}
+                      sx={{ mr: 1, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
+                    >
+                      {formatTimer(timer.remainingSeconds)}
+                    </Typography>
+                  )}
+
+                  <ActionsMenu
+                    ariaLabel="Ações da subtarefa"
+                    actions={[
+                      {
+                        label: "Abrir timer",
+                        onClick: () => onOpenTimer(subTask),
+                        icon: <TimerOutlined />,
+                      },
+                    ]}
+                  />
                 </Box>
               );
             })}

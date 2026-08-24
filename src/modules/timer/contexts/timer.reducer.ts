@@ -56,6 +56,10 @@ export const timerReducer = (
             };
 
         case 'PAUSE':
+            if (state.status !== 'RUNNING') {
+                return state;
+            }
+
             return {
                 ...state,
 
@@ -65,6 +69,10 @@ export const timerReducer = (
             };
 
         case 'RESUME':
+            if (state.status !== 'PAUSED') {
+                return state;
+            }
+
             return {
                 ...state,
 
@@ -77,19 +85,16 @@ export const timerReducer = (
             return initialTimerState;
 
         case 'TICK': {
+            if (state.status !== 'RUNNING') {
+                return state;
+            }
+
             const nextRemainingSeconds =
                 Math.max(state.remainingSeconds - 1, 0);
-            if (state.remainingSeconds <= 0) {
-                return {
-                    ...state,
-                    status: 'FINISHED',
-                    remainingSeconds: 0,
-                }
-            }
 
             return {
                 ...state,
-                remainingSeconds: state.remainingSeconds - 1,
+                remainingSeconds: nextRemainingSeconds,
                 status:
                     nextRemainingSeconds === 0
                         ? 'FINISHED'

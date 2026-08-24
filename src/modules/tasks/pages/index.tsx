@@ -38,6 +38,7 @@ const TasksContent = () => {
     openModal,
     modalMode,
     selectedTask,
+    timerTarget,
     openTimerModal,
     openConfirmDeletedModal,
     handleOpenModal,
@@ -158,6 +159,9 @@ const TasksContent = () => {
               onDelete={
                 handleConfirmDeletedTask
               }
+              onOpenTimer={
+                handleOpenTimerModal
+              }
             />
           ),
         )}
@@ -226,20 +230,13 @@ const TasksContent = () => {
           }
         />
       )}
-      {
-        openTimerModal && (
-          <TimerComponent open={false} data={timer.target} onCloseTimerModal={function (): void {
-            throw new Error("Function not implemented.");
-          }} timer={{
-            target: null,
-            status: "IDLE",
-            duration: 0,
-            remainingSeconds: 0,
-            startedAt: null,
-            pausedAt: null
-          }} />
-        )
-      }
+      {openTimerModal && timerTarget && (
+        <TimerComponent
+          open={openTimerModal}
+          data={timerTarget}
+          onCloseTimerModal={handleCloseTimerModal}
+        />
+      )}
     </Box>
   );
 };
