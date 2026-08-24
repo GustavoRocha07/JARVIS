@@ -38,8 +38,7 @@ const TasksContent = () => {
     openModal,
     modalMode,
     selectedTask,
-    timerTarget,
-    timerParentTitle,
+    selectedTimerTarget,
     openTimerModal,
     openConfirmDeletedModal,
     handleOpenModal,
@@ -62,6 +61,11 @@ const TasksContent = () => {
     page * ROWS_PER_PAGE,
   );
 
+  const timerParentTitle =
+    selectedTimerTarget && "taskId" in selectedTimerTarget
+      ? tasks.find((task) => task.id === selectedTimerTarget.taskId)?.title
+      : undefined;
+
   const handlePageChange = (
     newPage: number,
   ) => {
@@ -71,8 +75,7 @@ const TasksContent = () => {
   const handleSubmit = (
     payload: TaskSubmit,
   ) => {
-    const success =
-      handleSubmitTask(payload);
+    const success = handleSubmitTask(payload);
 
     if (success) {
       handleCloseModal();
@@ -102,9 +105,7 @@ const TasksContent = () => {
       return;
     }
 
-    handleDeleteTask(
-      selectedTask.id,
-    );
+    handleDeleteTask(selectedTask.id);
   };
 
   return (
@@ -231,11 +232,12 @@ const TasksContent = () => {
           }
         />
       )}
-      {openTimerModal && timerTarget && (
+
+      {openTimerModal && selectedTimerTarget && (
         <TimerComponent
           open={openTimerModal}
-          data={timerTarget}
-          parentTitle={timerParentTitle ?? undefined}
+          data={selectedTimerTarget}
+          parentTitle={timerParentTitle}
           onCloseTimerModal={handleCloseTimerModal}
         />
       )}

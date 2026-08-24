@@ -3,6 +3,7 @@ import {
     InfoOutlined,
     Pause,
     PlayArrow,
+    RestartAlt,
     SkipNext,
     Stop,
     TaskAlt,
@@ -24,7 +25,6 @@ import { ModalComponent } from "@/shared/components/ModalComponent";
 
 import { useTimer } from "../../contexts/useTimer";
 import type {
-    TimerPhase,
     TimerStatus,
     TimerTarget,
 } from "../../types/timer.type";
@@ -42,26 +42,43 @@ type TimerVisualState = {
     label: string;
 };
 
-const visualStates: Record<
-    TimerPhase,
-    Record<Exclude<TimerStatus, "IDLE">, TimerVisualState>
-> = {
-    FOCUS: {
-        RUNNING: { color: "error", label: "Foco" },
-        PAUSED: { color: "warning", label: "Pausado" },
-        FINISHED: { color: "success", label: "Finalizado" },
-    },
-    BREAK: {
-        RUNNING: { color: "info", label: "Pausa" },
-        PAUSED: { color: "warning", label: "Pausa pausada" },
-        FINISHED: { color: "success", label: "Finalizado" },
-    },
+const getTimerTarget = (data: Task | SubTask): TimerTarget => {
+    if ("taskId" in data) {
+        return {
+            type: "SUBTASK",
+            taskId: data.taskId,
+            subTaskId: data.id,
+        };
+    }
+
+    return {
+        type: "TASK",
+        taskId: data.id,
+    };
 };
 
-const getTimerTarget = (data: Task | SubTask): TimerTarget => ({
-    id: data.id,
-    type: "taskId" in data ? "SUBTASK" : "TASK",
-});
+const getVisualState = (
+    status: TimerStatus,
+    isBreak: boolean,
+): TimerVisualState | null => {
+    if (status === "IDLE") return null;
+    if (status === "WAITING_BREAK") {
+        return { color: "success", label: "Foco concluído" };
+    }
+    if (status === "FINISHED") {
+        return { color: "success", label: "Finalizado" };
+    }
+    if (status === "PAUSED") {
+        return {
+            color: "warning",
+            label: isBreak ? "Pausa pausada" : "Pausado",
+        };
+    }
+
+    return isBreak
+        ? { color: "info", label: "Pausa" }
+        : { color: "error", label: "Foco" };
+};
 
 export const TimerComponent = ({
     open,
@@ -74,6 +91,8 @@ export const TimerComponent = ({
         startTimer,
         pauseTimer,
         resumeTimer,
+        restartTimer,
+        startBreak,
         skipBreak,
         finishTimer,
         resetTimer,
@@ -84,6 +103,7 @@ export const TimerComponent = ({
     const ownsTimer = isTimerOwner(target);
     const hasAnotherTimer = timer.target !== null && !ownsTimer;
     const isWaitingToStart = !ownsTimer;
+    const isWaitingBreak = ownsTimer && timer.status === "WAITING_BREAK";
     const isFinished = ownsTimer && timer.status === "FINISHED";
     const isBreak = ownsTimer && timer.phase === "BREAK";
     const remainingProgress = timer.duration > 0
@@ -132,8 +152,45 @@ export const TimerComponent = ({
             );
         }
 
+        if (isWaitingBreak) {
+            return (
+                <Stack direction="row" spacing={1}>
+                    <Button
+                        variant="outlined"
+                        startIcon={<RestartAlt />}
+                        onClick={restartTimer}
+                    >
+                        Reiniciar foco
+                    </Button>
+                    <Button
+                        variant="contained"
+                        startIcon={<CoffeeOutlined />}
+                        onClick={startBreak}
+                    >
+                        Iniciar pausa
+                    </Button>
+                    <Button
+                        color="error"
+                        variant="outlined"
+                        startIcon={<Stop />}
+                        onClick={finishTimer}
+                    >
+                        Finalizar
+                    </Button>
+                </Stack>
+            );
+        }
+
         return (
             <Stack direction="row" spacing={1}>
+                <Button
+                    variant="outlined"
+                    startIcon={<RestartAlt />}
+                    onClick={restartTimer}
+                >
+                    Reiniciar
+                </Button>
+
                 {isBreak ? (
                     <Button
                         variant="outlined"
@@ -172,8 +229,8 @@ export const TimerComponent = ({
         );
     };
 
-    const visualState = ownsTimer && timer.status !== "IDLE"
-        ? visualStates[timer.phase][timer.status]
+    const visualState = ownsTimer
+        ? getVisualState(timer.status, isBreak)
         : null;
 
     return (
@@ -287,6 +344,12 @@ export const TimerComponent = ({
                             </Typography>
                         </Stack>
                     </Stack>
+
+                    {isWaitingBreak && (
+                        <Alert severity="success">
+                            Foco concluído. Inicie a pausa de 5 minutos quando estiver pronto.
+                        </Alert>
+                    )}
 
                     {isFinished && (
                         <Alert severity="success">

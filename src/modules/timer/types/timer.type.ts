@@ -2,20 +2,27 @@ export type TimerStatus =
     | 'IDLE'
     | 'RUNNING'
     | 'PAUSED'
+    | 'WAITING_BREAK'
     | 'FINISHED';
 
 export type TimerPhase =
     | 'FOCUS'
     | 'BREAK';
 
-export type TimerTargetType =
-    | 'TASK'
-    | 'SUBTASK';
-
-export type TimerTarget = {
-    id: number | string;
-    type: TimerTargetType;
+export type TaskTimerTarget = {
+    type: 'TASK';
+    taskId: number;
 };
+
+export type SubTaskTimerTarget = {
+    type: 'SUBTASK';
+    taskId: number;
+    subTaskId: string;
+};
+
+export type TimerTarget =
+    | TaskTimerTarget
+    | SubTaskTimerTarget;
 
 export type TimerState = {
     target: TimerTarget | null;

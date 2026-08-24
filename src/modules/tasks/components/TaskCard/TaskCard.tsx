@@ -33,7 +33,7 @@ type TaskCardProps = {
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
   onComplete: (task: Task, completed: boolean) => void;
-  onOpenTimer: (target: Task | SubTask, parentTitle?: string) => void;
+  onOpenTimer: (target: Task | SubTask) => void;
   onSubTaskComplete?: (subTask: SubTask, completed: boolean) => void;
 };
 
@@ -61,7 +61,10 @@ export const TaskCard = ({
 
   const { timer, isTimerOwner } = useTimer();
   const isCompleted = task.status === "COMPLETED";
-  const ownsTaskTimer = isTimerOwner({ id: task.id, type: "TASK" });
+  const ownsTaskTimer = isTimerOwner({
+    type: "TASK",
+    taskId: task.id,
+  });
 
   const handleCompleteChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -70,7 +73,6 @@ export const TaskCard = ({
     onComplete(task, event.target.checked);
   };
 
-
   const handleSubTaskChange = (
     event: React.ChangeEvent<HTMLInputElement>,
     subTask: SubTask,
@@ -78,6 +80,17 @@ export const TaskCard = ({
     event.stopPropagation();
     onSubTaskComplete?.(subTask, event.target.checked);
   };
+
+  const timerStatusLabel = timer.status === "PAUSED"
+    ? "Pausado"
+    : timer.status === "WAITING_BREAK"
+      ? "Foco concluído"
+      : timer.status === "FINISHED"
+        ? "Finalizado"
+        : timer.phase === "BREAK"
+          ? "Em pausa"
+          : "Em foco";
+
   return (
     <Card
       onClick={() => onClick(task)}
@@ -130,7 +143,6 @@ export const TaskCard = ({
                 {task.title}
               </Typography>
 
-
               <Chip
                 size="small"
                 label={priorityLabels[task.priority]}
@@ -148,13 +160,7 @@ export const TaskCard = ({
                 color={timer.status === "FINISHED" ? "success.main" : "primary.main"}
                 sx={{ mt: 0.5, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
               >
-                {formatTimer(timer.remainingSeconds)} · {timer.status === "PAUSED"
-                  ? "Pausado"
-                  : timer.status === "FINISHED"
-                    ? "Finalizado"
-                    : timer.phase === "BREAK"
-                      ? "Em pausa"
-                      : "Em foco"}
+                {formatTimer(timer.remainingSeconds)} · {timerStatusLabel}
               </Typography>
             )}
 
@@ -226,9 +232,7 @@ export const TaskCard = ({
                 onClick: () => onDelete(task),
                 icon: <DeleteForeverOutlined />
               },
-
             ]}
-
           />
         </Box>
 
@@ -237,8 +241,9 @@ export const TaskCard = ({
             {subtasks.map((subTask) => {
               const completed = isSubTaskCompleted(subTask);
               const ownsSubTaskTimer = isTimerOwner({
-                id: subTask.id,
                 type: "SUBTASK",
+                taskId: subTask.taskId,
+                subTaskId: subTask.id,
               });
 
               return (
@@ -297,7 +302,7 @@ export const TaskCard = ({
                     actions={[
                       {
                         label: "Abrir timer",
-                        onClick: () => onOpenTimer(subTask, task.title),
+                        onClick: () => onOpenTimer(subTask),
                         icon: <TimerOutlined />,
                       },
                     ]}

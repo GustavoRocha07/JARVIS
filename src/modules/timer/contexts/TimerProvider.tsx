@@ -5,7 +5,6 @@ import {
     type ReactNode,
 } from 'react';
 
-
 import {
     initialTimerState,
     timerReducer,
@@ -15,10 +14,41 @@ import { TimerContext } from './timerContext';
 import { canInitTimer } from '../rules/timer.rules';
 import { handleCreateTimerSessionService } from '../services/timer-session.service';
 
-
-
 type TimerProviderProps = {
     children: ReactNode;
+};
+
+const isSameTarget = (
+    currentTarget: TimerTarget | null,
+    target: TimerTarget,
+) => {
+    if (!currentTarget) {
+        return false;
+    }
+
+    if (target.type === 'TASK') {
+        return (
+            currentTarget.type === 'TASK' &&
+            currentTarget.taskId === target.taskId
+        );
+    }
+
+    return (
+        currentTarget.type === 'SUBTASK' &&
+        currentTarget.taskId === target.taskId &&
+        currentTarget.subTaskId === target.subTaskId
+    );
+};
+
+const getSessionKey = (
+    target: TimerTarget,
+    startedAt: number,
+) => {
+    if (target.type === 'TASK') {
+        return `TASK:${target.taskId}:${startedAt}`;
+    }
+
+    return `SUBTASK:${target.taskId}:${target.subTaskId}:${startedAt}`;
 };
 
 export const TimerProvider = ({
@@ -33,8 +63,9 @@ export const TimerProvider = ({
     const startTimer = (
         target: TimerTarget,
     ) => {
-
         if (!canInitTimer(timer)) return;
+
+        savedSessionKeyRef.current = null;
 
         dispatch({
             type: 'START',
@@ -45,40 +76,37 @@ export const TimerProvider = ({
     };
 
     const pauseTimer = () => {
-        dispatch({
-            type: 'PAUSE',
-        });
+        dispatch({ type: 'PAUSE' });
     };
 
     const resumeTimer = () => {
-        dispatch({
-            type: 'RESUME',
-        });
+        dispatch({ type: 'RESUME' });
+    };
+
+    const restartTimer = () => {
+        savedSessionKeyRef.current = null;
+        dispatch({ type: 'RESTART' });
+    };
+
+    const startBreak = () => {
+        dispatch({ type: 'START_BREAK' });
     };
 
     const skipBreak = () => {
-        dispatch({
-            type: 'SKIP_BREAK',
-        });
+        dispatch({ type: 'SKIP_BREAK' });
     };
 
     const finishTimer = () => {
-        dispatch({
-            type: 'FINISH',
-        });
+        dispatch({ type: 'FINISH' });
     };
 
     const resetTimer = () => {
-        dispatch({
-            type: 'RESET',
-        });
+        dispatch({ type: 'RESET' });
+        savedSessionKeyRef.current = null;
     };
 
     const isTimerOwner = (target: TimerTarget) => {
-        return (
-            timer.target?.id === target.id &&
-            timer.target?.type === target.type
-        );
+        return isSameTarget(timer.target, target);
     };
 
     useEffect(() => {
@@ -87,9 +115,7 @@ export const TimerProvider = ({
         }
 
         const intervalId = window.setInterval(() => {
-            dispatch({
-                type: 'TICK',
-            });
+            dispatch({ type: 'TICK' });
         }, 1000);
 
         return () => {
@@ -107,11 +133,10 @@ export const TimerProvider = ({
             return;
         }
 
-        const sessionKey = [
-            timer.target.type,
-            timer.target.id,
+        const sessionKey = getSessionKey(
+            timer.target,
             timer.startedAt,
-        ].join(':');
+        );
 
         if (savedSessionKeyRef.current === sessionKey) {
             return;
@@ -135,12 +160,13 @@ export const TimerProvider = ({
                 startTimer,
                 pauseTimer,
                 resumeTimer,
+                restartTimer,
+                startBreak,
                 skipBreak,
                 finishTimer,
                 resetTimer,
                 isTimerOwner,
-            }
-            }
+            }}
         >
             {children}
         </TimerContext.Provider>

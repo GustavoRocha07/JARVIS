@@ -4,9 +4,6 @@ import {
 } from "../constants/timer.constants";
 import type { TimerState, TimerTarget } from "../types/timer.type";
 
-
-
-
 export const initialTimerState: TimerState = {
     target: null,
     status: 'IDLE',
@@ -29,24 +26,14 @@ export type TimerAction =
             target: TimerTarget;
         };
     }
-    | {
-        type: 'PAUSE';
-    }
-    | {
-        type: 'RESUME';
-    }
-    | {
-        type: 'TICK';
-    }
-    | {
-        type: 'SKIP_BREAK';
-    }
-    | {
-        type: 'FINISH';
-    }
-    | {
-        type: 'RESET';
-    };
+    | { type: 'PAUSE' }
+    | { type: 'RESUME' }
+    | { type: 'RESTART' }
+    | { type: 'START_BREAK' }
+    | { type: 'TICK' }
+    | { type: 'SKIP_BREAK' }
+    | { type: 'FINISH' }
+    | { type: 'RESET' };
 
 export const timerReducer = (
     state: TimerState,
@@ -55,22 +42,10 @@ export const timerReducer = (
     switch (action.type) {
         case 'START':
             return {
-                ...state,
-
+                ...initialTimerState,
                 target: action.payload.target,
-
                 status: 'RUNNING',
-                phase: 'FOCUS',
-
-                duration: FOCUS_DURATION_SECONDS,
-                remainingSeconds: FOCUS_DURATION_SECONDS,
-                workedSeconds: 0,
-                completedFocus: false,
-
                 startedAt: Date.now(),
-
-                pausedAt: null,
-                finishedAt: null,
             };
 
         case 'PAUSE':
@@ -80,9 +55,7 @@ export const timerReducer = (
 
             return {
                 ...state,
-
                 status: 'PAUSED',
-
                 pausedAt: Date.now(),
             };
 
@@ -93,9 +66,49 @@ export const timerReducer = (
 
             return {
                 ...state,
-
                 status: 'RUNNING',
+                pausedAt: null,
+            };
 
+        case 'RESTART': {
+            if (!state.target || state.status === 'IDLE' || state.status === 'FINISHED') {
+                return state;
+            }
+
+            const isFocus = state.phase === 'FOCUS';
+
+            return {
+                ...state,
+                status: 'RUNNING',
+                duration: isFocus
+                    ? FOCUS_DURATION_SECONDS
+                    : BREAK_DURATION_SECONDS,
+                remainingSeconds: isFocus
+                    ? FOCUS_DURATION_SECONDS
+                    : BREAK_DURATION_SECONDS,
+                workedSeconds: isFocus ? 0 : state.workedSeconds,
+                completedFocus: isFocus ? false : state.completedFocus,
+                startedAt: isFocus ? Date.now() : state.startedAt,
+                pausedAt: null,
+                finishedAt: null,
+            };
+        }
+
+        case 'START_BREAK':
+            if (
+                state.status !== 'WAITING_BREAK' ||
+                state.phase !== 'FOCUS' ||
+                !state.completedFocus
+            ) {
+                return state;
+            }
+
+            return {
+                ...state,
+                phase: 'BREAK',
+                status: 'RUNNING',
+                duration: BREAK_DURATION_SECONDS,
+                remainingSeconds: BREAK_DURATION_SECONDS,
                 pausedAt: null,
             };
 
@@ -130,8 +143,10 @@ export const timerReducer = (
                 return state;
             }
 
-            const nextRemainingSeconds =
-                Math.max(state.remainingSeconds - 1, 0);
+            const nextRemainingSeconds = Math.max(
+                state.remainingSeconds - 1,
+                0,
+            );
 
             const workedSeconds = state.phase === 'FOCUS'
                 ? state.workedSeconds + 1
@@ -140,9 +155,8 @@ export const timerReducer = (
             if (nextRemainingSeconds === 0 && state.phase === 'FOCUS') {
                 return {
                     ...state,
-                    phase: 'BREAK',
-                    duration: BREAK_DURATION_SECONDS,
-                    remainingSeconds: BREAK_DURATION_SECONDS,
+                    status: 'WAITING_BREAK',
+                    remainingSeconds: 0,
                     workedSeconds,
                     completedFocus: true,
                 };
@@ -161,9 +175,8 @@ export const timerReducer = (
                 ...state,
                 remainingSeconds: nextRemainingSeconds,
                 workedSeconds,
-            }
+            };
         }
-
 
         default:
             return state;
