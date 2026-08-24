@@ -33,7 +33,7 @@ type TaskCardProps = {
   onEdit: (task: Task) => void;
   onDelete: (task: Task) => void;
   onComplete: (task: Task, completed: boolean) => void;
-  onOpenTimer: (target: Task | SubTask, parentTitle?: string) => void;
+  onOpenTimer: (target: Task | SubTask) => void;
   onSubTaskComplete?: (subTask: SubTask, completed: boolean) => void;
 };
 
@@ -302,7 +302,7 @@ export const TaskCard = ({
                     actions={[
                       {
                         label: "Abrir timer",
-                        onClick: () => onOpenTimer(subTask, task.title),
+                        onClick: () => onOpenTimer(subTask),
                         icon: <TimerOutlined />,
                       },
                     ]}
