@@ -57,6 +57,10 @@ const isStoredTimerSession = (
     );
 };
 
+const saveTimerSessions = (sessions: TimerSession[]): void => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+};
+
 export const handleListTimerSessionsService = (): TimerSession[] => {
     const rawData = localStorage.getItem(STORAGE_KEY);
 
@@ -86,10 +90,32 @@ export const handleCreateTimerSessionService = (
         id: crypto.randomUUID(),
     };
 
-    localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify([...sessions, newSession]),
-    );
+    saveTimerSessions([...sessions, newSession]);
 
     return newSession;
+};
+
+export const handleDeleteTimerSessionsByTaskIdService = (
+    taskId: number,
+): void => {
+    const sessions = handleListTimerSessionsService();
+    saveTimerSessions(
+        sessions.filter((session) => session.target.taskId !== taskId),
+    );
+};
+
+export const handleDeleteTimerSessionsBySubTaskIdService = (
+    taskId: number,
+    subTaskId: string,
+): void => {
+    const sessions = handleListTimerSessionsService();
+    saveTimerSessions(
+        sessions.filter((session) =>
+            !(
+                session.target.type === "SUBTASK" &&
+                session.target.taskId === taskId &&
+                session.target.subTaskId === subTaskId
+            ),
+        ),
+    );
 };
