@@ -41,8 +41,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   const [openTimerModal, setOpenTimerModal] = useState(false);
   const [modalMode, setModalMode] = useState<TaskModalMode>("create");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [timerTarget, setTimerTarget] = useState<Task | SubTask | null>(null);
-  const [timerParentTitle, setTimerParentTitle] = useState<string | null>(null);
+  const [selectedTimerTarget, setSelectedTimerTarget] = useState<Task | SubTask | null>(null);
   const [openConfirmDeletedModal, setOpenConfirmDeletedModal] = useState(false);
 
   const refreshTasks = useCallback(
@@ -213,10 +212,10 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
     },
     [],
   );
+
   const handleOpenTimerModal = useCallback(
-    (target: Task | SubTask, parentTitle?: string) => {
-      setTimerTarget(target);
-      setTimerParentTitle(parentTitle ?? null);
+    (target: Task | SubTask) => {
+      setSelectedTimerTarget(target);
       setOpenTimerModal(true);
     },
     [],
@@ -231,10 +230,10 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
     setSelectedTask(null);
     setModalMode("create");
   }, []);
+
   const handleCloseTimerModal = useCallback(() => {
     setOpenTimerModal(false);
-    setTimerTarget(null);
-    setTimerParentTitle(null);
+    setSelectedTimerTarget(null);
   }, []);
 
   const handleSetFilters = useCallback(
@@ -279,8 +278,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
       openTimerModal,
       modalMode,
       selectedTask,
-      timerTarget,
-      timerParentTitle,
+      selectedTimerTarget,
       openConfirmDeletedModal,
       handleOpenModal,
       handleOpenTimerModal,
@@ -292,7 +290,24 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
       handleConfirmDeletedTask,
       handleCloseConfirmDeletedModal,
     }),
-    [filters, openModal, openTimerModal, modalMode, selectedTask, timerTarget, timerParentTitle, openConfirmDeletedModal, handleOpenModal, handleOpenTimerModal, handleSetModalMode, handleCloseModal, handleSetFilters, handleClearFilters, handleCloseTimerModal, handleConfirmDeletedTask, handleCloseConfirmDeletedModal],
+    [
+      filters,
+      openModal,
+      openTimerModal,
+      modalMode,
+      selectedTask,
+      selectedTimerTarget,
+      openConfirmDeletedModal,
+      handleOpenModal,
+      handleOpenTimerModal,
+      handleSetModalMode,
+      handleCloseModal,
+      handleSetFilters,
+      handleClearFilters,
+      handleCloseTimerModal,
+      handleConfirmDeletedTask,
+      handleCloseConfirmDeletedModal,
+    ],
   );
 
   return (
