@@ -30,10 +30,18 @@ import {
 } from "../services/task-workflow.service";
 
 import { useAlert } from "@/context/AlertContext/useAlert";
+import { useTimer } from "@/modules/timer/contexts/useTimer";
+import { useTimerSessions } from "@/modules/timer/contexts/useTimerSessions";
+import {
+  isSubTaskLockedByTimer,
+  isTaskLockedByTimer,
+} from "@/modules/timer/rules/timer-target.rules";
 import { isApiError } from "../rules/isApiError";
 
 export const TasksProvider = ({ children }: PropsWithChildren) => {
   const { showAlert } = useAlert();
+  const { timer } = useTimer();
+  const { refreshTimerSessions } = useTimerSessions();
 
   const [tasks, setTasks] = useState<Task[]>(() => handleListTaskService({}));
   const [filters, setFilters] = useState<TasksParamsSearch>({});
@@ -98,8 +106,35 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   const handleSubmitTask = useCallback(
     (payload: TaskSubmit): boolean => {
       try {
+        const currentTimerTarget = timer.target;
+
+        if (
+          payload.action === "UPDATE" &&
+          currentTimerTarget?.type === "SUBTASK"
+        ) {
+          const activeSubTaskId = currentTimerTarget.subTaskId;
+          const activeSubTaskWasRemoved =
+            isSubTaskLockedByTimer(
+              timer,
+              payload.task.id,
+              activeSubTaskId,
+            ) &&
+            !payload.subTasks.some(
+              (subTask) => subTask.id === activeSubTaskId,
+            );
+
+          if (activeSubTaskWasRemoved) {
+            showAlert(
+              "error",
+              "Existe uma sessão de foco ativa nesta subtarefa. Finalize a sessão antes de removê-la.",
+            );
+            return false;
+          }
+        }
+
         handleSubmitTaskWorkflow(payload);
         refreshTasks();
+        refreshTimerSessions();
         showAlert(
           "success",
           payload.action === "CREATE"
@@ -112,7 +147,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
         return false;
       }
     },
-    [handleError, refreshTasks, showAlert],
+    [handleError, refreshTasks, refreshTimerSessions, showAlert, timer],
   );
 
   const handleCreateTask = useCallback(
@@ -180,8 +215,17 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   const handleDeleteTask = useCallback(
     (taskId: number): boolean => {
       try {
+        if (isTaskLockedByTimer(timer, taskId)) {
+          showAlert(
+            "error",
+            "Existe uma sessão de foco ativa nesta tarefa ou em uma de suas subtarefas. Finalize a sessão antes de excluí-la.",
+          );
+          return false;
+        }
+
         handleDeleteTaskService(taskId);
         refreshTasks();
+        refreshTimerSessions();
         setOpenConfirmDeletedModal(false);
         setSelectedTask(null);
         showAlert("success", "Task deletada com sucesso!");
@@ -191,7 +235,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
         return false;
       }
     },
-    [handleError, refreshTasks, showAlert],
+    [handleError, refreshTasks, refreshTimerSessions, showAlert, timer],
   );
 
   const handleConfirmDeletedTask = useCallback((task: Task) => {
