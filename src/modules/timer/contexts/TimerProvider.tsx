@@ -2,6 +2,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useMemo,
   useReducer,
   useRef,
   useState,
@@ -13,6 +14,7 @@ import {
 } from "./timer.reducer";
 import type { TimerTarget } from "../types/timer.type";
 import { TimerContext } from "./timerContext";
+import { TimerSessionsContext } from "./timerSessionsContext";
 import { canInitTimer } from "../rules/timer.rules";
 import {
   handleCreateTimerSessionService,
@@ -166,24 +168,32 @@ export const TimerProvider = ({
     refreshTimerSessions();
   }, [refreshTimerSessions, timer]);
 
+  const timerSessionsValue = useMemo(
+    () => ({
+      sessions,
+      refreshTimerSessions,
+    }),
+    [refreshTimerSessions, sessions],
+  );
+
   return (
-    <TimerContext.Provider
-      value={{
-        timer,
-        sessions,
-        startTimer,
-        pauseTimer,
-        resumeTimer,
-        restartTimer,
-        startBreak,
-        skipBreak,
-        finishTimer,
-        resetTimer,
-        refreshTimerSessions,
-        isTimerOwner,
-      }}
-    >
-      {children}
-    </TimerContext.Provider>
+    <TimerSessionsContext.Provider value={timerSessionsValue}>
+      <TimerContext.Provider
+        value={{
+          timer,
+          startTimer,
+          pauseTimer,
+          resumeTimer,
+          restartTimer,
+          startBreak,
+          skipBreak,
+          finishTimer,
+          resetTimer,
+          isTimerOwner,
+        }}
+      >
+        {children}
+      </TimerContext.Provider>
+    </TimerSessionsContext.Provider>
   );
 };
