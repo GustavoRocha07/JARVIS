@@ -39,7 +39,7 @@ import { isApiError } from "../rules/isApiError";
 
 export const TasksProvider = ({ children }: PropsWithChildren) => {
   const { showAlert } = useAlert();
-  const { timer } = useTimer();
+  const { timer, refreshTimerSessions } = useTimer();
 
   const [tasks, setTasks] = useState<Task[]>(() => handleListTaskService({}));
   const [filters, setFilters] = useState<TasksParamsSearch>({});
@@ -132,6 +132,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
 
         handleSubmitTaskWorkflow(payload);
         refreshTasks();
+        refreshTimerSessions();
         showAlert(
           "success",
           payload.action === "CREATE"
@@ -144,7 +145,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
         return false;
       }
     },
-    [handleError, refreshTasks, showAlert, timer],
+    [handleError, refreshTasks, refreshTimerSessions, showAlert, timer],
   );
 
   const handleCreateTask = useCallback(
@@ -222,6 +223,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
 
         handleDeleteTaskService(taskId);
         refreshTasks();
+        refreshTimerSessions();
         setOpenConfirmDeletedModal(false);
         setSelectedTask(null);
         showAlert("success", "Task deletada com sucesso!");
@@ -231,7 +233,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
         return false;
       }
     },
-    [handleError, refreshTasks, showAlert, timer],
+    [handleError, refreshTasks, refreshTimerSessions, showAlert, timer],
   );
 
   const handleConfirmDeletedTask = useCallback((task: Task) => {
