@@ -104,15 +104,21 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   const handleSubmitTask = useCallback(
     (payload: TaskSubmit): boolean => {
       try {
-        if (payload.action === "UPDATE" && timer.target?.type === "SUBTASK") {
+        const currentTimerTarget = timer.target;
+
+        if (
+          payload.action === "UPDATE" &&
+          currentTimerTarget?.type === "SUBTASK"
+        ) {
+          const activeSubTaskId = currentTimerTarget.subTaskId;
           const activeSubTaskWasRemoved =
             isSubTaskLockedByTimer(
               timer,
               payload.task.id,
-              timer.target.subTaskId,
+              activeSubTaskId,
             ) &&
             !payload.subTasks.some(
-              (subTask) => subTask.id === timer.target?.subTaskId,
+              (subTask) => subTask.id === activeSubTaskId,
             );
 
           if (activeSubTaskWasRemoved) {
