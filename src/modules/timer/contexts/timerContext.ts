@@ -1,10 +1,8 @@
 import { createContext } from "react";
-import type { TimerSession } from "../types/timer-session.type";
 import type { TimerState, TimerTarget } from "../types/timer.type";
 
 export type TimerContextData = {
   timer: TimerState;
-  sessions: TimerSession[];
 
   startTimer: (target: TimerTarget) => void;
   pauseTimer: () => void;
@@ -14,7 +12,6 @@ export type TimerContextData = {
   skipBreak: () => void;
   finishTimer: () => void;
   resetTimer: () => void;
-  refreshTimerSessions: () => void;
   isTimerOwner: (target: TimerTarget) => boolean;
 };
 
