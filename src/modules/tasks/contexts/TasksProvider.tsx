@@ -31,6 +31,7 @@ import {
 
 import { useAlert } from "@/context/AlertContext/useAlert";
 import { useTimer } from "@/modules/timer/contexts/useTimer";
+import { useTimerSessions } from "@/modules/timer/contexts/useTimerSessions";
 import {
   isSubTaskLockedByTimer,
   isTaskLockedByTimer,
@@ -39,7 +40,8 @@ import { isApiError } from "../rules/isApiError";
 
 export const TasksProvider = ({ children }: PropsWithChildren) => {
   const { showAlert } = useAlert();
-  const { timer, refreshTimerSessions } = useTimer();
+  const { timer } = useTimer();
+  const { refreshTimerSessions } = useTimerSessions();
 
   const [tasks, setTasks] = useState<Task[]>(() => handleListTaskService({}));
   const [filters, setFilters] = useState<TasksParamsSearch>({});
