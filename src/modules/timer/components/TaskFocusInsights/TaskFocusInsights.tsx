@@ -16,7 +16,7 @@ import {
 
 import type { Task } from "@/modules/tasks/types/tasks.type";
 
-import { useTimer } from "../../contexts/useTimer";
+import { useTimerSessions } from "../../contexts/useTimerSessions";
 import {
   getSubTaskCompletedFocusCount,
   getSubTaskWorkedSeconds,
@@ -61,7 +61,7 @@ const getSessionActivityLabel = (session: TimerSession, task: Task) => {
 };
 
 export const TaskFocusInsights = ({ task }: TaskFocusInsightsProps) => {
-  const { sessions } = useTimer();
+  const { sessions } = useTimerSessions();
 
   const taskSessions = useMemo(
     () => getTaskSessions(task.id, sessions),
