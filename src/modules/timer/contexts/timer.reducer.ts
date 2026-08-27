@@ -17,6 +17,7 @@ export const initialTimerState: TimerState = {
     startedAt: null,
     pausedAt: null,
     finishedAt: null,
+    endsAt: null,
 };
 
 export type TimerAction =
@@ -24,40 +25,114 @@ export type TimerAction =
         type: 'START';
         payload: {
             target: TimerTarget;
+            now: number;
         };
     }
-    | { type: 'PAUSE' }
-    | { type: 'RESUME' }
-    | { type: 'RESTART' }
-    | { type: 'START_BREAK' }
-    | { type: 'TICK' }
-    | { type: 'SKIP_BREAK' }
-    | { type: 'FINISH' }
+    | { type: 'PAUSE'; payload: { now: number } }
+    | { type: 'RESUME'; payload: { now: number } }
+    | { type: 'RESTART'; payload: { now: number } }
+    | { type: 'START_BREAK'; payload: { now: number } }
+    | { type: 'TICK'; payload: { now: number } }
+    | { type: 'SKIP_BREAK'; payload: { now: number } }
+    | { type: 'FINISH'; payload: { now: number } }
     | { type: 'RESET' };
+
+const getRemainingSeconds = (
+    endsAt: number | null,
+    now: number,
+    fallback: number,
+) => {
+    if (endsAt === null) {
+        return fallback;
+    }
+
+    return Math.max(
+        Math.ceil((endsAt - now) / 1000),
+        0,
+    );
+};
+
+const getWorkedSeconds = (
+    state: TimerState,
+    remainingSeconds: number,
+) => {
+    if (state.phase !== 'FOCUS') {
+        return state.workedSeconds;
+    }
+
+    const elapsedSeconds = Math.max(
+        state.remainingSeconds - remainingSeconds,
+        0,
+    );
+
+    return state.workedSeconds + elapsedSeconds;
+};
 
 export const timerReducer = (
     state: TimerState,
     action: TimerAction,
 ): TimerState => {
     switch (action.type) {
-        case 'START':
+        case 'START': {
+            const { now, target } = action.payload;
+
             return {
                 ...initialTimerState,
-                target: action.payload.target,
+                target,
                 status: 'RUNNING',
-                startedAt: Date.now(),
+                startedAt: now,
+                endsAt: now + FOCUS_DURATION_SECONDS * 1000,
             };
+        }
 
-        case 'PAUSE':
+        case 'PAUSE': {
             if (state.status !== 'RUNNING') {
                 return state;
+            }
+
+            const remainingSeconds = getRemainingSeconds(
+                state.endsAt,
+                action.payload.now,
+                state.remainingSeconds,
+            );
+            const workedSeconds = getWorkedSeconds(
+                state,
+                remainingSeconds,
+            );
+
+            if (remainingSeconds === 0 && state.phase === 'FOCUS') {
+                return {
+                    ...state,
+                    status: 'WAITING_BREAK',
+                    remainingSeconds: 0,
+                    workedSeconds,
+                    completedFocus: true,
+                    pausedAt: null,
+                    endsAt: null,
+                };
+            }
+
+            if (remainingSeconds === 0) {
+                return {
+                    ...state,
+                    status: 'FINISHED',
+                    remainingSeconds: 0,
+                    workedSeconds,
+                    pausedAt: null,
+                    finishedAt: action.payload.now,
+                    endsAt: null,
+                };
             }
 
             return {
                 ...state,
                 status: 'PAUSED',
-                pausedAt: Date.now(),
+                remainingSeconds,
+                workedSeconds,
+                pausedAt: action.payload.now,
+                endsAt: null,
             };
+        }
 
         case 'RESUME':
             if (state.status !== 'PAUSED') {
@@ -68,6 +143,7 @@ export const timerReducer = (
                 ...state,
                 status: 'RUNNING',
                 pausedAt: null,
+                endsAt: action.payload.now + state.remainingSeconds * 1000,
             };
 
         case 'RESTART': {
@@ -76,21 +152,21 @@ export const timerReducer = (
             }
 
             const isFocus = state.phase === 'FOCUS';
+            const duration = isFocus
+                ? FOCUS_DURATION_SECONDS
+                : BREAK_DURATION_SECONDS;
 
             return {
                 ...state,
                 status: 'RUNNING',
-                duration: isFocus
-                    ? FOCUS_DURATION_SECONDS
-                    : BREAK_DURATION_SECONDS,
-                remainingSeconds: isFocus
-                    ? FOCUS_DURATION_SECONDS
-                    : BREAK_DURATION_SECONDS,
+                duration,
+                remainingSeconds: duration,
                 workedSeconds: isFocus ? 0 : state.workedSeconds,
                 completedFocus: isFocus ? false : state.completedFocus,
-                startedAt: isFocus ? Date.now() : state.startedAt,
+                startedAt: isFocus ? action.payload.now : state.startedAt,
                 pausedAt: null,
                 finishedAt: null,
+                endsAt: action.payload.now + duration * 1000,
             };
         }
 
@@ -110,6 +186,7 @@ export const timerReducer = (
                 duration: BREAK_DURATION_SECONDS,
                 remainingSeconds: BREAK_DURATION_SECONDS,
                 pausedAt: null,
+                endsAt: action.payload.now + BREAK_DURATION_SECONDS * 1000,
             };
 
         case 'RESET':
@@ -124,56 +201,77 @@ export const timerReducer = (
                 ...state,
                 status: 'FINISHED',
                 remainingSeconds: 0,
-                finishedAt: Date.now(),
+                finishedAt: action.payload.now,
+                endsAt: null,
             };
 
-        case 'FINISH':
+        case 'FINISH': {
             if (state.status === 'IDLE' || state.status === 'FINISHED') {
                 return state;
             }
 
+            const remainingSeconds = state.status === 'RUNNING'
+                ? getRemainingSeconds(
+                    state.endsAt,
+                    action.payload.now,
+                    state.remainingSeconds,
+                )
+                : state.remainingSeconds;
+            const workedSeconds = state.status === 'RUNNING'
+                ? getWorkedSeconds(state, remainingSeconds)
+                : state.workedSeconds;
+
             return {
                 ...state,
                 status: 'FINISHED',
-                finishedAt: Date.now(),
+                remainingSeconds,
+                workedSeconds,
+                pausedAt: null,
+                finishedAt: action.payload.now,
+                endsAt: null,
             };
+        }
 
         case 'TICK': {
             if (state.status !== 'RUNNING') {
                 return state;
             }
 
-            const nextRemainingSeconds = Math.max(
-                state.remainingSeconds - 1,
-                0,
+            const remainingSeconds = getRemainingSeconds(
+                state.endsAt,
+                action.payload.now,
+                state.remainingSeconds,
+            );
+            const workedSeconds = getWorkedSeconds(
+                state,
+                remainingSeconds,
             );
 
-            const workedSeconds = state.phase === 'FOCUS'
-                ? state.workedSeconds + 1
-                : state.workedSeconds;
-
-            if (nextRemainingSeconds === 0 && state.phase === 'FOCUS') {
+            if (remainingSeconds === 0 && state.phase === 'FOCUS') {
                 return {
                     ...state,
                     status: 'WAITING_BREAK',
                     remainingSeconds: 0,
                     workedSeconds,
                     completedFocus: true,
+                    endsAt: null,
                 };
             }
 
-            if (nextRemainingSeconds === 0) {
+            if (remainingSeconds === 0) {
                 return {
                     ...state,
                     status: 'FINISHED',
                     remainingSeconds: 0,
-                    finishedAt: Date.now(),
+                    workedSeconds,
+                    finishedAt: action.payload.now,
+                    endsAt: null,
                 };
             }
 
             return {
                 ...state,
-                remainingSeconds: nextRemainingSeconds,
+                remainingSeconds,
                 workedSeconds,
             };
         }
