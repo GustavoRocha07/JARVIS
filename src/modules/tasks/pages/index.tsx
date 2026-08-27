@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 
 import { AddOutlined } from "@mui/icons-material";
 import { Box } from "@mui/material";
@@ -13,100 +13,14 @@ import { TaskSummary } from "../components/TaskSummary/TaskSummary";
 import { TaskCard } from "../components/TaskCard/TaskCard";
 
 import { TasksProvider } from "../contexts/TasksProvider";
-import { useTasksData } from "../contexts/useTasksData";
-import { useTasksUI } from "../contexts/useTasksUI";
 
-import type {
-  Task,
-  TaskSubmit,
-  UpdateTask,
-} from "../types/tasks.type";
 import { TimerComponent } from "@/modules/timer/components/TimerComponent/TimerComponent";
+import { useTasksComponent } from "../hooks/useTasksComponent";
 
-const ROWS_PER_PAGE = 10;
 
 const TasksContent = () => {
-  const {
-    tasks,
-    handleSubmitTask,
-    handleUpdateTask,
-    handleDeleteTask,
-    handleSubTaskComplete,
-  } = useTasksData();
 
-  const {
-    openModal,
-    modalMode,
-    selectedTask,
-    selectedTimerTarget,
-    openTimerModal,
-    openConfirmDeletedModal,
-    handleOpenModal,
-    handleCloseModal,
-    handleSetModalMode,
-    handleOpenTimerModal,
-    handleCloseTimerModal,
-    handleConfirmDeletedTask,
-    handleCloseConfirmDeletedModal,
-  } = useTasksUI();
-
-  const [page, setPage] = useState(1);
-
-  const totalPages = Math.ceil(
-    tasks.length / ROWS_PER_PAGE,
-  );
-
-  const paginatedTasks = tasks.slice(
-    (page - 1) * ROWS_PER_PAGE,
-    page * ROWS_PER_PAGE,
-  );
-
-  const timerParentTitle =
-    selectedTimerTarget && "taskId" in selectedTimerTarget
-      ? tasks.find((task) => task.id === selectedTimerTarget.taskId)?.title
-      : undefined;
-
-  const handlePageChange = (
-    newPage: number,
-  ) => {
-    setPage(newPage);
-  };
-
-  const handleSubmit = (
-    payload: TaskSubmit,
-  ) => {
-    const success = handleSubmitTask(payload);
-
-    if (success) {
-      handleCloseModal();
-    }
-  };
-
-  const handleCompleteTask = (
-    task: Task,
-    completed: boolean,
-  ) => {
-    const data: UpdateTask = {
-      id: task.id,
-      title: task.title,
-      description: task.description,
-      priority: task.priority,
-      status: completed
-        ? "COMPLETED"
-        : "PENDING",
-      dueDate: task.dueDate,
-    };
-
-    handleUpdateTask(data);
-  };
-
-  const handleConfirmDelete = () => {
-    if (!selectedTask) {
-      return;
-    }
-
-    handleDeleteTask(selectedTask.id);
-  };
+  const { state, actions } = useTasksComponent()
 
   return (
     <Box sx={{ width: "100%", minWidth: 0 }}>
@@ -117,7 +31,7 @@ const TasksContent = () => {
         buttonText="Cadastrar Tarefa"
         buttonIcon={<AddOutlined />}
         action={() =>
-          handleOpenModal(
+          actions.handleOpenModal(
             undefined,
             "create",
           )
@@ -135,110 +49,110 @@ const TasksContent = () => {
           minWidth: 0,
         }}
       >
-        {paginatedTasks.map(
+        {state.paginatedTasks.map(
           (task) => (
             <TaskCard
               key={task.id}
               task={task}
               onClick={(task) =>
-                handleOpenModal(
+                actions.handleOpenModal(
                   task,
                   "view",
                 )
               }
               onEdit={(task) =>
-                handleOpenModal(
+                actions.handleOpenModal(
                   task,
                   "edit",
                 )
               }
               onComplete={
-                handleCompleteTask
+                actions.handleCompleteTask
               }
               onSubTaskComplete={
-                handleSubTaskComplete
+                actions.handleSubTaskComplete
               }
               onDelete={
-                handleConfirmDeletedTask
+                actions.handleConfirmDeletedTask
               }
               onOpenTimer={
-                handleOpenTimerModal
+                actions.handleOpenTimerModal
               }
             />
           ),
         )}
 
-        {tasks.length === 0 && (
+        {state.tasks.length === 0 && (
           <EmptyCard />
         )}
       </Box>
 
-      {tasks.length > 0 &&
-        totalPages > 1 && (
+      {state.tasks.length > 0 &&
+        state.totalPages > 1 && (
           <PaginationComponent
-            page={page}
-            count={totalPages}
+            page={state.page}
+            count={state.totalPages}
             onPageChange={
-              handlePageChange
+              actions.handlePageChange
             }
           />
         )}
 
-      {openModal && (
+      {state.openModal && (
         <TaskModal
-          open={openModal}
-          mode={modalMode}
+          open={state.openModal}
+          mode={state.modalMode}
           onClose={
-            handleCloseModal
+            actions.handleCloseModal
           }
           onModeChange={
-            handleSetModalMode
+            actions.handleSetModalMode
           }
           onSubTaskComplete={
-            handleSubTaskComplete
+            actions.handleSubTaskComplete
           }
           title={
-            selectedTask
-              ? selectedTask.title.toUpperCase()
+            state.selectedTask
+              ? state.selectedTask.title.toUpperCase()
               : "Cadastrar Tarefa"
           }
           initialData={
-            selectedTask
+            state.selectedTask
           }
           onSubmit={
-            handleSubmit
+            actions.handleSubmit
           }
         />
       )}
 
-      {openConfirmDeletedModal && (
+      {state.openConfirmDeletedModal && (
         <ConfirmationModal
           open={
-            openConfirmDeletedModal
+            state.openConfirmDeletedModal
           }
           title={
-            selectedTask
-              ? `Tem certeza que deseja excluir a tarefa ${selectedTask.title}?`
+            state.selectedTask
+              ? `Tem certeza que deseja excluir a tarefa ${state.selectedTask.title}?`
               : "Excluir tarefa"
           }
           message={
-            selectedTask?.description
+            state.selectedTask?.description
           }
           onConfirm={
-            handleConfirmDelete
+            actions.handleConfirmDelete
           }
           onCancel={
-            handleCloseConfirmDeletedModal
+            actions.handleCloseConfirmDeletedModal
           }
         />
       )}
 
-      {openTimerModal && selectedTimerTarget && (
+      {state.openTimerModal && state.selectedTimerTarget && (
         <TimerComponent
-          open={openTimerModal}
-          data={selectedTimerTarget}
-          parentTitle={timerParentTitle}
-          onCloseTimerModal={handleCloseTimerModal}
+          open={state.openTimerModal}
+          data={state.selectedTimerTarget}
+          parentTitle={state.timerParentTitle}
+          onCloseTimerModal={actions.handleCloseTimerModal}
         />
       )}
     </Box>

@@ -9,6 +9,7 @@ import {
   ThemeProvider,
 } from "@/context/ThemeContext/ThemeProvider";
 import { TimerProvider } from "@/modules/timer/contexts/TimerProvider";
+import { PaginationProvider } from "@/context/PaginationContext/PaginatioProvider";
 
 type AppProvidersProps = {
   children: ReactNode;
@@ -19,11 +20,14 @@ export function AppProviders({
 }: AppProvidersProps) {
   return (
     <ThemeProvider>
-      <TimerProvider>
-        <AlertProvider>
-          {children}
-        </AlertProvider>
-      </TimerProvider>
+      <PaginationProvider>
+
+        <TimerProvider>
+          <AlertProvider>
+            {children}
+          </AlertProvider>
+        </TimerProvider>
+      </PaginationProvider>
     </ThemeProvider>
   );
 }
