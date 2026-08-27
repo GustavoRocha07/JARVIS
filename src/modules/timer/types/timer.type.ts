@@ -37,4 +37,5 @@ export type TimerState = {
     startedAt: number | null;
     pausedAt: number | null;
     finishedAt: number | null;
+    endsAt: number | null;
 };
