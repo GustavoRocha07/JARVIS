@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type UsePaginationParams<T> = {
     items: T[];
@@ -17,12 +17,6 @@ export function usePagination<T>({
     const total = items.length;
     const totalPages = Math.max(1, Math.ceil(total / normalizedPerPage));
     const currentPage = Math.min(page, totalPages);
-
-    useEffect(() => {
-        if (page !== currentPage) {
-            setPage(currentPage);
-        }
-    }, [currentPage, page]);
 
     const handlePageChange = useCallback(
         (newPage: number) => {
