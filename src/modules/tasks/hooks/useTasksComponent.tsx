@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { usePagination } from "@/context/PaginationContext/usePagination";
+import { usePagination } from "@/shared/hooks/usePagination";
 import { useTasksData } from "../contexts/useTasksData";
 import { useTasksUI } from "../contexts/useTasksUI";
 import type { Task, TaskSubmit, UpdateTask } from "../types/tasks.type";
@@ -31,24 +30,17 @@ export const useTasksComponent = () => {
 
     const {
         page,
-        perPage,
         totalPages,
+        paginatedItems: paginatedTasks,
         hasNextPage,
         hasPreviousPage,
         nextPage,
         previousPage,
         handlePageChange,
-        setTotal,
-    } = usePagination();
-
-    useEffect(() => {
-        setTotal(tasks.length);
-    }, [tasks.length, setTotal]);
-
-    const paginatedTasks = tasks.slice(
-        (page - 1) * perPage,
-        page * perPage,
-    );
+    } = usePagination<Task>({
+        items: tasks,
+        perPage: 10,
+    });
 
     const timerParentTitle =
         selectedTimerTarget && "taskId" in selectedTimerTarget
