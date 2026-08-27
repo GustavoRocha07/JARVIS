@@ -85,33 +85,52 @@ export const TimerProvider = ({
       type: "START",
       payload: {
         target,
+        now: Date.now(),
       },
     });
   };
 
   const pauseTimer = () => {
-    dispatch({ type: "PAUSE" });
+    dispatch({
+      type: "PAUSE",
+      payload: { now: Date.now() },
+    });
   };
 
   const resumeTimer = () => {
-    dispatch({ type: "RESUME" });
+    dispatch({
+      type: "RESUME",
+      payload: { now: Date.now() },
+    });
   };
 
   const restartTimer = () => {
     savedSessionKeyRef.current = null;
-    dispatch({ type: "RESTART" });
+    dispatch({
+      type: "RESTART",
+      payload: { now: Date.now() },
+    });
   };
 
   const startBreak = () => {
-    dispatch({ type: "START_BREAK" });
+    dispatch({
+      type: "START_BREAK",
+      payload: { now: Date.now() },
+    });
   };
 
   const skipBreak = () => {
-    dispatch({ type: "SKIP_BREAK" });
+    dispatch({
+      type: "SKIP_BREAK",
+      payload: { now: Date.now() },
+    });
   };
 
   const finishTimer = () => {
-    dispatch({ type: "FINISH" });
+    dispatch({
+      type: "FINISH",
+      payload: { now: Date.now() },
+    });
   };
 
   const resetTimer = () => {
@@ -128,12 +147,23 @@ export const TimerProvider = ({
       return;
     }
 
-    const intervalId = window.setInterval(() => {
-      dispatch({ type: "TICK" });
-    }, 1000);
+    const syncTimer = () => {
+      dispatch({
+        type: "TICK",
+        payload: { now: Date.now() },
+      });
+    };
+
+    syncTimer();
+
+    const intervalId = window.setInterval(syncTimer, 1000);
+    document.addEventListener("visibilitychange", syncTimer);
+    window.addEventListener("focus", syncTimer);
 
     return () => {
       window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", syncTimer);
+      window.removeEventListener("focus", syncTimer);
     };
   }, [timer.status]);
 
