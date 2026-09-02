@@ -3,11 +3,8 @@ import { useTasksData } from "../contexts/useTasksData";
 import { useTasksUI } from "../contexts/useTasksUI";
 import type { Task, TaskSubmit, UpdateTask } from "../types/tasks.type";
 import { useSearch } from "@/shared/hooks/useSearch";
-import { useState } from "react";
 
 export const useTasksComponent = () => {
-
-    const [searchTerm, setSearchTerm] = useState("");
 
     const {
         tasks,
@@ -17,9 +14,12 @@ export const useTasksComponent = () => {
         handleSubTaskComplete,
     } = useTasksData();
 
-    const filteredTasks = useSearch({
-        items: tasks,
+    const {
         searchTerm,
+        setSearchTerm,
+        filteredItems: filteredTasks,
+    } = useSearch<Task>({
+        items: tasks,
         searchBy: ["title", "description", "status", "priority"],
     });
     const {
@@ -50,7 +50,7 @@ export const useTasksComponent = () => {
         previousPage,
         handlePageChange,
     } = usePagination<Task>({
-        items: filteredTasks.filteredItems,
+        items: filteredTasks,
         perPage: 10,
     });
 
@@ -94,12 +94,11 @@ export const useTasksComponent = () => {
 
     return {
         state: {
-
-            searchTerm,
-            setSearchTerm,
             page,
             tasks,
             openModal,
+            searchTerm,
+
             modalMode,
             totalPages,
             hasNextPage,
@@ -116,6 +115,7 @@ export const useTasksComponent = () => {
             nextPage,
             previousPage,
             handleSubmit,
+            setSearchTerm,
             handleOpenModal,
             handleCloseModal,
             handlePageChange,

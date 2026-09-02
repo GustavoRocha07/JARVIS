@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 
 type UseSearchProps<T extends object> = {
     items: T[];
-    searchTerm: string;
     searchBy: Array<keyof T>;
 };
 export const useSearch = <T extends object>({ items, searchBy }: UseSearchProps<T>) => {
