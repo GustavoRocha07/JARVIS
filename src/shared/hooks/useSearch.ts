@@ -1,34 +1,37 @@
 import { useMemo, useState } from "react";
 
-
 type UseSearchProps<T extends object> = {
     items: T[];
-    searchTerm: string;
-    searchBy: Array<keyof T>;
+    searchBy: readonly (keyof T)[];
 };
-export const useSearch = <T extends object>({ items, searchBy }: UseSearchProps<T>) => {
 
-    const [searchTerm, setSearchTerm] = useState("")
-
+export const useSearch = <T extends object>({
+    items,
+    searchBy,
+}: UseSearchProps<T>) => {
+    const [searchTerm, setSearchTerm] = useState("");
 
     const filteredItems = useMemo(() => {
-        if (!searchTerm.trim() || searchBy.length === 0) return items;
+        const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+
+        if (!normalizedSearchTerm || searchBy.length === 0) {
+            return items;
+        }
 
         return items.filter((item) =>
             searchBy.some((key) => {
                 const value = item[key];
+
                 return String(value ?? "")
                     .toLowerCase()
-                    .includes(searchTerm.toLowerCase());
-            })
+                    .includes(normalizedSearchTerm);
+            }),
         );
     }, [items, searchTerm, searchBy]);
-
 
     return {
         searchTerm,
         setSearchTerm,
         filteredItems,
     };
-
-}
+};

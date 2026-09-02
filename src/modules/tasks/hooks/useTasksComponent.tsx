@@ -1,14 +1,17 @@
 import { usePagination } from "@/shared/hooks/usePagination";
+import { useSearch } from "@/shared/hooks/useSearch";
 import { useTasksData } from "../contexts/useTasksData";
 import { useTasksUI } from "../contexts/useTasksUI";
 import type { Task, TaskSubmit, UpdateTask } from "../types/tasks.type";
-import { useSearch } from "@/shared/hooks/useSearch";
-import { useState } from "react";
+
+const TASK_SEARCH_FIELDS: readonly (keyof Task)[] = [
+    "title",
+    "description",
+    "status",
+    "priority",
+];
 
 export const useTasksComponent = () => {
-
-    const [searchTerm, setSearchTerm] = useState("");
-
     const {
         tasks,
         handleSubmitTask,
@@ -17,11 +20,15 @@ export const useTasksComponent = () => {
         handleSubTaskComplete,
     } = useTasksData();
 
-    const filteredTasks = useSearch({
-        items: tasks,
+    const {
         searchTerm,
-        searchBy: ["title", "description", "status", "priority"],
+        setSearchTerm,
+        filteredItems: filteredTasks,
+    } = useSearch<Task>({
+        items: tasks,
+        searchBy: TASK_SEARCH_FIELDS,
     });
+
     const {
         openModal,
         modalMode,
@@ -38,8 +45,6 @@ export const useTasksComponent = () => {
         handleCloseConfirmDeletedModal,
     } = useTasksUI();
 
-
-
     const {
         page,
         totalPages,
@@ -50,7 +55,7 @@ export const useTasksComponent = () => {
         previousPage,
         handlePageChange,
     } = usePagination<Task>({
-        items: filteredTasks.filteredItems,
+        items: filteredTasks,
         perPage: 10,
     });
 
@@ -60,6 +65,11 @@ export const useTasksComponent = () => {
                 (task) => task.id === selectedTimerTarget.taskId,
             )?.title
             : undefined;
+
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        handlePageChange(1);
+    };
 
     const handleSubmit = (payload: TaskSubmit) => {
         const success = handleSubmitTask(payload);
@@ -94,9 +104,7 @@ export const useTasksComponent = () => {
 
     return {
         state: {
-
             searchTerm,
-            setSearchTerm,
             page,
             tasks,
             openModal,
@@ -119,6 +127,7 @@ export const useTasksComponent = () => {
             handleOpenModal,
             handleCloseModal,
             handlePageChange,
+            handleSearchChange,
             handleCompleteTask,
             handleSetModalMode,
             handleConfirmDelete,
