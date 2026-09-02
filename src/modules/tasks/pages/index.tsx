@@ -1,7 +1,10 @@
-
-
-import { AddOutlined } from "@mui/icons-material";
-import { Box } from "@mui/material";
+import { AddOutlined, SearchOutlined } from "@mui/icons-material";
+import {
+  Box,
+  InputAdornment,
+  TextField,
+  Typography,
+} from "@mui/material";
 
 import { HeaderComponent } from "@/shared/components/HeaderComponent";
 import { PaginationComponent } from "@/shared/components/Pagination";
@@ -17,10 +20,8 @@ import { TasksProvider } from "../contexts/TasksProvider";
 import { TimerComponent } from "@/modules/timer/components/TimerComponent/TimerComponent";
 import { useTasksComponent } from "../hooks/useTasksComponent";
 
-
 const TasksContent = () => {
-
-  const { state, actions } = useTasksComponent()
+  const { state, actions } = useTasksComponent();
 
   return (
     <Box sx={{ width: "100%", minWidth: 0 }}>
@@ -40,6 +41,34 @@ const TasksContent = () => {
 
       <Box sx={{ mt: { xs: 2, md: 3 } }}>
         <TaskSummary />
+      </Box>
+
+      <Box
+        sx={{
+          mt: { xs: 2, md: 3 },
+          display: "flex",
+          justifyContent: "flex-end",
+        }}
+      >
+        <TextField
+          value={state.searchTerm}
+          onChange={(event) =>
+            actions.handleSearchChange(event.target.value)
+          }
+          size="small"
+          placeholder="Pesquisar tarefas..."
+          aria-label="Pesquisar tarefas"
+          sx={{
+            width: { xs: "100%", md: 420 },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchOutlined />
+              </InputAdornment>
+            ),
+          }}
+        />
       </Box>
 
       <Box
@@ -85,6 +114,21 @@ const TasksContent = () => {
         {state.tasks.length === 0 && (
           <EmptyCard />
         )}
+
+        {state.tasks.length > 0 &&
+          state.paginatedTasks.length === 0 &&
+          state.searchTerm.trim() && (
+            <Box
+              sx={{
+                py: 6,
+                textAlign: "center",
+              }}
+            >
+              <Typography color="text.secondary">
+                Nenhuma tarefa encontrada para "{state.searchTerm}".
+              </Typography>
+            </Box>
+          )}
       </Box>
 
       {state.tasks.length > 0 &&
