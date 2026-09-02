@@ -1,4 +1,5 @@
 import { usePagination } from "@/shared/hooks/usePagination";
+
 import { useTasksData } from "../contexts/useTasksData";
 import { useTasksUI } from "../contexts/useTasksUI";
 import type { Task, TaskSubmit, UpdateTask } from "../types/tasks.type";
@@ -22,6 +23,7 @@ export const useTasksComponent = () => {
         items: tasks,
         searchBy: ["title", "description", "status", "priority"],
     });
+
     const {
         openModal,
         modalMode,
@@ -37,8 +39,6 @@ export const useTasksComponent = () => {
         handleConfirmDeletedTask,
         handleCloseConfirmDeletedModal,
     } = useTasksUI();
-
-
 
     const {
         page,
@@ -60,6 +60,11 @@ export const useTasksComponent = () => {
                 (task) => task.id === selectedTimerTarget.taskId,
             )?.title
             : undefined;
+
+    const handleSearchChange = (value: string) => {
+        setSearchTerm(value);
+        handlePageChange(1);
+    };
 
     const handleSubmit = (payload: TaskSubmit) => {
         const success = handleSubmitTask(payload);
@@ -119,6 +124,7 @@ export const useTasksComponent = () => {
             handleOpenModal,
             handleCloseModal,
             handlePageChange,
+            handleSearchChange,
             handleCompleteTask,
             handleSetModalMode,
             handleConfirmDelete,
