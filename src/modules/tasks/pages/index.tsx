@@ -57,16 +57,20 @@ const TasksContent = () => {
           }
           size="small"
           placeholder="Pesquisar tarefas..."
-          aria-label="Pesquisar tarefas"
           sx={{
             width: { xs: "100%", md: 420 },
           }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchOutlined />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchOutlined />
+                </InputAdornment>
+              ),
+            },
+            htmlInput: {
+              "aria-label": "Pesquisar tarefas",
+            },
           }}
         />
       </Box>
