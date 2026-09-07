@@ -3,14 +3,34 @@ import {
     CardContent,
     Grid,
     Typography,
-} from "@mui/material"
-import { useTaskSumary } from "../../hooks/useTaskSummary"
-
+} from "@mui/material";
+import { useTasksData } from "../../contexts/useTasksData";
 
 export const TaskSummary = () => {
+    const { summary } = useTasksData();
 
-
-    const { cards } = useTaskSumary()
+    const cards = [
+        {
+            label: "Total",
+            value: summary.total,
+            color: "#1976d2",
+        },
+        {
+            label: "Pendentes",
+            value: summary.pending,
+            color: "#ed6c02",
+        },
+        {
+            label: "Em andamento",
+            value: summary.inProgress,
+            color: "#0288d1",
+        },
+        {
+            label: "Concluídas",
+            value: summary.completed,
+            color: "#2e7d32",
+        },
+    ];
 
     return (
         <Grid container spacing={2}>
@@ -48,5 +68,5 @@ export const TaskSummary = () => {
                 </Grid>
             ))}
         </Grid>
-    )
-}
+    );
+};
