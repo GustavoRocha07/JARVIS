@@ -22,9 +22,10 @@ import {
 } from "@/shared/utils/getColorsAlert";
 import { TimerOutlined, RemoveRedEye, DeleteForeverOutlined } from "@mui/icons-material";
 import EditIcon from '@mui/icons-material/Edit';
-import { useTimer } from "@/modules/timer/contexts/useTimer";
 import { formatTimer } from "@/modules/timer/utils/formatTimer";
 import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
+import { useTaskCard } from "../../hooks/useTaskCard";
+import { formatDate } from "@/shared/utils/formatedTimerDate.utils";
 
 
 type TaskCardProps = {
@@ -37,11 +38,6 @@ type TaskCardProps = {
   onSubTaskComplete?: (subTask: SubTask, completed: boolean) => void;
 };
 
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat("pt-BR").format(date);
-
-const isSubTaskCompleted = (subTask: SubTask) =>
-  subTask.status === "COMPLETED";
 
 export const TaskCard = ({
   task,
@@ -52,44 +48,11 @@ export const TaskCard = ({
   onOpenTimer,
   onSubTaskComplete,
 }: TaskCardProps) => {
-  const subtasks = task.subTasks ?? [];
-  const totalSubtasks = subtasks.length;
-  const completedSubtasks = subtasks.filter(isSubTaskCompleted).length;
 
-  const progress =
-    totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
-
-  const { timer, isTimerOwner } = useTimer();
-  const isCompleted = task.status === "COMPLETED";
-  const ownsTaskTimer = isTimerOwner({
-    type: "TASK",
-    taskId: task.id,
-  });
-
-  const handleCompleteChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    event.stopPropagation();
-    onComplete(task, event.target.checked);
-  };
-
-  const handleSubTaskChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    subTask: SubTask,
-  ) => {
-    event.stopPropagation();
-    onSubTaskComplete?.(subTask, event.target.checked);
-  };
-
-  const timerStatusLabel = timer.status === "PAUSED"
-    ? "Pausado"
-    : timer.status === "WAITING_BREAK"
-      ? "Foco concluído"
-      : timer.status === "FINISHED"
-        ? "Finalizado"
-        : timer.phase === "BREAK"
-          ? "Em pausa"
-          : "Em foco";
+  const { state, actions } = useTaskCard({
+    onComplete,
+    onOpenTimer, task, onSubTaskComplete
+  })
 
   return (
     <Card
@@ -114,8 +77,8 @@ export const TaskCard = ({
         >
           <Checkbox
             size="small"
-            checked={isCompleted}
-            onChange={handleCompleteChange}
+            checked={state.isCompleted}
+            onChange={actions.handleCompleteChange}
             onClick={(event) => event.stopPropagation()}
             icon={<RadioButtonUncheckedIcon fontSize="small" />}
             checkedIcon={<CheckCircleIcon fontSize="small" />}
@@ -136,8 +99,8 @@ export const TaskCard = ({
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                  textDecoration: isCompleted ? "line-through" : "none",
-                  opacity: isCompleted ? 0.65 : 1,
+                  textDecoration: state.isCompleted ? "line-through" : "none",
+                  opacity: state.isCompleted ? 0.65 : 1,
                 }}
               >
                 {task.title}
@@ -154,13 +117,13 @@ export const TaskCard = ({
               />
             </Stack>
 
-            {ownsTaskTimer && (
+            {state.ownsTaskTimer && (
               <Typography
                 variant="body2"
-                color={timer.status === "FINISHED" ? "success.main" : "primary.main"}
+                color={state.timer.status === "FINISHED" ? "success.main" : "primary.main"}
                 sx={{ mt: 0.5, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
               >
-                {formatTimer(timer.remainingSeconds)} · {timerStatusLabel}
+                {formatTimer(state.timer.remainingSeconds)} · {state.timerStatusLabel}
               </Typography>
             )}
 
@@ -192,19 +155,19 @@ export const TaskCard = ({
             </Stack>
           </Box>
 
-          {totalSubtasks > 0 && (
+          {state.totalSubtasks > 0 && (
             <Box sx={{ width: 72, pt: 0.2 }}>
               <Typography
                 variant="caption"
                 color="text.secondary"
                 sx={{ display: "block", textAlign: "center", mb: 0.5 }}
               >
-                {completedSubtasks}/{totalSubtasks}
+                {state.completedSubtasks}/{state.totalSubtasks}
               </Typography>
 
               <LinearProgress
                 variant="determinate"
-                value={progress}
+                value={state.progress}
                 sx={{ height: 3, borderRadius: 99 }}
               />
             </Box>
@@ -236,11 +199,11 @@ export const TaskCard = ({
           />
         </Box>
 
-        {subtasks.length > 0 && (
+        {state.subtasks.length > 0 && (
           <Stack spacing={0.35} sx={{ mt: 1.1, ml: 3.7 }}>
-            {subtasks.map((subTask) => {
-              const completed = isSubTaskCompleted(subTask);
-              const ownsSubTaskTimer = isTimerOwner({
+            {state.subtasks.map((subTask) => {
+              const completed = actions.isSubTaskCompleted(subTask);
+              const ownsSubTaskTimer = state.isTimerOwner({
                 type: "SUBTASK",
                 taskId: subTask.taskId,
                 subTaskId: subTask.id,
@@ -265,7 +228,7 @@ export const TaskCard = ({
                     checked={completed}
                     disabled={!onSubTaskComplete}
                     onChange={(event) =>
-                      handleSubTaskChange(event, subTask)
+                      actions.handleSubTaskChange(event, subTask)
                     }
                     icon={<RadioButtonUncheckedIcon fontSize="small" />}
                     checkedIcon={<CheckCircleIcon fontSize="small" />}
@@ -290,10 +253,10 @@ export const TaskCard = ({
                   {ownsSubTaskTimer && (
                     <Typography
                       variant="caption"
-                      color={timer.status === "FINISHED" ? "success.main" : "primary.main"}
+                      color={state.timer.status === "FINISHED" ? "success.main" : "primary.main"}
                       sx={{ mr: 1, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
                     >
-                      {formatTimer(timer.remainingSeconds)}
+                      {formatTimer(state.timer.remainingSeconds)}
                     </Typography>
                   )}
 
