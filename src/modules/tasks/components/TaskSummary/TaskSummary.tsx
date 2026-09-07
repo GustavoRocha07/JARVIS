@@ -1,6 +1,6 @@
 import {
   AutorenewOutlined,
-  CheckCircleOutline,
+  CheckCircleOutlined,
   ListAltOutlined,
   RadioButtonUnchecked,
   WarningAmberOutlined,
@@ -37,7 +37,7 @@ export const TaskSummary = () => {
     {
       label: "Concluídas",
       value: summary.completed,
-      icon: <CheckCircleOutline sx={{ fontSize: 19 }} />,
+      icon: <CheckCircleOutlined sx={{ fontSize: 19 }} />,
       color: "#059669",
       backgroundColor: "#dcfce7",
     },
