@@ -1,21 +1,21 @@
+import { useTimer } from "@/modules/timer/contexts/useTimer";
 import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 import type { Task } from "../types/tasks.type";
-import { useTimer } from "@/modules/timer/contexts/useTimer";
 
-type useTaskCardProps = {
+type UseTaskCardProps = {
     task: Task;
     onComplete: (task: Task, completed: boolean) => void;
-    onOpenTimer: (target: Task | SubTask) => void;
     onSubTaskComplete?: (subTask: SubTask, completed: boolean) => void;
-}
+};
 
 const isSubTaskCompleted = (subTask: SubTask) =>
     subTask.status === "COMPLETED";
 
-
-export const useTaskCard = ({ onComplete,
-    task, onSubTaskComplete
-}: useTaskCardProps) => {
+export const useTaskCard = ({
+    task,
+    onComplete,
+    onSubTaskComplete,
+}: UseTaskCardProps) => {
     const subtasks = task.subTasks ?? [];
     const totalSubtasks = subtasks.length;
     const completedSubtasks = subtasks.filter(isSubTaskCompleted).length;
@@ -24,7 +24,6 @@ export const useTaskCard = ({ onComplete,
 
     const { timer, isTimerOwner } = useTimer();
     const isCompleted = task.status === "COMPLETED";
-
     const ownsTaskTimer = isTimerOwner({
         type: "TASK",
         taskId: task.id,
@@ -40,20 +39,15 @@ export const useTaskCard = ({ onComplete,
                     ? "Em pausa"
                     : "Em foco";
 
-
-    const handleCompleteChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
-    ) => {
-        event.stopPropagation();
-        onComplete(task, event.target.checked);
+    const completeTask = (completed: boolean) => {
+        onComplete(task, completed);
     };
 
-    const handleSubTaskChange = (
-        event: React.ChangeEvent<HTMLInputElement>,
+    const completeSubTask = (
         subTask: SubTask,
+        completed: boolean,
     ) => {
-        event.stopPropagation();
-        onSubTaskComplete?.(subTask, event.target.checked);
+        onSubTaskComplete?.(subTask, completed);
     };
 
     return {
@@ -62,16 +56,18 @@ export const useTaskCard = ({ onComplete,
             progress,
             subtasks,
             isCompleted,
-            isTimerOwner,
             ownsTaskTimer,
             totalSubtasks,
             timerStatusLabel,
             completedSubtasks,
         },
         actions: {
-            handleCompleteChange,
-            handleSubTaskChange,
+            completeTask,
+            completeSubTask,
+        },
+        selectors: {
+            isTimerOwner,
             isSubTaskCompleted,
-        }
-    }
-}
+        },
+    };
+};
