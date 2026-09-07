@@ -31,12 +31,12 @@ export function usePagination<T>({
     );
 
     const nextPage = useCallback(() => {
-        setPage((current) => Math.min(current + 1, totalPages));
-    }, [totalPages]);
+        handlePageChange(currentPage + 1);
+    }, [currentPage, handlePageChange]);
 
     const previousPage = useCallback(() => {
-        setPage((current) => Math.max(current - 1, 1));
-    }, []);
+        handlePageChange(currentPage - 1);
+    }, [currentPage, handlePageChange]);
 
     const paginatedItems = useMemo(() => {
         const startIndex = (currentPage - 1) * normalizedPerPage;
