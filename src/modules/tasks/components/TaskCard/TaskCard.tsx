@@ -12,6 +12,12 @@ import {
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CalendarTodayOutlinedIcon from "@mui/icons-material/CalendarTodayOutlined";
+import {
+  TimerOutlined,
+  RemoveRedEye,
+  DeleteForeverOutlined,
+} from "@mui/icons-material";
+import EditIcon from "@mui/icons-material/Edit";
 
 import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 import type { Task } from "../../types/tasks.type";
@@ -20,13 +26,10 @@ import {
   priorityLabels,
   statusStyles,
 } from "@/shared/utils/getColorsAlert";
-import { TimerOutlined, RemoveRedEye, DeleteForeverOutlined } from "@mui/icons-material";
-import EditIcon from '@mui/icons-material/Edit';
 import { formatTimer } from "@/modules/timer/utils/formatTimer";
 import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
+import { formatDate } from "@/shared/utils/date.utils";
 import { useTaskCard } from "../../hooks/useTaskCard";
-import { formatDate } from "@/shared/utils/formatedTimerDate.utils";
-
 
 type TaskCardProps = {
   task: Task;
@@ -38,7 +41,6 @@ type TaskCardProps = {
   onSubTaskComplete?: (subTask: SubTask, completed: boolean) => void;
 };
 
-
 export const TaskCard = ({
   task,
   onClick,
@@ -48,11 +50,11 @@ export const TaskCard = ({
   onOpenTimer,
   onSubTaskComplete,
 }: TaskCardProps) => {
-
-  const { state, actions } = useTaskCard({
+  const { state, actions, selectors } = useTaskCard({
+    task,
     onComplete,
-    onOpenTimer, task, onSubTaskComplete
-  })
+    onSubTaskComplete,
+  });
 
   return (
     <Card
@@ -78,7 +80,10 @@ export const TaskCard = ({
           <Checkbox
             size="small"
             checked={state.isCompleted}
-            onChange={actions.handleCompleteChange}
+            onChange={(event) => {
+              event.stopPropagation();
+              actions.completeTask(event.target.checked);
+            }}
             onClick={(event) => event.stopPropagation()}
             icon={<RadioButtonUncheckedIcon fontSize="small" />}
             checkedIcon={<CheckCircleIcon fontSize="small" />}
@@ -120,8 +125,16 @@ export const TaskCard = ({
             {state.ownsTaskTimer && (
               <Typography
                 variant="body2"
-                color={state.timer.status === "FINISHED" ? "success.main" : "primary.main"}
-                sx={{ mt: 0.5, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
+                color={
+                  state.timer.status === "FINISHED"
+                    ? "success.main"
+                    : "primary.main"
+                }
+                sx={{
+                  mt: 0.5,
+                  fontWeight: 700,
+                  fontVariantNumeric: "tabular-nums",
+                }}
               >
                 {formatTimer(state.timer.remainingSeconds)} · {state.timerStatusLabel}
               </Typography>
@@ -146,7 +159,11 @@ export const TaskCard = ({
             <Stack
               direction="row"
               spacing={0.5}
-              sx={{ mt: 0.65, color: "text.secondary", alignItems: "center" }}
+              sx={{
+                mt: 0.65,
+                color: "text.secondary",
+                alignItems: "center",
+              }}
             >
               <CalendarTodayOutlinedIcon sx={{ fontSize: 13 }} />
               <Typography variant="caption">
@@ -176,24 +193,24 @@ export const TaskCard = ({
           <ActionsMenu
             actions={[
               {
-                label: 'Abrir timer',
+                label: "Abrir timer",
                 onClick: () => onOpenTimer(task),
-                icon: <TimerOutlined />
+                icon: <TimerOutlined />,
               },
               {
-                label: 'Editar Tarefa',
+                label: "Editar Tarefa",
                 onClick: () => onEdit(task),
-                icon: <EditIcon />
+                icon: <EditIcon />,
               },
               {
-                label: 'Visualizar Tarefa',
+                label: "Visualizar Tarefa",
                 onClick: () => onClick(task),
-                icon: <RemoveRedEye />
+                icon: <RemoveRedEye />,
               },
               {
-                label: 'Deletar Tarefa',
+                label: "Deletar Tarefa",
                 onClick: () => onDelete(task),
-                icon: <DeleteForeverOutlined />
+                icon: <DeleteForeverOutlined />,
               },
             ]}
           />
@@ -202,8 +219,8 @@ export const TaskCard = ({
         {state.subtasks.length > 0 && (
           <Stack spacing={0.35} sx={{ mt: 1.1, ml: 3.7 }}>
             {state.subtasks.map((subTask) => {
-              const completed = actions.isSubTaskCompleted(subTask);
-              const ownsSubTaskTimer = state.isTimerOwner({
+              const completed = selectors.isSubTaskCompleted(subTask);
+              const ownsSubTaskTimer = selectors.isTimerOwner({
                 type: "SUBTASK",
                 taskId: subTask.taskId,
                 subTaskId: subTask.id,
@@ -217,7 +234,7 @@ export const TaskCard = ({
                     display: "flex",
                     alignItems: "center",
                     minHeight: 40,
-                    marginY: '1rem',
+                    marginY: "1rem",
                     px: 0.75,
                     borderRadius: 1.25,
                     backgroundColor: "action.hover",
@@ -227,9 +244,13 @@ export const TaskCard = ({
                     size="small"
                     checked={completed}
                     disabled={!onSubTaskComplete}
-                    onChange={(event) =>
-                      actions.handleSubTaskChange(event, subTask)
-                    }
+                    onChange={(event) => {
+                      event.stopPropagation();
+                      actions.completeSubTask(
+                        subTask,
+                        event.target.checked,
+                      );
+                    }}
                     icon={<RadioButtonUncheckedIcon fontSize="small" />}
                     checkedIcon={<CheckCircleIcon fontSize="small" />}
                     sx={{ p: 0.3, mr: 0.6 }}
@@ -253,8 +274,16 @@ export const TaskCard = ({
                   {ownsSubTaskTimer && (
                     <Typography
                       variant="caption"
-                      color={state.timer.status === "FINISHED" ? "success.main" : "primary.main"}
-                      sx={{ mr: 1, fontWeight: 700, fontVariantNumeric: "tabular-nums" }}
+                      color={
+                        state.timer.status === "FINISHED"
+                          ? "success.main"
+                          : "primary.main"
+                      }
+                      sx={{
+                        mr: 1,
+                        fontWeight: 700,
+                        fontVariantNumeric: "tabular-nums",
+                      }}
                     >
                       {formatTimer(state.timer.remainingSeconds)}
                     </Typography>
