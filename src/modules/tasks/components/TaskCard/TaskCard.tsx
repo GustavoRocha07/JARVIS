@@ -3,7 +3,7 @@ import {
   BarChartOutlined,
   CalendarTodayOutlined,
   CheckCircle,
-  CheckCircleOutline,
+  CheckCircleOutlined,
   DeleteForeverOutlined,
   ListAltOutlined,
   PlayArrowOutlined,
@@ -195,7 +195,7 @@ export const TaskCard = ({
                   icon: state.isCompleted ? (
                     <RadioButtonUnchecked />
                   ) : (
-                    <CheckCircleOutline />
+                    <CheckCircleOutlined />
                   ),
                 },
                 {
@@ -225,10 +225,8 @@ export const TaskCard = ({
 
         <Stack
           direction="row"
-          useFlexGap
-          flexWrap="wrap"
           spacing={0.75}
-          sx={{ mt: 1.45 }}
+          sx={{ mt: 1.45, flexWrap: "wrap", gap: 0.75 }}
         >
           <Chip
             size="small"
@@ -301,7 +299,7 @@ export const TaskCard = ({
                 gap: 1,
               }}
             >
-              <Stack direction="row" spacing={0.6} alignItems="center">
+              <Stack direction="row" spacing={0.6} sx={{ alignItems: "center" }}>
                 <ListAltOutlined sx={{ fontSize: 14, color: "#64748b" }} />
                 <Typography sx={{ fontSize: 11.5, color: "#64748b" }}>
                   {state.completedSubtasks} de {state.totalSubtasks} concluídas
@@ -413,8 +411,8 @@ export const TaskCard = ({
         <Stack
           direction="row"
           spacing={0.75}
-          alignItems="center"
           onClick={(event) => event.stopPropagation()}
+          sx={{ alignItems: "center" }}
         >
           <Button
             size="small"
