@@ -112,7 +112,7 @@ const TasksContent = () => {
 
         <Box sx={{ mt: 2.2, minHeight: "50vh" }}>
           {state.paginatedTasks.length > 0 && (
-            <Grid container spacing={1.5} alignItems="stretch">
+            <Grid container spacing={1.5} sx={{ alignItems: "stretch" }}>
               {state.paginatedTasks.map((task) => (
                 <Grid key={task.id} size={{ xs: 12, md: 4 }}>
                   <TaskCard
