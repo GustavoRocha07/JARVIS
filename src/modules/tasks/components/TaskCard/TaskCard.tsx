@@ -398,6 +398,17 @@ export const TaskCard = ({
                       {formatTimer(state.timer.remainingSeconds)}
                     </Typography>
                   )}
+
+                  <ActionsMenu
+                    ariaLabel="Ações da subtarefa"
+                    actions={[
+                      {
+                        label: "Abrir timer",
+                        onClick: () => onOpenTimer(subTask),
+                        icon: <TimerOutlined />,
+                      },
+                    ]}
+                  />
                 </Box>
               );
             })}
