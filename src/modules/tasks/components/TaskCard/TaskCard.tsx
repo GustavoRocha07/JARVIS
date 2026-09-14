@@ -154,6 +154,24 @@ export const TaskCard = ({
         }}
       >
         <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
+          <Checkbox
+            size="small"
+            checked={state.isCompleted}
+            onChange={(event) => {
+              event.stopPropagation();
+              actions.completeTask(event.target.checked);
+            }}
+            onClick={(event) => event.stopPropagation()}
+            icon={<RadioButtonUnchecked sx={{ fontSize: 18 }} />}
+            checkedIcon={<CheckCircle sx={{ fontSize: 18 }} />}
+            sx={{
+              p: 0.2,
+              mt: 0.05,
+              color: "#0284c7",
+              "&.Mui-checked": { color: "#0284c7" },
+            }}
+          />
+
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
               sx={{
@@ -186,6 +204,8 @@ export const TaskCard = ({
 
           <Box onClick={(event) => event.stopPropagation()}>
             <ActionsMenu
+              ariaLabel="Ações da tarefa"
+              tooltip="Ações da tarefa"
               actions={[
                 {
                   label: state.isCompleted
