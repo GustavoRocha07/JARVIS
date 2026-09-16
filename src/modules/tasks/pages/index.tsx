@@ -95,6 +95,7 @@ const TasksContent = () => {
 
         <Box sx={{ mt: 2.2 }}>
           <TaskFilters
+
             searchTerm={state.searchTerm}
             statusFilter={state.statusFilter}
             priorityFilter={state.priorityFilter}
@@ -107,6 +108,8 @@ const TasksContent = () => {
             onDueChange={actions.handleDueFilterChange}
             onSortChange={actions.handleSortChange}
             onClear={actions.handleClearFilters}
+            showCompleted={state.showCompleted}
+            handleShowCompletedChange={actions.handleShowCompletedChange}
           />
         </Box>
 

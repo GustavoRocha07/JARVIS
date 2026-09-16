@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   FormControl,
+
   InputAdornment,
   MenuItem,
   OutlinedInput,
@@ -25,6 +26,8 @@ type TaskFiltersProps = {
   dueFilter: TaskDueFilter;
   sort: TaskSort;
   hasActiveFilters: boolean;
+  showCompleted: boolean;
+  handleShowCompletedChange: (value: boolean) => void;
   onSearchChange: (value: string) => void;
   onStatusChange: (value: TaskStatusFilter) => void;
   onPriorityChange: (value: TaskPriorityFilter) => void;
@@ -52,6 +55,7 @@ export const TaskFilters = ({
   priorityFilter,
   dueFilter,
   sort,
+  showCompleted,
   hasActiveFilters,
   onSearchChange,
   onStatusChange,
@@ -59,6 +63,7 @@ export const TaskFilters = ({
   onDueChange,
   onSortChange,
   onClear,
+  handleShowCompletedChange,
 }: TaskFiltersProps) => (
   <Paper
     elevation={0}
@@ -189,6 +194,34 @@ export const TaskFilters = ({
       >
         Limpar filtros
       </Button>
+    </Box>
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        marginTop: '1rem',
+        gap: 1,
+        flexWrap: { xs: "wrap", lg: "nowrap" },
+      }}
+    >
+      <FormControl size="small" sx={{ minWidth: 164 }}>
+        <Select
+          value={String(showCompleted)}
+          input={<OutlinedInput />}
+          onChange={(event) => {
+            handleShowCompletedChange(event.target.value === "true");
+          }}
+          sx={selectSx}
+        >
+          <MenuItem value="true">
+            Mostrar concluídas
+          </MenuItem>
+
+          <MenuItem value="false">
+            Ocultar concluídas
+          </MenuItem>
+        </Select>
+      </FormControl>
     </Box>
   </Paper>
 );

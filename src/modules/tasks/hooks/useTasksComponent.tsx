@@ -11,6 +11,7 @@ import type {
   TaskStatusFilter,
 } from "./useTaskFilters";
 import type { Task, TaskSubmit, UpdateTask } from "../types/tasks.type";
+import { useMemo, useState } from "react";
 
 const TASK_SEARCH_FIELDS: Array<keyof Task> = [
   "title",
@@ -20,6 +21,8 @@ const TASK_SEARCH_FIELDS: Array<keyof Task> = [
 ];
 
 export const useTasksComponent = () => {
+
+  const [showCompleted, setShowCompleted] = useState<boolean>(false);
   const {
     tasks,
     handleSubmitTask,
@@ -28,16 +31,32 @@ export const useTasksComponent = () => {
     handleSubTaskComplete,
   } = useTasksData();
 
+
+  const visibleTasks = useMemo(() => {
+    if (showCompleted) {
+      return tasks;
+    }
+
+    return tasks.filter(
+      (task) => task.status !== "COMPLETED",
+    );
+  }, [tasks, showCompleted])
+
   const {
     searchTerm,
     setSearchTerm,
     filteredItems: searchedTasks,
   } = useSearch<Task>({
-    items: tasks,
+    items: visibleTasks,
     searchBy: TASK_SEARCH_FIELDS,
   });
 
   const taskFilters = useTaskFilters({ items: searchedTasks });
+
+  const handleShowCompletedChange = (value: boolean) => {
+    setShowCompleted(value);
+    resetPage()
+  }
 
   const {
     openModal,
@@ -152,6 +171,7 @@ export const useTasksComponent = () => {
       paginatedTasks,
       timerParentTitle,
       hasPreviousPage,
+      showCompleted,
       selectedTimerTarget,
       openConfirmDeletedModal,
       statusFilter: taskFilters.state.statusFilter,
@@ -163,6 +183,7 @@ export const useTasksComponent = () => {
 
     actions: {
       nextPage,
+      handleShowCompletedChange,
       previousPage,
       handleSubmit,
       handleOpenModal,
