@@ -126,7 +126,11 @@ export const TaskFilters = ({
           <MenuItem value="ALL">Todos os status</MenuItem>
           <MenuItem value="PENDING">Pendentes</MenuItem>
           <MenuItem value="IN_PROGRESS">Em andamento</MenuItem>
-          <MenuItem value="COMPLETED">Concluídas</MenuItem>
+          {showCompleted && (
+            <MenuItem value="COMPLETED">
+              Concluídas
+            </MenuItem>
+          )}
           <MenuItem value="CANCELLED">Canceladas</MenuItem>
         </Select>
       </FormControl>
