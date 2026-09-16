@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+
 import { usePagination } from "@/shared/hooks/usePagination";
 import { useSearch } from "@/shared/hooks/useSearch";
 
@@ -11,7 +13,6 @@ import type {
   TaskStatusFilter,
 } from "./useTaskFilters";
 import type { Task, TaskSubmit, UpdateTask } from "../types/tasks.type";
-import { useMemo, useState } from "react";
 
 const TASK_SEARCH_FIELDS: Array<keyof Task> = [
   "title",
@@ -121,6 +122,7 @@ export const useTasksComponent = () => {
   };
 
   const handleClearFilters = () => {
+    setShowCompleted(false)
     setSearchTerm("");
     taskFilters.actions.clearFilters();
     resetPage();
@@ -155,7 +157,9 @@ export const useTasksComponent = () => {
   };
 
   const hasActiveFilters =
-    Boolean(searchTerm.trim()) || taskFilters.state.hasActiveFilters;
+    Boolean(searchTerm.trim()) ||
+    showCompleted ||
+    taskFilters.state.hasActiveFilters;
 
   return {
     state: {
