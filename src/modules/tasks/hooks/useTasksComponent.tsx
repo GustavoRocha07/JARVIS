@@ -53,11 +53,15 @@ export const useTasksComponent = () => {
   });
 
   const taskFilters = useTaskFilters({ items: searchedTasks });
-
   const handleShowCompletedChange = (value: boolean) => {
     setShowCompleted(value);
-    resetPage()
-  }
+
+    if (!value && taskFilters.state.statusFilter === "COMPLETED") {
+      taskFilters.actions.setStatusFilter("ALL");
+    }
+
+    resetPage();
+  };
 
   const {
     openModal,
