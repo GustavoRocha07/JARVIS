@@ -57,21 +57,25 @@ export const TaskModal = ({
     validationSchema,
     enableReinitialize: true,
 
-    onSubmit: (values) => {
-      if (isEdit && initialData) {
+    onSubmit: (values, { setSubmitting }) => {
+      try {
+        if (isEdit && initialData) {
+          onSubmit({
+            action: "UPDATE",
+            task: formValuesToUpdateTask(initialData.id, values),
+            subTasks: values.subTasks,
+          });
+          return;
+        }
+
         onSubmit({
-          action: "UPDATE",
-          task: formValuesToUpdateTask(initialData.id, values),
+          action: "CREATE",
+          task: formValuesToCreateTask(values),
           subTasks: values.subTasks,
         });
-        return;
+      } finally {
+        setSubmitting(false);
       }
-
-      onSubmit({
-        action: "CREATE",
-        task: formValuesToCreateTask(values),
-        subTasks: values.subTasks,
-      });
     },
   });
 
@@ -259,7 +263,7 @@ export const TaskModal = ({
                           Boolean(formik.errors.dueDate),
                         helperText:
                           formik.touched.dueDate &&
-                          typeof formik.errors.dueDate === "string"
+                            typeof formik.errors.dueDate === "string"
                             ? formik.errors.dueDate
                             : undefined,
                       },
