@@ -32,6 +32,7 @@ const getStoredTasks = (): Task[] => {
       .filter(isTaskFromStorage)
       .map((task) => ({
         ...task,
+        projectId: task.projectId ?? null,
         createdAt: new Date(task.createdAt),
         dueDate: new Date(task.dueDate),
         subTasks: handleListSubTasksService(task.id),

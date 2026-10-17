@@ -33,16 +33,12 @@ export type CreateTask = {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: Date;
-  projectId: ProjectId | null,
+  projectId?: ProjectId | null,
 };
 
-export type UpdateTask = {
+
+export type UpdateTask = CreateTask & {
   id: number;
-  title: string;
-  description: string;
-  status: TaskStatus;
-  priority: TaskPriority;
-  dueDate: Date;
 };
 
 export type TasksParamsSearch = {
@@ -101,8 +97,12 @@ export const isTaskFromStorage = (value: unknown): value is StoredTask => {
   if (!("priority" in value)) return false;
   if (!("createdAt" in value)) return false;
   if (!("dueDate" in value)) return false;
-
+  const validProjectId =
+    !("projectId" in value) ||
+    value.projectId === null ||
+    typeof value.projectId === "string";
   return (
+    validProjectId &&
     typeof value.id === "number" &&
     typeof value.title === "string" &&
     typeof value.description === "string" &&
