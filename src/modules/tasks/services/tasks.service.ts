@@ -48,6 +48,7 @@ const saveTasks = (tasks: Task[]): void => {
     description: task.description,
     status: task.status,
     priority: task.priority,
+    projectId: task.projectId ?? null,
     createdAt: task.createdAt,
     dueDate: task.dueDate,
   }));

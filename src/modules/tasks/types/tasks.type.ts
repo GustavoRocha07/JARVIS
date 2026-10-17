@@ -33,6 +33,7 @@ export type CreateTask = {
   status: TaskStatus;
   priority: TaskPriority;
   dueDate: Date;
+  projectId: ProjectId | null,
 };
 
 export type UpdateTask = {
