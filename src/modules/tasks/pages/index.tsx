@@ -83,15 +83,19 @@ const TasksContent = () => {
 
         {state.tasks.length > 0 && state.paginatedTasks.length === 0 && (
           <Box
-            sx={{
-              py: 8,
-              textAlign: "center",
-              border: "1px dashed #dce2e8",
-              borderRadius: "14px",
-              backgroundColor: "#fff",
-            }}
+            sx={(theme) => (
+              {
+                py: 8,
+                textAlign: "center",
+                border: `1px dashed ${theme.palette.background.paper}`,
+                borderRadius: "14px",
+                backgroundColor: theme.palette.background.paper,
+              }
+            )}
           >
-            <Typography sx={{ fontSize: 14, color: "#64748b" }}>
+            <Typography sx={(theme) => (
+              { fontSize: 14, color: theme.palette.text.primary}
+            )}>
               Nenhuma tarefa encontrada com os filtros selecionados.
             </Typography>
           </Box>
