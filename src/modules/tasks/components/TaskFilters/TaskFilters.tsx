@@ -39,14 +39,6 @@ type TaskFiltersProps = {
 const selectSx = {
   height: 40,
   borderRadius: "10px",
-  backgroundColor: "#fff",
-  fontSize: 14,
-  "& .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#dce2e8",
-  },
-  "&:hover .MuiOutlinedInput-notchedOutline": {
-    borderColor: "#c9d2dc",
-  },
 };
 
 export const TaskFilters = ({
@@ -67,13 +59,13 @@ export const TaskFilters = ({
 }: TaskFiltersProps) => (
   <Paper
     elevation={0}
-    sx={{
+    sx={(theme) => ({
       p: 1.25,
-      border: "1px solid #e2e8f0",
+      border: theme.palette.action.active,
       borderRadius: "14px",
       boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
-      backgroundColor: "#fff",
-    }}
+      backgroundColor: theme.palette.background.paper,
+    })}
   >
     <Box
       sx={{
@@ -91,14 +83,6 @@ export const TaskFilters = ({
         sx={{
           flex: "1 1 320px",
           minWidth: { xs: "100%", md: 280 },
-          "& .MuiOutlinedInput-root": {
-            height: 40,
-            borderRadius: "10px",
-            backgroundColor: "#fff",
-          },
-          "& .MuiOutlinedInput-notchedOutline": {
-            borderColor: "#dce2e8",
-          },
         }}
         slotProps={{
           input: {
@@ -184,17 +168,20 @@ export const TaskFilters = ({
       <Button
         onClick={onClear}
         disabled={!hasActiveFilters}
-        sx={{
+        sx={(theme) => ({
+
           minWidth: 112,
           height: 40,
           textTransform: "none",
           fontSize: 14,
           fontWeight: 500,
-          color: "#64748b",
+          backgroundColor : theme.palette.background.default,
+          color: theme.palette.text.primary,
           "&.Mui-disabled": {
-            color: "#b8c0ca",
-          },
-        }}
+            color: theme.palette.text.disabled,
+
+          }
+        })}
       >
         Limpar filtros
       </Button>
@@ -227,5 +214,5 @@ export const TaskFilters = ({
         </Select>
       </FormControl>
     </Box>
-  </Paper>
+  </Paper >
 );

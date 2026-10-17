@@ -7,6 +7,7 @@ import {
   LogoutOutlined,
   MenuOutlined,
   TaskOutlined,
+  Folder
 } from "@mui/icons-material";
 
 import {
@@ -44,6 +45,11 @@ const menuItems: MenuItem[] = [
     label: "Tarefas",
     path: "/tasks",
     icon: <TaskOutlined />,
+  },
+  {
+    label: "Projetos",
+    path: "/projects",
+    icon: <Folder />,
   },
 ];
 

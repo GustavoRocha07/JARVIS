@@ -19,6 +19,9 @@ export const createAppTheme = (
         dark: mode === "light" ? "#6D28D9" : "#8B5CF6",
         contrastText: "#FFFFFF",
       },
+      button: {
+        main: mode === 'light' ? "#A78BFA" : "#8B5CF6"
+      },
       secondary: {
         main: mode === "light" ? "#64748B" : "#94A3B8",
         contrastText: mode === "light" ? "#FFFFFF" : "#0F172A",

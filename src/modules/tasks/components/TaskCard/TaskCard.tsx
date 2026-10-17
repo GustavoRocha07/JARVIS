@@ -1,12 +1,10 @@
 import {
-  AccessTimeOutlined,
   BarChartOutlined,
   CalendarTodayOutlined,
   CheckCircle,
   CheckCircleOutlined,
   DeleteForeverOutlined,
   ListAltOutlined,
-  PlayArrowOutlined,
   RadioButtonUnchecked,
   RemoveRedEye,
   TimerOutlined,
@@ -15,12 +13,10 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Checkbox,
   Chip,
-  Divider,
   LinearProgress,
   Stack,
   Typography,
@@ -33,6 +29,7 @@ import { formatTimer } from "@/modules/timer/utils/formatTimer";
 import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
 import { formatDate } from "@/shared/utils/date.utils";
 import { useTaskCard } from "../../hooks/useTaskCard";
+import { TomatoComponent } from "../TomatoComponent/TomatoComponent";
 
 type TaskCardProps = {
   task: Task;
@@ -127,13 +124,13 @@ export const TaskCard = ({
   return (
     <Card
       onClick={() => onClick(task)}
-      sx={{
+      sx={(theme) => ({
         height: "100%",
         minHeight: 300,
-        border: "1px solid #e2e8f0",
+        border: `1px solid ${theme.palette.divider}`,
         borderRadius: "14px",
         boxShadow: "0 1px 3px rgba(15, 23, 42, 0.08)",
-        backgroundColor: "#fff",
+        backgroundColor: theme.palette.background.default,
         cursor: "pointer",
         overflow: "hidden",
         opacity: state.isCancelled ? 0.72 : 1,
@@ -142,7 +139,7 @@ export const TaskCard = ({
           boxShadow: "0 8px 24px rgba(15, 23, 42, 0.10)",
           transform: "translateY(-1px)",
         },
-      }}
+      })}
     >
       <CardContent
         sx={{
@@ -156,29 +153,29 @@ export const TaskCard = ({
         <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
           <Box sx={{ minWidth: 0, flex: 1 }}>
             <Typography
-              sx={{
+              sx={(theme) => ({
                 fontSize: 15,
                 fontWeight: 700,
-                color: state.isCancelled ? "#64748b" : "#0f172a",
+                color: state.isCancelled ? theme.palette.text.primary : theme.palette.text.secondary,
                 lineHeight: 1.35,
                 textDecoration: state.isCompleted ? "line-through" : "none",
-              }}
+              })}
             >
               {task.title}
             </Typography>
 
             <Typography
-              sx={{
+              sx={(theme) => ({
                 mt: 0.7,
                 minHeight: 38,
                 fontSize: 12.5,
                 lineHeight: 1.55,
-                color: state.isCancelled ? "#94a3b8" : "#64748b",
+                color: state.isCancelled ? theme.palette.text.primary : theme.palette.text.secondary,
                 display: "-webkit-box",
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: "vertical",
                 overflow: "hidden",
-              }}
+              })}
             >
               {task.description}
             </Typography>
@@ -306,12 +303,12 @@ export const TaskCard = ({
                 </Typography>
               </Stack>
               <Typography
-                sx={{
+                sx={(theme) => ({
                   fontSize: 11,
                   fontWeight: 700,
-                  color: "#0f172a",
+                  color: theme.palette.text.primary,
                   fontVariantNumeric: "tabular-nums",
-                }}
+                })}
               >
                 {Math.round(state.progress)}%
               </Typography>
@@ -371,16 +368,16 @@ export const TaskCard = ({
                   />
 
                   <Typography
-                    sx={{
+                    sx={(theme) => ({
                       minWidth: 0,
                       flex: 1,
                       fontSize: 12.5,
-                      color: completed ? "#64748b" : "#0f172a",
+                      color: completed ? theme.palette.text.primary : theme.palette.text.secondary,
                       textDecoration: completed ? "line-through" : "none",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
                       whiteSpace: "nowrap",
-                    }}
+                    })}
                   >
                     {subTask.title}
                   </Typography>
@@ -417,9 +414,11 @@ export const TaskCard = ({
 
         <Box sx={{ flexGrow: 1, minHeight: 10 }} />
 
-        <Divider sx={{ mt: 1.25, mb: 1.15, borderColor: "#e8edf3" }} />
-
-        <Stack
+        <TomatoComponent item={task} onOpenTimer={() => onOpenTimer(task)} ownsTaskTimer={state.ownsTaskTimer} target={{
+          taskId: task.id,
+          type: 'TASK'
+        }} />
+        {/* <Stack
           direction="row"
           spacing={0.75}
           onClick={(event) => event.stopPropagation()}
@@ -484,7 +483,7 @@ export const TaskCard = ({
           >
             Detalhes
           </Button>
-        </Stack>
+        </Stack> */}
       </CardContent>
     </Card>
   );

@@ -21,6 +21,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   subTasks?: SubTask[];
+  projectId?: string;
   createdAt: Date;
   dueDate: Date;
 }
@@ -53,15 +54,15 @@ export type TasksParamsSearch = {
 
 export type TaskSubmit =
   | {
-      action: "CREATE";
-      task: CreateTask;
-      subTasks: SubTaskFormValues[];
-    }
+    action: "CREATE";
+    task: CreateTask;
+    subTasks: SubTaskFormValues[];
+  }
   | {
-      action: "UPDATE";
-      task: UpdateTask;
-      subTasks: SubTaskFormValues[];
-    };
+    action: "UPDATE";
+    task: UpdateTask;
+    subTasks: SubTaskFormValues[];
+  };
 
 export type TaskModalProps = {
   open: boolean;

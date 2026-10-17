@@ -5,9 +5,10 @@ import {
   RadioButtonUnchecked,
   WarningAmberOutlined,
 } from "@mui/icons-material";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 import { useTaskSummary } from "../../hooks/useTaskSummary";
+import { CardComponent } from "@/shared/components/CardComponent/Card";
 
 export const TaskSummary = () => {
   const summary = useTaskSummary();
@@ -63,22 +64,7 @@ export const TaskSummary = () => {
       }}
     >
       {cards.map((card) => (
-        <Paper
-          key={card.label}
-          elevation={0}
-          sx={{
-            minHeight: 62,
-            px: 1.6,
-            py: 1.25,
-            border: "1px solid #e2e8f0",
-            borderRadius: "14px",
-            display: "flex",
-            alignItems: "center",
-            gap: 1.25,
-            backgroundColor: "#fff",
-            boxShadow: "0 1px 2px rgba(15, 23, 42, 0.06)",
-          }}
-        >
+        <CardComponent>
           <Box
             sx={{
               width: 36,
@@ -96,29 +82,32 @@ export const TaskSummary = () => {
 
           <Box sx={{ minWidth: 0 }}>
             <Typography
-              sx={{
+              sx={(theme) => ({
+
                 fontSize: 20,
                 lineHeight: 1,
                 fontWeight: 800,
-                color: "#0f172a",
-              }}
+                color: theme.palette.text.primary,
+
+              })}
             >
               {card.value}
             </Typography>
             <Typography
-              sx={{
+              sx={(theme) => ({
                 mt: 0.35,
                 fontSize: 12,
                 lineHeight: 1.2,
-                color: "#64748b",
+                color: card.color ?? theme.palette.text.secondary,
                 whiteSpace: "nowrap",
-              }}
+              })}
             >
               {card.label}
             </Typography>
           </Box>
-        </Paper>
-      ))}
-    </Box>
+        </CardComponent>
+      ))
+      }
+    </Box >
   );
 };
