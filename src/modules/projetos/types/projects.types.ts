@@ -1,5 +1,7 @@
+export type ProjectId = string;
 
 export type Project = {
+    id: ProjectId;
     name: string;
     description: string;
     createdAt: string;
@@ -13,8 +15,13 @@ export type ProjectFormValues = {
 };
 
 export type ProjectProgress = {
-    totalTasks: number;
-    completedTasks: number;
+    total: number;
+    completed: number;
+    pending: number;
     percentage: number;
 };
 
+
+export type CreateProjectInput = Pick<Project, 'name' | 'description'>;
+
+export type UpdateProjectInput = Partial<CreateProjectInput>;

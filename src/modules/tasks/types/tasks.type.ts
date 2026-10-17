@@ -9,6 +9,7 @@ import {
 } from "@/shared/types/task-domain.type";
 
 import type { SubTaskFormValues } from "./task-form.type";
+import type { ProjectId } from "@/modules/projetos/types/projects.types";
 
 export type { TaskPriority, TaskStatus } from "@/shared/types/task-domain.type";
 
@@ -21,7 +22,7 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   subTasks?: SubTask[];
-  projectId?: string;
+  projectId?: ProjectId | null;
   createdAt: Date;
   dueDate: Date;
 }
