@@ -67,6 +67,21 @@ const statusMeta: Record<
   },
 };
 
+const borderCard: Record<Task["status"], { borderColor: string }> = {
+  CANCELLED: {
+    borderColor: '#EF4444',
+  },
+  COMPLETED: {
+    borderColor: '#10B981'
+  },
+  IN_PROGRESS: {
+    borderColor: '#019ee7'
+  },
+  PENDING: {
+    borderColor: '#F59E0B'
+  }
+}
+
 const priorityMeta: Record<
   Task["priority"],
   { label: string; backgroundColor: string; color: string }
@@ -117,6 +132,8 @@ export const TaskCard = ({
     onSubTaskComplete,
   });
 
+
+
   const status = statusMeta[task.status];
   const priority = priorityMeta[task.priority];
   const progressColor = state.isCompleted ? "#059669" : "#0284c7";
@@ -127,9 +144,9 @@ export const TaskCard = ({
       sx={(theme) => ({
         height: "100%",
         minHeight: 300,
-        border: `1px solid ${theme.palette.divider}`,
+        border: `1px solid ${borderCard[task.status].borderColor}`,
         borderRadius: "14px",
-        boxShadow: "0 1px 3px rgba(15, 23, 42, 0.08)",
+        boxShadow: `0 1px 3px  ${borderCard[task.status].borderColor}`,
         backgroundColor: theme.palette.background.default,
         cursor: "pointer",
         overflow: "hidden",

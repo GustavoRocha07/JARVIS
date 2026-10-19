@@ -14,6 +14,7 @@ export const useProjectData = () => {
         const created = projectRepository.create(input);
 
         refreshProjects();
+        
         return created;
     }, [refreshProjects]);
     const updateProject = useCallback(

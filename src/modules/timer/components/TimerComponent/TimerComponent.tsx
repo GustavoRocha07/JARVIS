@@ -184,7 +184,11 @@ export const TimerComponent = ({
         return (
             <Stack direction="row" spacing={1}>
                 <Button
-                    variant="outlined"
+                    sx={(theme) => ({
+                        backgroundColor: theme.palette.mode === 'light' ? '#A78BFA' : '#8B5CF6',
+                        color: theme.palette.text.primary
+                    })}
+                    variant="contained"
                     startIcon={<RestartAlt />}
                     onClick={restartTimer}
                 >
@@ -193,7 +197,11 @@ export const TimerComponent = ({
 
                 {isBreak ? (
                     <Button
-                        variant="outlined"
+                        sx={(theme) => ({
+                            backgroundColor: theme.palette.mode === 'light' ? '#A78BFA' : '#8B5CF6',
+                            color: theme.palette.text.primary
+                        })}
+                        variant="contained"
                         startIcon={<SkipNext />}
                         onClick={skipBreak}
                     >
@@ -201,7 +209,11 @@ export const TimerComponent = ({
                     </Button>
                 ) : timer.status === "RUNNING" ? (
                     <Button
-                        variant="outlined"
+                        sx={(theme) => ({
+                            backgroundColor: theme.palette.mode === 'light' ? '#A78BFA' : '#8B5CF6',
+                            color: theme.palette.text.primary
+                        })}
+                        variant="contained"
                         startIcon={<Pause />}
                         onClick={pauseTimer}
                     >
@@ -209,6 +221,10 @@ export const TimerComponent = ({
                     </Button>
                 ) : (
                     <Button
+                        sx={(theme) => ({
+                            backgroundColor: theme.palette.mode === 'light' ? '#A78BFA' : '#8B5CF6',
+                            color: theme.palette.text.primary
+                        })}
                         variant="outlined"
                         startIcon={<PlayArrow />}
                         onClick={resumeTimer}
