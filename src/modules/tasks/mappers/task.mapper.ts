@@ -17,6 +17,7 @@ export const taskToFormValues = (
 ): TaskFormValues => {
     if (!task) {
         return {
+            projectId: null,
             title: "",
             description: "",
             status: "PENDING",
@@ -27,6 +28,7 @@ export const taskToFormValues = (
     }
 
     return {
+        projectId: task.projectId ?? null,
         title: task.title,
         description: task.description,
         status: task.status,
@@ -43,6 +45,7 @@ export const taskToFormValues = (
 export const formValuesToCreateTask = (
     values: TaskFormValues,
 ): CreateTask => ({
+    projectId: values.projectId ?? null,
     title: values.title.trim(),
 
     description:
@@ -61,6 +64,7 @@ export const formValuesToUpdateTask = (
 ): UpdateTask => ({
     id,
 
+    projectId: values.projectId ?? null,
     title: values.title.trim(),
 
     description:

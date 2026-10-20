@@ -50,6 +50,7 @@ const subTaskValidationSchema = Yup.object({
 
 export const validationSchema: Yup.ObjectSchema<TaskFormValues> =
     Yup.object({
+        projectId: Yup.string().nullable().defined(),
         title: Yup.string()
             .trim()
             .min(

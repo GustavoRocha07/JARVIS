@@ -1,3 +1,4 @@
+import { projectRepository } from "@/modules/projetos/services/projectRepository";
 import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 import { formValuesToCreateSubTask } from "@/modules/subtasks/mappers/subtask.mapper";
 import {
@@ -20,6 +21,7 @@ const restoreTaskSnapshot = (
 ) => {
   handleUpdateTaskService(taskId, {
     id: snapshot.id,
+    projectId: snapshot.projectId ?? null,
     title: snapshot.title,
     description: snapshot.description,
     status: snapshot.status,
@@ -41,6 +43,7 @@ const restoreTaskSnapshot = (
 
 export const handleSubmitTaskWorkflow = (payload: TaskSubmit): void => {
   if (payload.action === "CREATE") {
+    validateProjectLink(payload.task.projectId);
     const createdTask = handleCreateTaskService(payload.task);
 
     try {
@@ -67,6 +70,8 @@ export const handleSubmitTaskWorkflow = (payload: TaskSubmit): void => {
     );
   }
 
+  validateProjectLink(payload.task.projectId, currentTask.projectId);
+
   try {
     handleUpdateTaskService(payload.task.id, payload.task);
     handleSyncTaskSubTasksService(payload.task.id, payload.subTasks);
@@ -92,3 +97,15 @@ export const handleSetSubTaskCompletionWorkflow = (
     status: completed ? "COMPLETED" : "PENDING",
     priority: subTask.priority,
   });
+
+// Existing archived links may be retained; only new destinations must be active.
+const validateProjectLink = (
+  projectId?: string | null,
+  currentProjectId?: string | null,
+): void => {
+  if (!projectId || projectId === currentProjectId) return;
+  const project = projectRepository.getById(projectId);
+  if (!project || project.archivedAt !== null) {
+    throw new Error("Selecione um projeto ativo ou a opção Sem projeto.");
+  }
+};

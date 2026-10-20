@@ -1,3 +1,4 @@
+import { TaskProjectField } from "./TaskProjectField";
 import { useMemo } from "react";
 
 import { FormikProvider, useFormik } from "formik";
@@ -270,6 +271,8 @@ export const TaskModal = ({
                     }}
                   />
                 </Stack>
+
+                {open && <TaskProjectField key={initialData?.id ?? "new"} />}
 
                 <SubTaskComponent />
               </Stack>

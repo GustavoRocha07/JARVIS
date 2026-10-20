@@ -1,3 +1,4 @@
+import type { ProjectId } from "@/modules/projetos/types/projects.types";
 import type {
   TaskPriority,
   TaskStatus,
@@ -12,6 +13,7 @@ export type SubTaskFormValues = {
 };
 
 export type TaskFormValues = {
+  projectId: ProjectId | null;
   title: string;
   description: string;
   status: TaskStatus;
