@@ -1,7 +1,6 @@
 
 import {
     Box,
-    Button,
     Card,
     CardActions,
     CardContent,
@@ -14,7 +13,9 @@ import type {
     ProjectProgress as ProjectProgressType,
 } from "../types/projects.types";
 import { ProjectProgress } from "./ProjectProgress";
-import { Folder } from "@mui/icons-material";
+import { ArrowForward, Folder } from "@mui/icons-material";
+import { ButtonComponent } from "@/shared/components/ButtonComponent";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -32,13 +33,14 @@ type Props = {
 
 export const ProjectCard = ({
     project,
-    onEdit,
-    onView,
-    onArchive,
-    onRestore,
+    // onEdit,
+    // onView,
+    // onArchive,
+    // onRestore,
 }: Props) => {
     const isArchived = project.archivedAt !== null;
 
+    const navigate = useNavigate()
     return (
         <Card
             variant="outlined"
@@ -112,27 +114,19 @@ export const ProjectCard = ({
                 <ProjectProgress progress={project.progress} />
             </CardContent>
 
-            <CardActions sx={{ px: 2, pb: 2 }}>
-                <Button onClick={() => onView(project)}>
-                    Visualizar
-                </Button>
-
-                {!isArchived && (
-                    <Button onClick={() => onEdit(project)}>
-                        Editar
-                    </Button>
-                )}
-
-                <Button
-                    color={isArchived ? "success" : "warning"}
-                    onClick={() =>
-                        isArchived
-                            ? onRestore(project)
-                            : onArchive(project)
-                    }
-                >
-                    {isArchived ? "Restaurar" : "Arquivar"}
-                </Button>
+            <CardActions sx={{ px: 2, pb: 2, display: 'flex', borderTop: '1px solid #cdcdcd' }}>
+                <ButtonComponent
+                    sx={(theme) => ({
+                        width: '100%',
+                        color: theme.palette.text.primary,
+                        display: 'flex',
+                        justifyContent: 'flex-start'
+                    })}
+                    variant="text"
+                    text="Ver Projeto"
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                    endIcon={<ArrowForward />}
+                />
             </CardActions>
         </Card>
     );

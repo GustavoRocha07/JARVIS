@@ -9,16 +9,21 @@ type ButtonComponentProps = ButtonProps & {
 export const ButtonComponent = ({
     text,
     buttonIcon,
+    startIcon,
+    sx = [],
     ...props
 }: ButtonComponentProps) => {
     return (
         <Button
             {...props}
-            startIcon={buttonIcon}
-            sx={{
-                padding: '1rem',
-                fontWeight: 'bold'
-            }}
+            startIcon={startIcon ?? buttonIcon}
+            sx={[
+                {
+                    padding: "1rem",
+                    fontWeight: "bold",
+                },
+                ...(Array.isArray(sx) ? sx : [sx]),
+            ]}
         >
             {text}
         </Button>
