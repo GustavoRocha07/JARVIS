@@ -13,9 +13,10 @@ import type {
     ProjectProgress as ProjectProgressType,
 } from "../types/projects.types";
 import { ProjectProgress } from "./ProjectProgress";
-import { ArrowForward, Folder } from "@mui/icons-material";
+import { ArrowForward, Delete, Edit, Folder } from "@mui/icons-material";
 import { ButtonComponent } from "@/shared/components/ButtonComponent";
 import { useNavigate } from "react-router-dom";
+import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
 
 
 
@@ -33,10 +34,9 @@ type Props = {
 
 export const ProjectCard = ({
     project,
-    // onEdit,
-    // onView,
-    // onArchive,
-    // onRestore,
+    onEdit,
+    onArchive,
+    onRestore,
 }: Props) => {
     const isArchived = project.archivedAt !== null;
 
@@ -67,16 +67,29 @@ export const ProjectCard = ({
                         justifyContent: 'center',
                         borderRadius: '.6rem',
                         mb: '1rem',
-                        backgroundColor: theme.palette.mode === 'light' ? '#A78BFA' : '#8B5CF6'
+                        bgcolor: theme.palette.mode === 'dark' ? '#16345C' : '#E3F2FD',
                     })}>
                         <Folder sx={(theme) => (
                             {
                                 fontSize: 40,
-                                color: theme.palette.text.primary
+                                color: theme.palette.mode === 'dark' ? '#64B5F6' : '#1976D2',
                             }
                         )} />
                     </Box>
-
+                    <ActionsMenu
+                        actions={[
+                            {
+                                label: 'Editar',
+                                onClick: () => onEdit(project),
+                                icon: <Edit />
+                            },
+                            {
+                                label: project.archivedAt ? 'Desarquivar Projeto' : 'Arquivar Projeto',
+                                onClick: () => project.archivedAt ? onRestore(project) : onArchive(project),
+                                icon: <Delete />
+                            },
+                        ]}
+                    />
                 </Box>
 
 

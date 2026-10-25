@@ -103,7 +103,7 @@ export const AppLayout = () => {
           },
           minWidth: { md: SIDEBAR_WIDTH },
           height: "100vh",
-          bgcolor: "primary.main",
+          bgcolor: "#1976D2",
           color: "primary.contrastText",
           transform: {
             xs: mobileMenuOpen
