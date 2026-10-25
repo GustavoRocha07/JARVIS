@@ -20,6 +20,7 @@ import {
   handleCreateTimerSessionService,
   handleListTimerSessionsService,
 } from "../services/timer-session.service";
+import { playSound, stopSound } from "@/shared/utils/playSound";
 
 type TimerProviderProps = {
   children: ReactNode;
@@ -141,6 +142,24 @@ export const TimerProvider = ({
   const isTimerOwner = (target: TimerTarget) => {
     return isSameTarget(timer.target, target);
   };
+
+
+  useEffect(() => {
+    if (timer.status !== "WAITING_BREAK") {
+      return;
+    }
+
+    const audio = playSound("src/assets/sounds/timer-finished.mp3");
+
+    const timeoutId = window.setTimeout(() => {
+      stopSound(audio);
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      stopSound(audio);
+    };
+  }, [timer.status]);
 
   useEffect(() => {
     if (timer.status !== "RUNNING") {

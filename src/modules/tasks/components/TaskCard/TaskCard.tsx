@@ -435,72 +435,7 @@ export const TaskCard = ({
           taskId: task.id,
           type: 'TASK'
         }} />
-        {/* <Stack
-          direction="row"
-          spacing={0.75}
-          onClick={(event) => event.stopPropagation()}
-          sx={{ alignItems: "center" }}
-        >
-          <Button
-            size="small"
-            startIcon={<AccessTimeOutlined sx={{ fontSize: 15 }} />}
-            onClick={() => onOpenTimer(task)}
-            sx={{
-              minWidth: 0,
-              px: 1,
-              height: 30,
-              borderRadius: "9px",
-              textTransform: "none",
-              fontSize: 11.5,
-              fontWeight: 600,
-              color: "#ef5b3f",
-              backgroundColor: "#fff0eb",
-              whiteSpace: "nowrap",
-              "&:hover": { backgroundColor: "#ffe6de" },
-            }}
-          >
-            {state.ownsTaskTimer
-              ? `Pomodoro ${formatTimer(state.timer.remainingSeconds)}`
-              : "Pomodoro 25 min"}
-          </Button>
 
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<PlayArrowOutlined sx={{ fontSize: 15 }} />}
-            disabled={state.isCompleted || state.isCancelled}
-            onClick={() => onOpenTimer(task)}
-            sx={{
-              minWidth: 0,
-              px: 1,
-              height: 30,
-              borderRadius: "9px",
-              textTransform: "none",
-              fontSize: 11.5,
-              color: "#64748b",
-              borderColor: "#dce2e8",
-            }}
-          >
-            Focar
-          </Button>
-
-          <Box sx={{ flex: 1 }} />
-
-          <Button
-            size="small"
-            onClick={() => onClick(task)}
-            sx={{
-              minWidth: 0,
-              px: 0.4,
-              height: 30,
-              textTransform: "none",
-              fontSize: 11.5,
-              color: "#64748b",
-            }}
-          >
-            Detalhes
-          </Button>
-        </Stack> */}
       </CardContent>
     </Card>
   );
