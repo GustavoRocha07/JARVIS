@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
-
+import timerFinishedSound from "@/assets/sounds/timer-finished.mp3";
 import {
   initialTimerState,
   timerReducer,
@@ -148,8 +148,8 @@ export const TimerProvider = ({
     if (timer.status !== "WAITING_BREAK") {
       return;
     }
-
-    const audio = playSound("src/assets/sounds/timer-finished.mp3");
+    const audio = playSound(timerFinishedSound);
+    console.log("veui aqui", audio)
 
     const timeoutId = window.setTimeout(() => {
       stopSound(audio);

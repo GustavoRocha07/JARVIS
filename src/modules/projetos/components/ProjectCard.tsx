@@ -19,7 +19,6 @@ import { useNavigate } from "react-router-dom";
 import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
 
 
-
 export type ProjectWithProgress = Project & {
     progress: ProjectProgressType;
 };
