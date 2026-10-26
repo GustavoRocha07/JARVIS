@@ -5,7 +5,7 @@ import { projectRepository } from "../services/projectRepository";
 import { calculateProgress } from "../utils/calculateProjectProgress";
 
 import { useAlert } from "@/context/AlertContext/useAlert";
-import { useProjectTasks } from "./useProjectTasks";
+import { useTasksData } from "@/modules/tasks/contexts/useTasksData";
 
 type UseDetalhamentoProjectsProps = {
     projectId: string;
@@ -20,7 +20,7 @@ export const useDetalhamentoProject = ({
     } | null>(null);
 
     const { showAlert } = useAlert();
-    const { tasks, refreshTasks } = useProjectTasks();
+    const { tasks } = useTasksData();
 
     useEffect(() => {
         if (!projectId) return;
@@ -93,8 +93,6 @@ export const useDetalhamentoProject = ({
             project: projectWithProgress,
             tasks
         },
-        actions: {
-            refreshTasks,
-        },
+
     };
 };

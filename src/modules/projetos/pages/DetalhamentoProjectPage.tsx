@@ -11,7 +11,9 @@ import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
 import { TaskProjectComponent } from "../components/TaskProjectComponent";
 
 
-export const DetalhamentoProjectPage = () => {
+import { TasksProvider } from "@/modules/tasks/contexts/TasksProvider";
+
+const DetalhamentoProjectContent = () => {
 
     const { projectId } = useParams<{ projectId: string }>();
 
@@ -184,26 +186,13 @@ export const DetalhamentoProjectPage = () => {
                 </Box>
             </Box>
 
-            <Box
-                sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                        xs: "1fr",
-                        md: "minmax(0, 2.5fr) minmax(0, 1fr)",
-                    },
-                    gap: 2,
-                    alignItems: "stretch",
-                }}
-            >
-                <Box sx={{ minWidth: 0 }}>
-                    <TaskProjectComponent tasks={state.tasks} />
-                </Box>
+            {project && <TaskProjectComponent key={project.id} projectId={project.id} />}
 
-                <Box sx={{ minWidth: 0 }}>
-                    {/* Coloque seu componente de timer aqui */}
-                </Box>
-            </Box>
 
         </Container>
     )
 }
+
+export const DetalhamentoProjectPage = () => (
+    <TasksProvider><DetalhamentoProjectContent /></TasksProvider>
+);
