@@ -1,4 +1,4 @@
-import { projectRepository } from "@/modules/projetos/services/projectRepository";
+import { projectService } from "@/modules/projetos/services/project.service";
 import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 import { formValuesToCreateSubTask } from "@/modules/subtasks/mappers/subtask.mapper";
 import {
@@ -104,7 +104,7 @@ const validateProjectLink = (
   currentProjectId?: string | null,
 ): void => {
   if (!projectId || projectId === currentProjectId) return;
-  const project = projectRepository.getById(projectId);
+  const project = projectService.getById(projectId);
   if (!project || project.archivedAt !== null) {
     throw new Error("Selecione um projeto ativo ou a opção Sem projeto.");
   }

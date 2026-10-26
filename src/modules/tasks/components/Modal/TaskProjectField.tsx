@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { MenuItem, TextField } from "@mui/material";
 import { useField } from "formik";
-import { projectRepository } from "@/modules/projetos/services/projectRepository";
+import { projectService } from "@/modules/projetos/services/project.service";
 import type { Project } from "@/modules/projetos/types/projects.types";
 
 export const TaskProjectField = () => {
   const [field, meta, helpers] = useField<string | null>("projectId");
   const [{ projects, error }] = useState(() => {
     try {
-      return { projects: projectRepository.getAll(), error: "" };
+      return { projects: projectService.getAll(), error: "" };
     } catch {
       return {
         projects: [] as Project[],
