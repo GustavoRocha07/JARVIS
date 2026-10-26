@@ -37,6 +37,7 @@ export const TaskModal = ({
   title,
   mode,
   initialData,
+  defaultProjectId,
   onClose,
   onModeChange,
   onSubTaskComplete,
@@ -49,8 +50,8 @@ export const TaskModal = ({
   const isEdit = mode === "edit";
 
   const initialValues = useMemo<TaskFormValues>(
-    () => taskToFormValues(initialData),
-    [initialData],
+    () => ({ ...taskToFormValues(initialData), projectId: initialData ? initialData.projectId ?? null : defaultProjectId ?? null }),
+    [initialData, defaultProjectId],
   );
 
   const formik = useFormik<TaskFormValues>({

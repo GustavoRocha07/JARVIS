@@ -67,6 +67,7 @@ export type TaskModalProps = {
   title: string;
   mode: TaskModalMode;
   initialData?: Task | null;
+  defaultProjectId?: ProjectId;
   onClose: () => void;
   onModeChange: (mode: TaskModalMode) => void;
   onSubTaskComplete: (subTask: SubTask, completed: boolean) => void;
