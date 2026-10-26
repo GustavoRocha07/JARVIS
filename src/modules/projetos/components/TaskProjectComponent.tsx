@@ -2,12 +2,18 @@ import type { Task } from "@/modules/tasks/types/tasks.type"
 import { HeaderComponent } from "@/shared/components/HeaderComponent"
 import { Add } from "@mui/icons-material"
 import { Box, } from "@mui/material"
+import { useEffect } from "react"
+
 
 type TaskProjectComponentProps = {
     tasks?: Task[]
 }
 
 export const TaskProjectComponent = ({ tasks }: TaskProjectComponentProps) => {
+
+    useEffect(() => {
+        console.log(tasks)
+    }, [])
     return (
         <Box sx={(theme) => ({
             border: `1px solid ${theme.palette.text.secondary}`,
