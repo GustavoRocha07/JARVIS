@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import type { Project } from "../types/projects.types";
-import { projectRepository } from "../services/projectRepository";
+import { projectService } from "../services/project.service";
 import { calculateProgress } from "../utils/calculateProjectProgress";
 
 import { useAlert } from "@/context/AlertContext/useAlert";
@@ -29,7 +29,7 @@ export const useDetalhamentoProject = ({
 
         function carregarProjeto() {
             try {
-                const project = projectRepository.getById(projectId);
+                const project = projectService.getById(projectId);
 
                 if (ativo) {
                     setResultado({

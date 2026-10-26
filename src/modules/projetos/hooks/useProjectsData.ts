@@ -1,17 +1,17 @@
 import { useCallback, useState } from "react"
 import type { CreateProjectInput, Project, ProjectId, UpdateProjectInput } from "../types/projects.types"
-import { projectRepository } from "../services/projectRepository"
+import { projectService } from "../services/project.service"
 
 
 export const useProjectData = () => {
-    const [projects, setProjects] = useState<Project[]>(() => projectRepository.getAll());
+    const [projects, setProjects] = useState<Project[]>(() => projectService.getAll());
 
     const refreshProjects = useCallback(() => {
-        setProjects(projectRepository.getAll())
+        setProjects(projectService.getAll())
     }, []);
 
     const createProject = useCallback((input: CreateProjectInput): Project => {
-        const created = projectRepository.create(input);
+        const created = projectService.create(input);
 
         refreshProjects();
         
@@ -22,7 +22,7 @@ export const useProjectData = () => {
             id: ProjectId,
             input: UpdateProjectInput,
         ): Project => {
-            const updated = projectRepository.update(id, input);
+            const updated = projectService.update(id, input);
 
             refreshProjects();
 
@@ -33,7 +33,7 @@ export const useProjectData = () => {
 
     const archiveProject = useCallback(
         (id: ProjectId): Project => {
-            const archived = projectRepository.archive(id);
+            const archived = projectService.archive(id);
 
             refreshProjects();
 
@@ -44,7 +44,7 @@ export const useProjectData = () => {
 
     const restoreProject = useCallback(
         (id: ProjectId): Project => {
-            const restored = projectRepository.restore(id);
+            const restored = projectService.restore(id);
 
             refreshProjects();
 
