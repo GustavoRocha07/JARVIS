@@ -22,7 +22,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import Logo from "@/assets/logo.svg";
+import Logo from "@/assets/logo_white.png";
 import { useThemeMode } from "@/context/ThemeContext/useThemeMode";
 
 import { NavLink, Outlet } from "react-router-dom";

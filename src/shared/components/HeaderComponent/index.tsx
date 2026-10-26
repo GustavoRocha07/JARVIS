@@ -1,9 +1,10 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, type TypographyProps } from "@mui/material";
 import type { ReactNode } from "react";
 import { ButtonComponent } from "../ButtonComponent";
 
 type HeaderComponentProps = {
   title: string;
+  variant?: TypographyProps["variant"];
   subtitle?: string;
   hasButton?: boolean;
   buttonText?: string;
@@ -15,6 +16,7 @@ export const HeaderComponent = ({
   title,
   subtitle,
   buttonIcon,
+  variant,
   buttonText,
   hasButton,
   action,
@@ -37,14 +39,10 @@ export const HeaderComponent = ({
     >
       <Box sx={{ minWidth: 0 }}>
         <Typography
-          variant="h4"
+          variant={variant}
           sx={{
             fontWeight: "bolder",
-            fontSize: {
-              xs: "1.65rem",
-              sm: "2rem",
-              md: "2.125rem",
-            },
+           
             overflowWrap: "anywhere",
           }}
         >

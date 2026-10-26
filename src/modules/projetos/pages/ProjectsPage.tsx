@@ -69,6 +69,7 @@ export const ProjectsPage = () => {
         <Box>
             <HeaderComponent
                 title="Meus Projetos"
+                variant="h4"
                 subtitle="Organize suas tarefas por projetos"
                 buttonIcon={<AddOutlined />}
                 hasButton

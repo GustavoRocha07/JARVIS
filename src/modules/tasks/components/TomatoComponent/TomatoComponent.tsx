@@ -127,6 +127,7 @@ export const TomatoComponent = ({ target, ownsTaskTimer, onOpenTimer, item }: To
                     </Box>
                 ) : (
                     <Button
+                        disabled={item.status === 'COMPLETED'}
                         onClick={() => startTimer(target)}
                         sx={(theme) => (
                             {

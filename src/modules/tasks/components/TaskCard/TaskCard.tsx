@@ -216,11 +216,13 @@ export const TaskCard = ({
                   label: "Abrir timer",
                   onClick: () => onOpenTimer(task),
                   icon: <TimerOutlined />,
+                  disabled: task.status === 'COMPLETED'
                 },
                 {
                   label: "Editar Tarefa",
                   onClick: () => onEdit(task),
                   icon: <EditIcon />,
+                  disabled: task.status === 'COMPLETED'
                 },
                 {
                   label: "Visualizar Tarefa",

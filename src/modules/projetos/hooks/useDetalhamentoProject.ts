@@ -91,6 +91,7 @@ export const useDetalhamentoProject = ({
     return {
         state: {
             project: projectWithProgress,
+            tasks
         },
         actions: {
             refreshTasks,

@@ -25,6 +25,7 @@ const TasksContent = () => {
 
       <HeaderComponent
         title="Tarefas"
+        variant="h4"
         subtitle="Organize suas atividades e acompanhe seu progresso"
         action={() => actions.handleOpenModal(undefined, "create")}
         buttonIcon={<AddOutlined sx={{ fontSize: 18 }} />}
@@ -94,7 +95,7 @@ const TasksContent = () => {
             )}
           >
             <Typography sx={(theme) => (
-              { fontSize: 14, color: theme.palette.text.primary}
+              { fontSize: 14, color: theme.palette.text.primary }
             )}>
               Nenhuma tarefa encontrada com os filtros selecionados.
             </Typography>

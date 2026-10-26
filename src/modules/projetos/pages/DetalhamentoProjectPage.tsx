@@ -8,10 +8,11 @@ import { Folder } from "@mui/icons-material";
 import { ButtonComponent } from "@/shared/components/ButtonComponent";
 import EditIcon from '@mui/icons-material/Edit';
 import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
+import { TaskProjectComponent } from "../components/TaskProjectComponent";
 
 
 export const DetalhamentoProjectPage = () => {
- 
+
     const { projectId } = useParams<{ projectId: string }>();
 
     const { state } = useDetalhamentoProject({ projectId: projectId ?? '' })
@@ -180,6 +181,26 @@ export const DetalhamentoProjectPage = () => {
                     >
                         {project?.progress?.percentage ?? 0}%
                     </Typography>
+                </Box>
+            </Box>
+
+            <Box
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                        xs: "1fr",
+                        md: "minmax(0, 2.5fr) minmax(0, 1fr)",
+                    },
+                    gap: 2,
+                    alignItems: "stretch",
+                }}
+            >
+                <Box sx={{ minWidth: 0 }}>
+                    <TaskProjectComponent tasks={state.tasks} />
+                </Box>
+
+                <Box sx={{ minWidth: 0 }}>
+                    {/* Coloque seu componente de timer aqui */}
                 </Box>
             </Box>
 
