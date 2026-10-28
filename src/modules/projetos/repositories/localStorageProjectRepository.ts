@@ -1,3 +1,4 @@
+import type { ProjectRepository } from "./ProjectRepository";
 import type { Project, ProjectId } from "../types/projects.types";
 
 const STORAGE_KEY = 'jarvis:projects';
@@ -23,7 +24,7 @@ const saveProjects = (projects: Project[]): void => {
     );
 };
 
-export const projectRepository = {
+export const localStorageProjectRepository: ProjectRepository = {
     getAll(): Project[] {
         return readProjects();
     },
