@@ -13,7 +13,7 @@ registerHooks({
 });
 
 const { projectService } = await import("../src/modules/projetos/services/project.service.ts");
-const { projectRepository } = await import("../src/modules/projetos/services/projectRepository.ts");
+const { localStorageProjectRepository: projectRepository } = await import("../src/modules/projetos/repositories/localStorageProjectRepository.ts");
 const key = "jarvis:projects";
 let storage;
 let writes;
