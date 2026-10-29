@@ -20,71 +20,120 @@ const seed = {
 };
 
 // Nenhum mock de localStorage: a fábrica e o adapter em memória não usam o navegador.
-test("deve normalizar e persistir quando criar um projeto em memória", () => {
+test("deve normalizar e persistir quando criar um projeto em memória", async () => {
   const repository = createMemoryProjectRepository();
   const service = createProjectService(repository);
-  const project = service.create({ name: "  JARVIS  ", description: "  Estudo  " });
+  const project = (await service.create({ name: "  JARVIS  ", description: "  Estudo  " }));
   assert.equal(project.name, "JARVIS");
   assert.equal(project.description, "Estudo");
   assert.equal(project.archivedAt, null);
   assert.equal(project.createdAt, project.updatedAt);
-  assert.deepEqual(repository.getById(project.id), project);
+  assert.deepEqual((await repository.getById(project.id)), project);
 });
 
-test("deve preservar os demais campos quando editar parcialmente", () => {
+test("deve preservar os demais campos quando editar parcialmente", async () => {
   const service = createProjectService(createMemoryProjectRepository([seed]));
-  const updated = service.update(seed.id, { name: "  Novo  " });
+  const updated = (await service.update(seed.id, { name: "  Novo  " }));
   assert.equal(updated.name, "Novo");
   assert.equal(updated.description, seed.description);
   assert.equal(updated.createdAt, seed.createdAt);
   assert.notEqual(updated.updatedAt, seed.updatedAt);
-  assert.deepEqual(service.getAll(), [updated]);
+  assert.deepEqual((await service.getAll()), [updated]);
 });
 
 for (const operation of ["archive", "restore"]) {
-  test(`deve evitar nova gravação quando repetir ${operation}`, () => {
+  test(`deve evitar nova gravação quando repetir ${operation}`, async () => {
     const initial = operation === "archive" ? seed : { ...seed, archivedAt: seed.createdAt };
     const repository = createMemoryProjectRepository([initial]);
     let writes = 0;
     const service = createProjectService({
       ...repository,
-      save(project) { writes++; repository.save(project); },
+      async save(project) { writes++; (await repository.save(project)); },
     });
-    const result = service[operation](seed.id);
+    const result = (await service[operation](seed.id));
     assert.equal(result.archivedAt, operation === "archive" ? result.updatedAt : null);
     assert.notEqual(result.updatedAt, seed.updatedAt);
-    assert.deepEqual(service[operation](seed.id), result);
+    assert.deepEqual((await service[operation](seed.id)), result);
     assert.equal(writes, 1);
-    assert.deepEqual(service.getById(seed.id), result);
+    assert.deepEqual((await service.getById(seed.id)), result);
   });
 }
 
 for (const operation of ["update", "archive", "restore"]) {
-  test(`deve lançar erro quando ${operation} receber um ID inexistente`, () => {
+  test(`deve lançar erro quando ${operation} receber um ID inexistente`, async () => {
     const service = createProjectService(createMemoryProjectRepository([seed]));
-    assert.throws(() => service[operation]("missing", {}), /Projeto não encontrado/);
-    assert.deepEqual(service.getAll(), [seed]);
+    await assert.rejects(() => service[operation]("missing", {}), /Projeto não encontrado/);
+    assert.deepEqual((await service.getAll()), [seed]);
   });
 }
 
-test("deve isolar dados quando criar repositories distintos", () => {
+test("deve isolar dados quando criar repositories distintos", async () => {
   const first = createProjectService(createMemoryProjectRepository());
   const second = createProjectService(createMemoryProjectRepository());
-  first.create({ name: "Primeiro", description: "" });
-  assert.deepEqual(second.getAll(), []);
-  assert.equal(second.getById("missing"), null);
+  (await first.create({ name: "Primeiro", description: "" }));
+  assert.deepEqual((await second.getAll()), []);
+  assert.equal((await second.getById("missing")), null);
 });
 
-test("deve proteger a persistência quando objetos externos forem alterados", () => {
+test("deve proteger a persistência quando objetos externos forem alterados", async () => {
   const input = { ...seed };
   const repository = createMemoryProjectRepository([input]);
   input.name = "Mutação na entrada";
-  repository.getById(seed.id).name = "Mutação na leitura";
-  repository.getAll()[0].name = "Mutação na lista";
-  assert.deepEqual(repository.getById(seed.id), seed);
+  (await repository.getById(seed.id)).name = "Mutação na leitura";
+  (await repository.getAll())[0].name = "Mutação na lista";
+  assert.deepEqual((await repository.getById(seed.id)), seed);
   const saved = { ...seed, name: "Salvo" };
-  repository.save(saved);
+  (await repository.save(saved));
   saved.name = "Mutação após salvar";
-  assert.equal(repository.getById(seed.id).name, "Salvo");
-  assert.equal(repository.getAll().length, 1);
+  assert.equal((await repository.getById(seed.id)).name, "Salvo");
+  assert.equal((await repository.getAll()).length, 1);
 });
+
+
+for (const operation of ["create", "update", "archive", "restore"]) {
+  const invoke = (service) => operation === "create"
+    ? service.create({ name: "Novo", description: "" })
+    : operation === "update" ? service.update(seed.id, { name: "Novo" }) : service[operation](seed.id);
+
+  test(`deve aguardar a persistência quando executar ${operation}`, async () => {
+    const initial = operation === "restore" ? { ...seed, archivedAt: seed.createdAt } : seed;
+    const repository = createMemoryProjectRepository([initial]);
+    let release;
+    let started;
+    const writing = new Promise((resolve) => { started = resolve; });
+    const gate = new Promise((resolve) => { release = resolve; });
+    const service = createProjectService({
+      ...repository,
+      async save(project) { started(); await gate; await repository.save(project); },
+    });
+    let finished = false;
+    const pending = invoke(service).then((project) => { finished = true; return project; });
+    await writing;
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(finished, false);
+    release();
+    const result = await pending;
+    assert.deepEqual(await repository.getById(result.id), result);
+  });
+
+  test(`deve propagar falha de gravação quando executar ${operation}`, async () => {
+    const initial = operation === "restore" ? { ...seed, archivedAt: seed.createdAt } : seed;
+    const repository = createMemoryProjectRepository([initial]);
+    const service = createProjectService({
+      ...repository,
+      async save() { throw new Error("Falha na persistência"); },
+    });
+    await assert.rejects(() => invoke(service), /Falha na persistência/);
+    assert.deepEqual(await repository.getAll(), [initial]);
+  });
+}
+
+for (const name of ["", "   "]) {
+  test(`deve rejeitar nome ${JSON.stringify(name)} quando criar ou editar`, async () => {
+    const repository = createMemoryProjectRepository([seed]);
+    const service = createProjectService(repository);
+    await assert.rejects(() => service.create({ name, description: "" }), /obrigatório/i);
+    await assert.rejects(() => service.update(seed.id, { name }), /obrigatório/i);
+    assert.deepEqual(await repository.getAll(), [seed]);
+  });
+}

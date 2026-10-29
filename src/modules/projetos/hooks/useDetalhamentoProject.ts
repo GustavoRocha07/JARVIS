@@ -27,9 +27,9 @@ export const useDetalhamentoProject = ({
 
         let ativo = true;
 
-        function carregarProjeto() {
+        async function carregarProjeto() {
             try {
-                const project = projectService.getById(projectId);
+                const project = await projectService.getById(projectId);
 
                 if (ativo) {
                     setResultado({

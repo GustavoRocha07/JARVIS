@@ -41,9 +41,9 @@ const restoreTaskSnapshot = (
   );
 };
 
-export const handleSubmitTaskWorkflow = (payload: TaskSubmit): void => {
+export const handleSubmitTaskWorkflow = async (payload: TaskSubmit): Promise<void> => {
   if (payload.action === "CREATE") {
-    validateProjectLink(payload.task.projectId);
+    await validateProjectLink(payload.task.projectId);
     const createdTask = handleCreateTaskService(payload.task);
 
     try {
@@ -70,7 +70,7 @@ export const handleSubmitTaskWorkflow = (payload: TaskSubmit): void => {
     );
   }
 
-  validateProjectLink(payload.task.projectId, currentTask.projectId);
+  await validateProjectLink(payload.task.projectId, currentTask.projectId);
 
   try {
     handleUpdateTaskService(payload.task.id, payload.task);
@@ -99,12 +99,12 @@ export const handleSetSubTaskCompletionWorkflow = (
   });
 
 // Existing archived links may be retained; only new destinations must be active.
-const validateProjectLink = (
+const validateProjectLink = async (
   projectId?: string | null,
   currentProjectId?: string | null,
-): void => {
+): Promise<void> => {
   if (!projectId || projectId === currentProjectId) return;
-  const project = projectService.getById(projectId);
+  const project = await projectService.getById(projectId);
   if (!project || project.archivedAt !== null) {
     throw new Error("Selecione um projeto ativo ou a opção Sem projeto.");
   }

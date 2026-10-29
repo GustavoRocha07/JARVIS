@@ -32,12 +32,12 @@ export const ProjectsPage = () => {
     const { state, actions } = useProjectsComponent();
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = (values: ProjectFormValues) => {
+    const handleSubmit = async (values: ProjectFormValues) => {
         setError(null);
 
         try {
             if (state.modalMode === "create") {
-                actions.handleCreateProject(values);
+                await actions.handleCreateProject(values);
                 return;
             }
 
@@ -45,7 +45,7 @@ export const ProjectsPage = () => {
                 state.modalMode === "edit" &&
                 state.selectedProject
             ) {
-                actions.handleUpdateProject(
+                await actions.handleUpdateProject(
                     state.selectedProject.id,
                     values,
                 );
@@ -55,11 +55,11 @@ export const ProjectsPage = () => {
         }
     };
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         setError(null);
 
         try {
-            actions.handleConfirmAction();
+            await actions.handleConfirmAction();
         } catch {
             setError("Não foi possível concluir a operação.");
         }

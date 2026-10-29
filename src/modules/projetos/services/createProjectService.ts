@@ -10,7 +10,7 @@ export const createProjectService = (repository: ProjectRepository) => ({
         return repository.getById(id);
     },
 
-    create(input: CreateProjectInput): Project {
+    async create(input: CreateProjectInput): Promise<Project> {
         const now = new Date().toISOString();
 
         if (!input.name.trim()) {
@@ -26,7 +26,7 @@ export const createProjectService = (repository: ProjectRepository) => ({
             archivedAt: null,
         };
 
-        repository.save(project);
+        await repository.save(project);
 
         return project;
     },
@@ -56,7 +56,7 @@ export const createProjectService = (repository: ProjectRepository) => ({
             updatedAt: new Date().toISOString(),
         };
 
-        repository.save(updated);
+        await repository.save(updated);
 
         return updated;
     },
@@ -80,7 +80,7 @@ export const createProjectService = (repository: ProjectRepository) => ({
             updatedAt: now,
         };
 
-        repository.save(archived);
+        await repository.save(archived);
 
         return archived;
     },
@@ -102,7 +102,7 @@ export const createProjectService = (repository: ProjectRepository) => ({
             updatedAt: new Date().toISOString(),
         };
 
-        repository.save(restored);
+        await repository.save(restored);
 
         return restored;
     },

@@ -132,8 +132,8 @@ export const useTasksComponent = () => {
     resetPage();
   };
 
-  const handleSubmit = (payload: TaskSubmit) => {
-    const success = handleSubmitTask(payload);
+  const handleSubmit = async (payload: TaskSubmit) => {
+    const success = await handleSubmitTask(payload);
 
     if (success) {
       handleCloseModal();

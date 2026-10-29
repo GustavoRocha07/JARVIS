@@ -104,7 +104,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
   );
 
   const handleSubmitTask = useCallback(
-    (payload: TaskSubmit): boolean => {
+    async (payload: TaskSubmit): Promise<boolean> => {
       try {
         const currentTimerTarget = timer.target;
 
@@ -132,7 +132,7 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
           }
         }
 
-        handleSubmitTaskWorkflow(payload);
+        await handleSubmitTaskWorkflow(payload);
         refreshTasks();
         refreshTimerSessions();
         showAlert(

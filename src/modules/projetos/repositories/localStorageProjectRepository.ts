@@ -25,16 +25,16 @@ const saveProjects = (projects: Project[]): void => {
 };
 
 export const localStorageProjectRepository: ProjectRepository = {
-    getAll(): Project[] {
+    async getAll(): Promise<Project[]> {
         return readProjects();
     },
 
-    getById(id: ProjectId): Project | null {
+    async getById(id: ProjectId): Promise<Project | null> {
         return readProjects().find((project) => project.id === id) ?? null;
     },
 
     // Persiste o projeto pronto: insere um novo ID ou substitui o existente.
-    save(project: Project): void {
+    async save(project: Project): Promise<void> {
         const projects = readProjects();
         const exists = projects.some((stored) => stored.id === project.id);
 

@@ -22,7 +22,7 @@ export type TasksDataContextValue = {
 
   handleSubmitTask: (
     payload: TaskSubmit,
-  ) => boolean;
+  ) => Promise<boolean>;
 
   handleCreateTask: (
     task: CreateTask,

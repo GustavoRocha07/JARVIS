@@ -59,10 +59,10 @@ export const TaskModal = ({
     validationSchema,
     enableReinitialize: true,
 
-    onSubmit: (values, { setSubmitting }) => {
+    onSubmit: async (values, { setSubmitting }) => {
       try {
         if (isEdit && initialData) {
-          onSubmit({
+          await onSubmit({
             action: "UPDATE",
             task: formValuesToUpdateTask(initialData.id, values),
             subTasks: values.subTasks,
@@ -70,7 +70,7 @@ export const TaskModal = ({
           return;
         }
 
-        onSubmit({
+        await onSubmit({
           action: "CREATE",
           task: formValuesToCreateTask(values),
           subTasks: values.subTasks,

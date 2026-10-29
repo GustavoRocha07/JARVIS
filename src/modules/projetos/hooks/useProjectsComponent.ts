@@ -113,8 +113,8 @@ export const useProjectsComponent = () => {
 
     // Criar projeto
     const handleCreateProject = useCallback(
-        (input: CreateProjectInput): Project => {
-            const created = createProject(input);
+        async (input: CreateProjectInput): Promise<Project> => {
+            const created = await createProject(input);
 
             uiActions.handleCloseModal();
 
@@ -125,11 +125,11 @@ export const useProjectsComponent = () => {
 
     // Atualizar projeto
     const handleUpdateProject = useCallback(
-        (
+        async (
             id: Project["id"],
             input: UpdateProjectInput,
-        ): Project => {
-            const updated = updateProject(id, input);
+        ): Promise<Project> => {
+            const updated = await updateProject(id, input);
 
             uiActions.handleCloseModal();
 
@@ -139,16 +139,16 @@ export const useProjectsComponent = () => {
     );
 
     // Confirmar arquivamento ou restauração
-    const handleConfirmAction = useCallback(() => {
+    const handleConfirmAction = useCallback(async () => {
         const project = uiState.projectToConfirm;
         const action = uiState.confirmAction;
 
         if (!project || !action) return;
 
         if (action === "archive") {
-            archiveProject(project.id);
+            await archiveProject(project.id);
         } else {
-            restoreProject(project.id);
+            await restoreProject(project.id);
         }
 
         uiActions.handleCloseConfirmModal();

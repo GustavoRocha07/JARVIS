@@ -71,7 +71,7 @@ export type TaskModalProps = {
   onClose: () => void;
   onModeChange: (mode: TaskModalMode) => void;
   onSubTaskComplete: (subTask: SubTask, completed: boolean) => void;
-  onSubmit: (values: TaskSubmit) => void;
+  onSubmit: (values: TaskSubmit) => void | Promise<void>;
 };
 
 const isValidDate = (value: unknown): value is string => {

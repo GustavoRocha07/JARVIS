@@ -79,7 +79,7 @@ export const TaskProjectComponent = ({ projectId }: { projectId: string }) => {
         <Typography variant="caption" color="text.secondary" sx={{ display: "block", p: 2 }}>Exibindo {filtered.length} de {tasks.length} tarefas</Typography>
       </Box>
       <ProjectFocusTimer task={focusTask} onStart={play} />
-      {ui.openModal && <TaskModal open mode={ui.modalMode} title={ui.selectedTask?.title ?? "Nova tarefa"} initialData={ui.selectedTask} defaultProjectId={projectId} onClose={ui.handleCloseModal} onModeChange={ui.handleSetModalMode} onSubTaskComplete={data.handleSubTaskComplete} onSubmit={(payload) => { if (data.handleSubmitTask(payload)) ui.handleCloseModal(); }} />}
+      {ui.openModal && <TaskModal open mode={ui.modalMode} title={ui.selectedTask?.title ?? "Nova tarefa"} initialData={ui.selectedTask} defaultProjectId={projectId} onClose={ui.handleCloseModal} onModeChange={ui.handleSetModalMode} onSubTaskComplete={data.handleSubTaskComplete} onSubmit={async (payload) => { if (await data.handleSubmitTask(payload)) ui.handleCloseModal(); }} />}
       {ui.openConfirmDeletedModal && <ConfirmationModal open title={`Excluir a tarefa ${ui.selectedTask?.title}?`} message="A tarefa, suas subtarefas e sessões de foco serão removidas." onCancel={ui.handleCloseConfirmDeletedModal} onConfirm={() => { if (ui.selectedTask) data.handleDeleteTask(ui.selectedTask.id); }} />}
     </Box>
   );
