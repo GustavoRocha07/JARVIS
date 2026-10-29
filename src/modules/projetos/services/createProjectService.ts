@@ -2,16 +2,20 @@ import type { CreateProjectInput, Project, ProjectId, UpdateProjectInput } from 
 import type { ProjectRepository } from "../repositories/ProjectRepository";
 
 export const createProjectService = (repository: ProjectRepository) => ({
-    getAll(): Project[] {
+    getAll(): Promise<Project[]> {
         return repository.getAll();
     },
 
-    getById(id: ProjectId): Project | null {
+    getById(id: ProjectId): Promise<Project | null> {
         return repository.getById(id);
     },
 
     create(input: CreateProjectInput): Project {
         const now = new Date().toISOString();
+
+        if (!input.name.trim()) {
+            throw new Error('Nome do Projeto Obrigatório!');
+        }
 
         const project: Project = {
             id: crypto.randomUUID(),
@@ -27,21 +31,25 @@ export const createProjectService = (repository: ProjectRepository) => ({
         return project;
     },
 
-    update(
+    async update(
         id: ProjectId,
         input: UpdateProjectInput,
-    ): Project {
-        const existing = repository.getById(id);
+    ): Promise<Project> {
+        const existing = await repository.getById(id);
 
         if (!existing) {
             throw new Error('Projeto não encontrado.');
         }
 
+        const name = input.name?.trim();
+
+        if (name !== undefined && !name) {
+            throw new Error("Nome do projeto obrigatório!");
+        }
+
         const updated: Project = {
             ...existing,
-            ...(input.name !== undefined && {
-                name: input.name.trim(),
-            }),
+            ...(name !== undefined && { name }),
             ...(input.description !== undefined && {
                 description: input.description.trim(),
             }),
@@ -53,8 +61,8 @@ export const createProjectService = (repository: ProjectRepository) => ({
         return updated;
     },
 
-    archive(id: ProjectId): Project {
-        const existing = repository.getById(id);
+    async archive(id: ProjectId): Promise<Project> {
+        const existing = await repository.getById(id);
 
         if (!existing) {
             throw new Error('Projeto não encontrado.');
@@ -77,8 +85,8 @@ export const createProjectService = (repository: ProjectRepository) => ({
         return archived;
     },
 
-    restore(id: ProjectId): Project {
-        const existing = repository.getById(id);
+    async restore(id: ProjectId): Promise<Project> {
+        const existing = await repository.getById(id);
 
         if (!existing) {
             throw new Error('Projeto não encontrado.');
