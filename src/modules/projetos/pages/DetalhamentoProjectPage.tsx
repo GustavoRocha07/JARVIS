@@ -3,24 +3,54 @@ import { Container } from "@/shared/components/Container/Container"
 
 import { useParams } from "react-router-dom";
 import { useDetalhamentoProject } from "../hooks/useDetalhamentoProject";
-import { Box, LinearProgress, Typography } from "@mui/material";
+import { Box, Chip, LinearProgress, Typography, } from "@mui/material";
 import { Folder } from "@mui/icons-material";
 import { ButtonComponent } from "@/shared/components/ButtonComponent";
 import EditIcon from '@mui/icons-material/Edit';
-import { ActionsMenu } from "@/shared/components/ActionsMenu/ActionsMenu";
 import { TaskProjectComponent } from "../components/TaskProjectComponent";
 
 
 import { TasksProvider } from "@/modules/tasks/contexts/TasksProvider";
 
+import { getColorDeadLine, getStatusColor } from "../utils/statusColor";
+import { ProjectModal } from "../components/ProjectModal";
+
+import { calculateProjectDeadline } from "../utils/calculateDeadLine";
+import { useMemo } from "react";
+
+
 const DetalhamentoProjectContent = () => {
 
     const { projectId } = useParams<{ projectId: string }>();
 
-    const { state } = useDetalhamentoProject({ projectId: projectId ?? '' })
+    const { state, actions } = useDetalhamentoProject({ projectId: projectId ?? '' })
 
     const project = state.project
 
+    const getProjectStatus = () => {
+        if (!project) return "";
+
+        if (project.archivedAt) return "Arquivado";
+
+        if (project.tasks.length === 0) return "Sem tarefa";
+
+        if (project.progress.completed === project.progress.total) {
+            return "Completo";
+        }
+
+        if (project.tasks.some((t) => t.status === "IN_PROGRESS")) {
+            return "Em Andamento";
+        }
+
+        return "Pendente";
+    };
+
+    const statusProject = getProjectStatus();
+
+    const prazoRestante = useMemo(
+        () => calculateProjectDeadline(project?.dueDate),
+        [project?.dueDate]
+    );
     return (
         <Container>
             <BreadcrumbComponent
@@ -76,6 +106,35 @@ const DetalhamentoProjectContent = () => {
 
                 </Box>
                 <Box sx={{
+                    minWidth: '30%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-evenly'
+                }}>
+
+                    <Chip
+                        label={prazoRestante === null
+                            ? "Sem prazo definido"
+                            : prazoRestante < 0
+                                ? `Atrasado há ${Math.abs(prazoRestante)} dias`
+                                : prazoRestante === 0
+                                    ? "Vence hoje"
+                                    : `Faltam ${prazoRestante} dias`}
+                        color={getColorDeadLine(prazoRestante)}
+                        variant="outlined"
+                    />
+
+                    <Chip
+                        label={statusProject}
+                        color={getStatusColor(statusProject)}
+                        size="small"
+                        sx={{
+                            padding: 2
+                        }}
+                    />
+                    { }
+                </Box>
+                <Box sx={{
                     display: 'flex',
                     alignItems: 'center'
                 }}>
@@ -86,29 +145,10 @@ const DetalhamentoProjectContent = () => {
                         })}
                         variant="outlined"
                         text="Editar Projeto"
-
+                        onClick={() => actions.handleOpenEditModal()}
                         startIcon={<EditIcon />}
                     />
-                    <Box sx={(theme) => ({
-                        border: `1px solid ${theme.palette.text.primary}`,
-                        color: theme.palette.text.primary,
-                        width: 50,
-                        height: 50,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                        , ml: 4,
-                        borderRadius: 1
-                    })}>
-                        <ActionsMenu actions={[
-                            {
-                                label: 'Editar Projeto',
-                                icon: <EditIcon />,
-                                onClick: () => console.log("ola")
-                            }
-                        ]} />
 
-                    </Box>
                 </Box>
 
 
@@ -188,7 +228,13 @@ const DetalhamentoProjectContent = () => {
 
             {project && <TaskProjectComponent key={project.id} projectId={project.id} />}
 
-
+            <ProjectModal
+                open={state.openModal}
+                mode={'edit'}
+                project={state.project}
+                onClose={actions.handleCloseModal}
+                onSubmit={actions.handleSubmit}
+            />
         </Container>
     )
 }

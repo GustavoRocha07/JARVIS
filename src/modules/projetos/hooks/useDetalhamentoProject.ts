@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { Project } from "../types/projects.types";
+import type { Project, ProjectFormValues } from "../types/projects.types";
 import { projectService } from "../services/project.service";
 import { calculateProgress } from "../utils/calculateProjectProgress";
 
 import { useAlert } from "@/context/AlertContext/useAlert";
 import { useTasksData } from "@/modules/tasks/contexts/useTasksData";
+import { useProjectData } from "./useProjectsData";
 
 type UseDetalhamentoProjectsProps = {
     projectId: string;
@@ -19,6 +20,8 @@ export const useDetalhamentoProject = ({
         project: Project | null;
     } | null>(null);
 
+    const { updateProject } = useProjectData()
+    const [openModal, setOpenModal] = useState(false);
     const { showAlert } = useAlert();
     const { tasks } = useTasksData();
 
@@ -81,6 +84,7 @@ export const useDetalhamentoProject = ({
 
         return {
             ...project,
+            tasks: tasks,
             progress: calculateProgress(
                 projectTasks.length,
                 completedTasks.length,
@@ -88,11 +92,56 @@ export const useDetalhamentoProject = ({
         };
     }, [project, tasks]);
 
+    const handleOpenEditModal = useCallback(() => {
+
+        setOpenModal(true);
+    }, []);
+
+
+    const handleSubmit = useCallback(
+        async (values: ProjectFormValues) => {
+            try {
+                const updated = await updateProject(projectId, values);
+
+                if (!updated) {
+                    throw new Error("Não foi possível atualizar o projeto!");
+                }
+
+                setResultado({
+                    projectId,
+                    project: updated,
+                });
+
+                setOpenModal(false);
+                showAlert("success", "Projeto atualizado com sucesso!");
+
+                return updated;
+            } catch (error) {
+                const message =
+                    error instanceof Error
+                        ? error.message
+                        : "Não foi possível concluir a operação!";
+
+                showAlert("error", message);
+            }
+        },
+        [projectId, showAlert, updateProject]
+    );
+
+
     return {
         state: {
             project: projectWithProgress,
-            tasks
+            tasks,
+            openModal
         },
+        actions: {
+            handleOpenEditModal,
+            handleCloseModal: () => {
+                setOpenModal(false)
+            },
+            handleSubmit
+        }
 
     };
 };

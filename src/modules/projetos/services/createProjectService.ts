@@ -27,6 +27,7 @@ export const createProjectService = (repository: ProjectRepository, listProjectT
             id: crypto.randomUUID(),
             name: input.name.trim(),
             description: input.description.trim(),
+            dueDate: input.dueDate ?? '',
             createdAt: now,
             updatedAt: now,
             archivedAt: null,
@@ -59,6 +60,7 @@ export const createProjectService = (repository: ProjectRepository, listProjectT
             ...(input.description !== undefined && {
                 description: input.description.trim(),
             }),
+            dueDate: input.dueDate ?? '',
             updatedAt: new Date().toISOString(),
         };
 
