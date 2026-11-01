@@ -5,7 +5,10 @@ import { beforeEach, test } from "node:test";
 // Node 22.18+ executa TypeScript nativo; resolve os imports sem extensão do Vite.
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) {
+    if (specifier.startsWith("@/")) {
+      return nextResolve(new URL(`../src/${specifier.slice(2)}.ts`, import.meta.url).href, context);
+    }
+    if (specifier.startsWith(".") && !/\.(?:ts|tsx|js|mjs|json)$/i.test(specifier)) {
       return nextResolve(`${specifier}.ts`, context);
     }
     return nextResolve(specifier, context);
@@ -102,4 +105,25 @@ test("dados antigos continuam legíveis e erros de armazenamento são propagados
   storage.delete(key);
   localStorage.setItem = () => { throw new Error("Quota excedida"); };
   await assert.rejects(async () => (await projectService.create({ name: "Novo", description: "" })), /Quota excedida/);
+});
+
+for (const raw of ["invalid json", "{}", "", '[{"status":"COMPLETED"}]']) {
+  test(`deve bloquear quando os dados de tarefas forem inválidos: ${raw}`, async () => {
+    const project = await projectService.create({ name: "Projeto", description: "" });
+    storage.set("tasksMap", raw);
+    const before = writes;
+    await assert.rejects(() => projectService.archive(project.id), /dados inválidos/);
+    assert.equal(writes, before);
+    assert.deepEqual(await projectService.getById(project.id), project);
+  });
+}
+
+test("deve propagar erro quando o armazenamento de tarefas estiver indisponível", async () => {
+  const project = await projectService.create({ name: "Projeto", description: "" });
+  localStorage.getItem = key => {
+    if (key === "tasksMap") throw new Error("Leitura indisponível");
+    return storage.get(key) ?? null;
+  };
+  await assert.rejects(() => projectService.archive(project.id), /Leitura indisponível/);
+  assert.deepEqual(await projectService.getById(project.id), project);
 });

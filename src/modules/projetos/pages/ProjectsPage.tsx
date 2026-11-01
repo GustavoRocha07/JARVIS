@@ -216,7 +216,7 @@ export const ProjectsPage = () => {
 
             <Dialog
                 open={state.openConfirmModal}
-                onClose={actions.handleCloseConfirmModal}
+                onClose={state.isConfirming ? undefined : actions.handleCloseConfirmModal}
                 fullWidth
                 maxWidth="xs"
             >
@@ -235,7 +235,7 @@ export const ProjectsPage = () => {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={actions.handleCloseConfirmModal}>
+                    <Button disabled={state.isConfirming} onClick={actions.handleCloseConfirmModal}>
                         Cancelar
                     </Button>
 
@@ -247,6 +247,8 @@ export const ProjectsPage = () => {
                                 : "success"
                         }
                         onClick={handleConfirm}
+                        loading={state.isConfirming}
+                        disabled={state.isConfirming}
                     >
                         Confirmar
                     </Button>

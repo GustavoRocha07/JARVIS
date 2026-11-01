@@ -4,15 +4,17 @@ import { test } from "node:test";
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (specifier.startsWith(".") && !/\.[a-z]+$/i.test(specifier)) {
+    if (specifier.startsWith(".") && !/\.(?:ts|tsx|js|mjs|json)$/i.test(specifier)) {
       return nextResolve(`${specifier}.ts`, context);
     }
     return nextResolve(specifier, context);
   },
 });
 
-const { createProjectService } = await import("../src/modules/projetos/services/createProjectService.ts");
+const { createProjectService: createService } = await import("../src/modules/projetos/services/createProjectService.ts");
 const { createMemoryProjectRepository } = await import("../src/modules/projetos/repositories/memoryProjectRepository.ts");
+
+const createProjectService = (repository, query = async () => []) => createService(repository, query);
 
 const seed = {
   id: "project-1", name: "Projeto", description: "Estudo",
@@ -137,3 +139,45 @@ for (const name of ["", "   "]) {
     assert.deepEqual(await repository.getAll(), [seed]);
   });
 }
+
+for (const status of ["PENDING", "IN_PROGRESS", "CANCELLED"]) {
+  test(`deve bloquear quando a segunda tarefa estiver ${status}`, async () => {
+    const repository = createMemoryProjectRepository([seed]);
+    let writes = 0;
+    const service = createProjectService({ ...repository, async save() { writes++; } }, async (id) => {
+      assert.equal(id, seed.id);
+      return [{ projectId: id, status: "COMPLETED" }, { projectId: id, status }];
+    });
+    await assert.rejects(() => service.archive(seed.id), /tarefas pendentes/);
+    assert.equal(writes, 0);
+    assert.deepEqual(await repository.getById(seed.id), seed);
+  });
+}
+
+test("deve arquivar quando todas as tarefas próprias estiverem concluídas", async () => {
+  const repository = createMemoryProjectRepository([seed]);
+  const service = createProjectService(repository, async () => [
+    { projectId: seed.id, status: "COMPLETED" },
+    { projectId: "outro", status: "PENDING" },
+  ]);
+  assert.ok((await service.archive(seed.id)).archivedAt);
+});
+
+test("deve preservar o projeto quando a consulta falhar", async () => {
+  const repository = createMemoryProjectRepository([seed]);
+  const service = createProjectService(repository, async () => { throw new Error("Falha na consulta"); });
+  await assert.rejects(() => service.archive(seed.id), /Falha na consulta/);
+  assert.deepEqual(await repository.getById(seed.id), seed);
+});
+
+test("deve aguardar quando a consulta de tarefas for assíncrona", async () => {
+  const repository = createMemoryProjectRepository([seed]);
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  const service = createProjectService(repository, () => gate);
+  const pending = service.archive(seed.id);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.deepEqual(await repository.getById(seed.id), seed);
+  release([{ projectId: seed.id, status: "PENDING" }]);
+  await assert.rejects(() => pending, /tarefas pendentes/);
+});

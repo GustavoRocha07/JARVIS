@@ -42,6 +42,23 @@ const getStoredTasks = (): Task[] => {
   }
 };
 
+// Consulta estrita para decisões de negócio: corrupção não equivale a lista vazia.
+export const listProjectTasksForArchive = async (projectId: string) => {
+  const rawData = localStorage.getItem(STORAGE_KEY);
+  if (rawData === null) return [];
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawData);
+  } catch {
+    throw new Error("Não foi possível consultar as tarefas: dados inválidos.");
+  }
+  if (!Array.isArray(parsed) || !parsed.every(isTaskFromStorage)) {
+    throw new Error("Não foi possível consultar as tarefas: dados inválidos.");
+  }
+  return parsed.filter((task) => task.projectId === projectId);
+};
+
 const saveTasks = (tasks: Task[]): void => {
   const tasksWithoutSubTasks = tasks.map((task) => ({
     id: task.id,
