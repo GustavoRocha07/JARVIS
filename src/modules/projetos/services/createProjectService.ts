@@ -60,7 +60,9 @@ export const createProjectService = (repository: ProjectRepository, listProjectT
             ...(input.description !== undefined && {
                 description: input.description.trim(),
             }),
-            dueDate: input.dueDate ?? '',
+            ...(input.dueDate !== undefined && {
+                dueDate: input.dueDate,
+            }),
             updatedAt: new Date().toISOString(),
         };
 

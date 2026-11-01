@@ -123,6 +123,7 @@ const ProjectForm = ({
                                     ? parseISO(values.dueDate)
                                     : null
                             }
+                            disabled={isView}
                             onChange={(date) => {
                                 setValues((previous) => ({
                                     ...previous,
