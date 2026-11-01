@@ -152,10 +152,10 @@ export const useProjectsComponent = () => {
 
             if (action === "archive") {
                 await archiveProject(project.id);
-                showAlert('success', 'Mensagem Arquivada com sucesso')
+                showAlert('success', 'Projeto Arquivado com sucesso.')
             } else {
                 await restoreProject(project.id);
-                showAlert('success', 'Mensagem Desarquivada com sucesso')
+                showAlert('success', 'Projeto Desarquivado com sucesso.')
             }
 
 
