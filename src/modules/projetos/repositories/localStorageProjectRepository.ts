@@ -1,5 +1,6 @@
 import type { ProjectRepository } from "./ProjectRepository";
 import type { Project, ProjectId } from "../types/projects.types";
+import { isProjectFromStorage } from "../guards/isProjectFromStorage";
 
 const STORAGE_KEY = 'jarvis:projects';
 
@@ -10,11 +11,14 @@ const readProjects = (): Project[] => {
 
     const parsed: unknown = JSON.parse(stored);
 
-    if (!Array.isArray(parsed)) {
-        throw new Error('Dados de projetos Inválidos!')
+    if (
+        !Array.isArray(parsed) ||
+        !parsed.every(isProjectFromStorage)
+    ) {
+        throw new Error("Dados de projetos inválidos.");
     }
 
-    return parsed as Project[];
+    return parsed;
 }
 
 const saveProjects = (projects: Project[]): void => {
