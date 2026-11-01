@@ -7,7 +7,7 @@ const STORAGE_KEY = 'jarvis:projects';
 const readProjects = (): Project[] => {
     const stored = localStorage.getItem(STORAGE_KEY);
 
-    if (!stored) return [];
+    if (stored === null) return [];
 
     const parsed: unknown = JSON.parse(stored);
 
