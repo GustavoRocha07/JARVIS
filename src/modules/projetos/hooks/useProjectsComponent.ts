@@ -13,8 +13,12 @@ import type {
     UpdateProjectInput,
 } from "../types/projects.types";
 import { useProjectTasks } from "./useProjectTasks";
+import { useAlert } from "@/context/AlertContext/useAlert";
 
 export const useProjectsComponent = () => {
+
+    const { showAlert } = useAlert()
+
     // Dados dos projetos
     const {
         projects,
@@ -140,19 +144,30 @@ export const useProjectsComponent = () => {
 
     // Confirmar arquivamento ou restauração
     const handleConfirmAction = useCallback(async () => {
-        const project = uiState.projectToConfirm;
-        const action = uiState.confirmAction;
+        try {
+            const project = uiState.projectToConfirm;
+            const action = uiState.confirmAction;
 
-        if (!project || !action) return;
+            if (!project || !action) return;
 
-        if (action === "archive") {
-            await archiveProject(project.id);
-        } else {
-            await restoreProject(project.id);
+            if (action === "archive") {
+                await archiveProject(project.id);
+            } else {
+                await restoreProject(project.id);
+            }
+
+
+        } catch (error: unknown) {
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Não foi possível concluir a operação!";
+
+            showAlert("error", message);
+        } finally {
+            uiActions.handleCloseConfirmModal();
         }
-
-        uiActions.handleCloseConfirmModal();
-    }, [uiState.projectToConfirm, uiState.confirmAction, uiActions, archiveProject, restoreProject]);
+    }, [uiState.projectToConfirm, uiState.confirmAction, archiveProject, restoreProject, showAlert, uiActions]);
 
     return {
         state: {

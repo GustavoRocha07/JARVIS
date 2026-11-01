@@ -1,5 +1,6 @@
 import type { CreateProjectInput, Project, ProjectId, UpdateProjectInput } from "../types/projects.types";
 import type { ProjectRepository } from "../repositories/ProjectRepository";
+import { handleListTaskService } from "@/modules/tasks/services/tasks.service";
 
 export const createProjectService = (repository: ProjectRepository) => ({
     getAll(): Promise<Project[]> {
@@ -72,6 +73,16 @@ export const createProjectService = (repository: ProjectRepository) => ({
             return existing;
         }
 
+        const tasks = handleListTaskService();
+
+        
+        const hasTasks = tasks.find((t) => t.projectId === existing.id);
+
+        if (hasTasks && hasTasks?.status !== 'COMPLETED') {
+            throw new Error('Projeto não pode ser arquivado, pois existe tarefas incompletas!');
+        }
+
+        console.log("Arquivou!")
         const now = new Date().toISOString();
 
         const archived: Project = {

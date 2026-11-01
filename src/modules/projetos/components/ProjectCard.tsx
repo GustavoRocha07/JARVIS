@@ -85,7 +85,9 @@ export const ProjectCard = ({
                             {
                                 label: project.archivedAt ? 'Desarquivar Projeto' : 'Arquivar Projeto',
                                 onClick: () => project.archivedAt ? onRestore(project) : onArchive(project),
-                                icon: <Delete />
+                                icon: <Delete />,
+                                // disabled: !project.archivedAt,
+                                
                             },
                         ]}
                     />
