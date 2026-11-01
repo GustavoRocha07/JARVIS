@@ -5,6 +5,7 @@ import type {
   UpdateTask,
 } from "../types/tasks.type";
 import { isTaskFromStorage } from "../types/tasks.type";
+import { shouldDeleteExpiredTask } from "../rules/shouldDeleteExpiredTask";
 
 import {
   handleDeleteSubTasksByTaskIdService,
@@ -170,4 +171,22 @@ export const handleUpdateTaskService = (
     ...updatedTask,
     subTasks: handleListSubTasksService(taskId),
   };
+};
+
+/**
+ * Remove tarefas concluídas cujo vencimento ocorreu há mais de um mês.
+ * Reutiliza a exclusão existente para limpar subtarefas e sessões.
+ * O predicado opcional permite proteger tarefas com timer ativo.
+ */
+export const handleCleanupExpiredCompletedTasksService = (
+  canDelete: (task: Task) => boolean = () => true,
+  now: Date = new Date(),
+): number => {
+  const expiredTasks = getStoredTasks().filter(
+    (task) => shouldDeleteExpiredTask(task, now) && canDelete(task),
+  );
+
+  expiredTasks.forEach((task) => handleDeleteTaskService(task.id));
+
+  return expiredTasks.length;
 };
