@@ -116,7 +116,7 @@ const ProjectForm = ({
                             fullWidth
                         />
                         <DatePicker
-                            label="Data de Criação"
+                            label="Prazo do projeto"
                             format="dd/MM/yyyy"
                             value={
                                 values.dueDate

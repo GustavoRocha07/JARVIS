@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import type { Project, ProjectFormValues } from "../types/projects.types";
+import type { Project, ProjectDetails, ProjectFormValues } from "../types/projects.types";
 import { projectService } from "../services/project.service";
 import { calculateProgress } from "../utils/calculateProjectProgress";
 
@@ -71,7 +71,7 @@ export const useDetalhamentoProject = ({
             ? resultado.project
             : null;
 
-    const projectWithProgress = useMemo(() => {
+    const projectWithProgress = useMemo<ProjectDetails | null>(() => {
         if (!project) return null;
 
         const projectTasks = tasks.filter(
