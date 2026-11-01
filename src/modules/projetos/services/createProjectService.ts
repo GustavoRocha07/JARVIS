@@ -75,14 +75,18 @@ export const createProjectService = (repository: ProjectRepository) => ({
 
         const tasks = handleListTaskService();
 
-        
-        const hasTasks = tasks.find((t) => t.projectId === existing.id);
 
-        if (hasTasks && hasTasks?.status !== 'COMPLETED') {
-            throw new Error('Projeto não pode ser arquivado, pois existe tarefas incompletas!');
+        const hasPendingTasks = tasks.some(
+            (task) =>
+                task.projectId === existing.id &&
+                task.status !== "COMPLETED",
+        );
+
+        if (hasPendingTasks) {
+            throw new Error(
+                "Não é possível arquivar este projeto enquanto houver tarefas pendentes.",
+            );
         }
-
-        console.log("Arquivou!")
         const now = new Date().toISOString();
 
         const archived: Project = {

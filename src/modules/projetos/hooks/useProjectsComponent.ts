@@ -152,8 +152,10 @@ export const useProjectsComponent = () => {
 
             if (action === "archive") {
                 await archiveProject(project.id);
+                showAlert('success', 'Mensagem Arquivada com sucesso')
             } else {
                 await restoreProject(project.id);
+                showAlert('success', 'Mensagem Desarquivada com sucesso')
             }
 
 
@@ -172,7 +174,6 @@ export const useProjectsComponent = () => {
     return {
         state: {
             ...uiState,
-
             projects: filteredProjects,
             allProjects: projectsWithProgress,
             projectCounts,
