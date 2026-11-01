@@ -1,5 +1,5 @@
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 
 import { useProjectData } from "./useProjectsData";
@@ -17,7 +17,9 @@ import { useAlert } from "@/context/AlertContext/useAlert";
 
 export const useProjectsComponent = () => {
 
-    const { showAlert } = useAlert()
+    const { showAlert } = useAlert();
+    const [isConfirming, setIsConfirming] = useState(false);
+    const confirmingRef = useRef(false);
 
     // Dados dos projetos
     const {
@@ -144,6 +146,9 @@ export const useProjectsComponent = () => {
 
     // Confirmar arquivamento ou restauração
     const handleConfirmAction = useCallback(async () => {
+        if (confirmingRef.current) return;
+        confirmingRef.current = true;
+        setIsConfirming(true);
         try {
             const project = uiState.projectToConfirm;
             const action = uiState.confirmAction;
@@ -152,13 +157,13 @@ export const useProjectsComponent = () => {
 
             if (action === "archive") {
                 await archiveProject(project.id);
-                showAlert('success', 'Projeto Arquivado com sucesso.')
+                showAlert('success', 'Projeto arquivado com sucesso.');
             } else {
                 await restoreProject(project.id);
-                showAlert('success', 'Projeto Desarquivado com sucesso.')
+                showAlert('success', 'Projeto restaurado com sucesso.');
             }
 
-
+            uiActions.handleCloseConfirmModal();
         } catch (error: unknown) {
             const message =
                 error instanceof Error
@@ -167,13 +172,15 @@ export const useProjectsComponent = () => {
 
             showAlert("error", message);
         } finally {
-            uiActions.handleCloseConfirmModal();
+            confirmingRef.current = false;
+            setIsConfirming(false);
         }
     }, [uiState.projectToConfirm, uiState.confirmAction, archiveProject, restoreProject, showAlert, uiActions]);
 
     return {
         state: {
             ...uiState,
+            isConfirming,
             projects: filteredProjects,
             allProjects: projectsWithProgress,
             projectCounts,

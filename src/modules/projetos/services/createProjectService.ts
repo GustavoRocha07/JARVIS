@@ -1,8 +1,13 @@
 import type { CreateProjectInput, Project, ProjectId, UpdateProjectInput } from "../types/projects.types";
 import type { ProjectRepository } from "../repositories/ProjectRepository";
-import { handleListTaskService } from "@/modules/tasks/services/tasks.service";
+import type { TaskStatus } from "@/shared/types/task-domain.type";
 
-export const createProjectService = (repository: ProjectRepository) => ({
+export type ProjectTaskQuery = (projectId: ProjectId) => Promise<readonly {
+    projectId?: ProjectId | null;
+    status: TaskStatus;
+}[]>;
+
+export const createProjectService = (repository: ProjectRepository, listProjectTasks: ProjectTaskQuery) => ({
     getAll(): Promise<Project[]> {
         return repository.getAll();
     },
@@ -73,7 +78,7 @@ export const createProjectService = (repository: ProjectRepository) => ({
             return existing;
         }
 
-        const tasks = handleListTaskService();
+        const tasks = await listProjectTasks(existing.id);
 
 
         const hasPendingTasks = tasks.some(
