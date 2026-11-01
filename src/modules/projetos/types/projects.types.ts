@@ -7,7 +7,6 @@ export type Project = {
     name: string;
     description: string;
     dueDate?: string;
-    tasks?: Task[]
     createdAt: string;
     updatedAt: string;
     archivedAt: string | null;
@@ -17,6 +16,11 @@ export type ProjectFormValues = {
     name: string;
     description: string;
     dueDate?: string;
+};
+
+export type ProjectDetails = Project & {
+    tasks: Task[];
+    progress: ProjectProgress;
 };
 
 export type ProjectProgress = {

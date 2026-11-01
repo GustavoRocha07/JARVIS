@@ -84,7 +84,7 @@ export const useDetalhamentoProject = ({
 
         return {
             ...project,
-            tasks: tasks,
+            tasks: projectTasks,
             progress: calculateProgress(
                 projectTasks.length,
                 completedTasks.length,

@@ -234,7 +234,7 @@ export const TaskModal = ({
                 >
                   {!isCreate && initialData?.createdAt && (
                     <DatePicker
-                      label="Data de Criação"
+                      label="Prazo do projeto"
                       format="dd/MM/yyyy"
                       value={initialData.createdAt}
                       disabled
