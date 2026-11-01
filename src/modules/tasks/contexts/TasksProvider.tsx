@@ -1,6 +1,7 @@
 import {
   type PropsWithChildren,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
@@ -19,6 +20,7 @@ import type {
 import type { SubTask } from "@/modules/subtasks/types/subtask.type";
 
 import {
+  handleCleanupExpiredCompletedTasksService,
   handleCreateTaskService,
   handleDeleteTaskService,
   handleListTaskService,
@@ -58,6 +60,27 @@ export const TasksProvider = ({ children }: PropsWithChildren) => {
     },
     [filters],
   );
+
+  useEffect(() => {
+    const cleanup = () => {
+      try {
+        const removed = handleCleanupExpiredCompletedTasksService(
+          (task) => !isTaskLockedByTimer(timer, task.id),
+        );
+        if (removed > 0) {
+          refreshTasks();
+          refreshTimerSessions();
+        }
+      } catch (error) {
+        console.error("Erro ao limpar tarefas concluídas e vencidas:", error);
+      }
+    };
+
+    cleanup();
+    // Revalida tarefas antigas se o JARVIS permanecer aberto.
+    const interval = window.setInterval(cleanup, 60 * 60 * 1000);
+    return () => window.clearInterval(interval);
+  }, [refreshTasks, refreshTimerSessions, timer]);
 
   const handleError = useCallback(
     (error: unknown) => {
