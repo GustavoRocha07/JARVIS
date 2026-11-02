@@ -32,7 +32,12 @@ export const useProjectsComponent = () => {
         refreshProjects,
     } = useProjectData();
 
-    const { projects } = useProjectQuery()
+    const {
+        projects,
+        isPending,
+        isError,
+        error,
+    } = useProjectQuery();
     // Fonte única de tarefas
     const { tasks, refreshTasks } = useProjectTasks();
 
@@ -187,8 +192,13 @@ export const useProjectsComponent = () => {
             allProjects: projectsWithProgress,
             projectCounts,
 
-            hasProjects: filteredProjects,
+            hasProjects: (filteredProjects?.length ?? 0) > 0,
+
+            isPending,
+            isError,
+            error,
         },
+
 
         actions: {
             ...uiActions,

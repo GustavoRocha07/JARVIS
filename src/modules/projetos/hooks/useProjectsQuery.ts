@@ -1,17 +1,21 @@
-import { useQuery } from "@tanstack/react-query"
-import { projectService } from "../services/project.service"
-
+import { useQuery } from "@tanstack/react-query";
+import { projectService } from "../services/project.service";
 
 export const useProjectQuery = () => {
-
-
-    const { data } = useQuery({
+    const {
+        data,
+        isPending,
+        isError,
+        error,
+    } = useQuery({
         queryKey: ["projects"],
-        queryFn: projectService.getAll,
+        queryFn: () => projectService.getAll(),
     });
 
-    
     return {
-        projects: data
-    }
-}
+        projects: data ?? [],
+        isPending,
+        isError,
+        error,
+    };
+};

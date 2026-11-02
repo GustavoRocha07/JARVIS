@@ -5,6 +5,7 @@ import {
     Alert,
     Box,
     Button,
+    CircularProgress,
     Dialog,
     DialogActions,
     DialogContent,
@@ -18,18 +19,19 @@ import {
     Typography,
 } from "@mui/material";
 
-import { HeaderComponent } from "@/shared/components/HeaderComponent";
+import { AddOutlined, Search } from "@mui/icons-material";
 
+import { HeaderComponent } from "@/shared/components/HeaderComponent";
 import { useProjectsComponent } from "../hooks/useProjectsComponent";
 import { ProjectCard } from "../components/ProjectCard";
 import { ProjectModal } from "../components/ProjectModal";
 
 import type { ProjectFormValues } from "../types/projects.types";
 import type { ProjectTab } from "../hooks/useProjectsUI";
-import { AddOutlined, Search } from "@mui/icons-material";
 
 export const ProjectsPage = () => {
     const { state, actions } = useProjectsComponent();
+
     const [error, setError] = useState<string | null>(null);
 
     const handleSubmit = async (values: ProjectFormValues) => {
@@ -41,17 +43,18 @@ export const ProjectsPage = () => {
                 return;
             }
 
-            if (
-                state.modalMode === "edit" &&
-                state.selectedProject
-            ) {
+            if (state.modalMode === "edit" && state.selectedProject) {
                 await actions.handleUpdateProject(
                     state.selectedProject.id,
-                    values,
+                    values
                 );
             }
-        } catch {
-            setError("Não foi possível salvar o projeto.");
+        } catch (error: unknown) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Não foi possível salvar o projeto."
+            );
         }
     };
 
@@ -60,9 +63,82 @@ export const ProjectsPage = () => {
 
         try {
             await actions.handleConfirmAction();
-        } catch {
-            setError("Não foi possível concluir a operação.");
+        } catch (error: unknown) {
+            setError(
+                error instanceof Error
+                    ? error.message
+                    : "Não foi possível concluir a operação."
+            );
         }
+    };
+
+    const renderProjects = () => {
+        if (state.isPending) {
+            return (
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        py: 8,
+                    }}
+                >
+                    <CircularProgress />
+                </Box>
+            );
+        }
+
+        if (state.isError) {
+            return (
+                <Alert severity="error">
+                    {state.error?.message ?? "Erro ao carregar projetos."}
+                </Alert>
+            );
+        }
+
+        if (!state.hasProjects) {
+            return (
+                <Box
+                    sx={{
+                        textAlign: "center",
+                        py: 8,
+                    }}
+                >
+                    <Typography variant="h6" color="text.secondary">
+                        Nenhum projeto encontrado
+                    </Typography>
+
+                    <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mt: 1 }}
+                    >
+                        {state.searchTerm
+                            ? "Tente alterar sua busca."
+                            : "Você ainda não possui projetos nesta aba."}
+                    </Typography>
+                </Box>
+            );
+        }
+
+        return (
+            <Grid container spacing={3}>
+                {state.projects?.map((project) => (
+                    <Grid
+                        key={project.id}
+                        size={{ xs: 12, md: 6, lg: 4 }}
+                    >
+                        <ProjectCard
+                            project={project}
+                            onEdit={actions.handleOpenEditModal}
+                            onView={actions.handleOpenViewModal}
+                            onArchive={actions.handleOpenArchiveConfirm}
+                            onRestore={actions.handleOpenRestoreConfirm}
+                        />
+                    </Grid>
+                ))}
+            </Grid>
+        );
     };
 
     return (
@@ -77,9 +153,7 @@ export const ProjectsPage = () => {
                 buttonText="Novo Projeto"
             />
 
-            <Stack spacing={3} sx={{
-                mt: 3
-            }}>
+            <Stack spacing={3} sx={{ mt: 3 }}>
                 {error && (
                     <Alert
                         severity="error"
@@ -94,18 +168,20 @@ export const ProjectsPage = () => {
                         display: "flex",
                         gap: 2,
                         flexWrap: "wrap",
-                        alignContent: 'center'
+                        alignItems: "center",
                     }}
                 >
                     <TextField
-
                         placeholder="Buscar projetos..."
                         size="small"
                         value={state.searchTerm}
                         onChange={(event) =>
                             actions.handleSearchChange(event.target.value)
                         }
-                        sx={{ maxWidth: '50%', flexGrow: 1 }}
+                        sx={{
+                            maxWidth: "50%",
+                            flexGrow: 1,
+                        }}
                         slotProps={{
                             input: {
                                 startAdornment: (
@@ -122,32 +198,29 @@ export const ProjectsPage = () => {
                         onChange={(_, value: ProjectTab) =>
                             actions.handleTabChange(value)
                         }
-
                         sx={(theme) => ({
                             minHeight: 36,
-
-                            padding: '3px',
-                            borderRadius: '8px',
+                            padding: "3px",
+                            borderRadius: "8px",
                             border: `1px solid ${theme.palette.divider}`,
                             backgroundColor: theme.palette.background.paper,
 
-                            '& .MuiTab-root': {
+                            "& .MuiTab-root": {
                                 minHeight: 40,
                                 minWidth: 100,
-                                padding: '6px 16px',
-                                borderRadius: '6px',
-                                textTransform: 'none',
-                                fontSize: '12px',
+                                padding: "6px 16px",
+                                borderRadius: "6px",
+                                textTransform: "none",
+                                fontSize: "12px",
                                 color: theme.palette.text.secondary,
-                                transition: 'all 0.2s ease',
+                                transition: "all 0.2s ease",
 
-                                '&.Mui-selected': {
+                                "&.Mui-selected": {
                                     backgroundColor: theme.palette.primary.main,
                                     color: theme.palette.primary.contrastText,
-
                                 },
 
-                                '&:hover:not(.Mui-selected)': {
+                                "&:hover:not(.Mui-selected)": {
                                     backgroundColor: theme.palette.action.hover,
                                 },
                             },
@@ -155,55 +228,17 @@ export const ProjectsPage = () => {
                     >
                         <Tab
                             value="active"
-                            label={`Ativos (${state.projectCounts.active})`}
+                            label={`Ativos (${state.projectCounts.active ?? 0})`}
                         />
 
                         <Tab
                             value="archived"
-                            label={`Arquivados (${state.projectCounts.archived})`}
+                            label={`Arquivados (${state.projectCounts.archived ?? 0})`}
                         />
                     </Tabs>
-
                 </Box>
 
-                {state.hasProjects ? (
-                    <Grid container spacing={3}>
-                        {state.projects?.map((project) => (
-                            <Grid key={project.id} size={{ xs: 12, md: 6, lg: 4 }}>
-                                <ProjectCard
-                                    project={project}
-                                    onEdit={actions.handleOpenEditModal}
-                                    onView={actions.handleOpenViewModal}
-                                    onArchive={actions.handleOpenArchiveConfirm}
-                                    onRestore={actions.handleOpenRestoreConfirm}
-                                />
-                            </Grid>
-                        ))}
-                    </Grid>
-                ) : (
-                    <Box sx={{
-                        textAlign: "center", py: 8
-                    }}>
-                        <Typography
-                            variant="h6"
-                            color="text.secondary"
-                        >
-                            Nenhum projeto encontrado
-                        </Typography>
-
-                        <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{
-                                mt: 1
-                            }}
-                        >
-                            {state.searchTerm
-                                ? "Tente alterar sua busca."
-                                : "Você ainda não possui projetos nesta aba."}
-                        </Typography>
-                    </Box>
-                )}
+                {renderProjects()}
             </Stack>
 
             <ProjectModal
@@ -216,7 +251,11 @@ export const ProjectsPage = () => {
 
             <Dialog
                 open={state.openConfirmModal}
-                onClose={state.isConfirming ? undefined : actions.handleCloseConfirmModal}
+                onClose={
+                    state.isConfirming
+                        ? undefined
+                        : actions.handleCloseConfirmModal
+                }
                 fullWidth
                 maxWidth="xs"
             >
@@ -235,7 +274,10 @@ export const ProjectsPage = () => {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button disabled={state.isConfirming} onClick={actions.handleCloseConfirmModal}>
+                    <Button
+                        disabled={state.isConfirming}
+                        onClick={actions.handleCloseConfirmModal}
+                    >
                         Cancelar
                     </Button>
 

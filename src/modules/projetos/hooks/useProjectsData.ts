@@ -1,52 +1,81 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import type { CreateProjectInput, Project, ProjectId, UpdateProjectInput } from "../types/projects.types";
+
+import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+
+import type {
+    CreateProjectInput,
+    Project,
+    ProjectId,
+    UpdateProjectInput,
+} from "../types/projects.types";
+
 import { projectService } from "../services/project.service";
-import { useAlert } from "@/context/AlertContext/useAlert";
+import { useProjectQuery } from "./useProjectsQuery";
 
 export const useProjectData = () => {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const requestId = useRef(0);
-    const { showAlert } = useAlert();
+    const queryClient = useQueryClient();
+
+    const { projects } = useProjectQuery();
 
     const refreshProjects = useCallback(async (): Promise<void> => {
-        const current = ++requestId.current;
-        const projects = await projectService.getAll();
-        if (current === requestId.current) setProjects(projects);
-    }, []);
-
-    const invalidateRequests = useCallback(() => { requestId.current++; }, []);
-
-    useEffect(() => {
-        let active = true;
-        refreshProjects().catch((error: unknown) => {
-            if (active) showAlert("error", error instanceof Error ? error.message : "Erro ao carregar projetos.");
+        await queryClient.invalidateQueries({
+            queryKey: ["projects"],
         });
-        return () => { active = false; invalidateRequests(); };
-    }, [refreshProjects, showAlert, invalidateRequests]);
+    }, [queryClient]);
 
-    const createProject = useCallback(async (input: CreateProjectInput): Promise<Project> => {
-        const created = await projectService.create(input);
-        await refreshProjects();
-        return created;
-    }, [refreshProjects]);
+    const createProject = useCallback(
+        async (input: CreateProjectInput): Promise<Project> => {
+            const created = await projectService.create(input);
 
-    const updateProject = useCallback(async (id: ProjectId, input: UpdateProjectInput): Promise<Project> => {
-        const updated = await projectService.update(id, input);
-        await refreshProjects();
-        return updated;
-    }, [refreshProjects]);
+            await refreshProjects();
 
-    const archiveProject = useCallback(async (id: ProjectId): Promise<Project> => {
-        const archived = await projectService.archive(id);
-        await refreshProjects();
-        return archived;
-    }, [refreshProjects]);
+            return created;
+        },
+        [refreshProjects]
+    );
 
-    const restoreProject = useCallback(async (id: ProjectId): Promise<Project> => {
-        const restored = await projectService.restore(id);
-        await refreshProjects();
-        return restored;
-    }, [refreshProjects]);
+    const updateProject = useCallback(
+        async (
+            id: ProjectId,
+            input: UpdateProjectInput
+        ): Promise<Project> => {
+            const updated = await projectService.update(id, input);
 
-    return { projects, refreshProjects, createProject, updateProject, archiveProject, restoreProject };
+            await refreshProjects();
+
+            return updated;
+        },
+        [refreshProjects]
+    );
+
+    const archiveProject = useCallback(
+        async (id: ProjectId): Promise<Project> => {
+            const archived = await projectService.archive(id);
+
+            await refreshProjects();
+
+            return archived;
+        },
+        [refreshProjects]
+    );
+
+    const restoreProject = useCallback(
+        async (id: ProjectId): Promise<Project> => {
+            const restored = await projectService.restore(id);
+
+            await refreshProjects();
+
+            return restored;
+        },
+        [refreshProjects]
+    );
+
+    return {
+        projects,
+        refreshProjects,
+        createProject,
+        updateProject,
+        archiveProject,
+        restoreProject,
+    };
 };
