@@ -7,16 +7,22 @@ import '@/styles/global.css';
 
 import { AppRouter } from './app/routes/AppRoutes';
 import { AppProviders } from './app/providers/AppProviders';
-
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { queryClient } from './shared/libs/queryClient';
+import { QueryClientProvider } from '@tanstack/react-query';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AppProviders>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <AppProviders>
 
           <AppRouter />
 
-      </AppProviders>
-    </BrowserRouter>
+        </AppProviders>
+        <ReactQueryDevtools />
+      </BrowserRouter>
+    </QueryClientProvider>
+
   </React.StrictMode>,
 );

@@ -10,14 +10,18 @@ import {
 } from "@/context/ThemeContext/ThemeProvider";
 import { TimerProvider } from "@/modules/timer/contexts/TimerProvider";
 
+
 type AppProvidersProps = {
   children: ReactNode;
 };
+
+
 
 export function AppProviders({
   children,
 }: AppProvidersProps) {
   return (
+
     <ThemeProvider>
       <TimerProvider>
         <AlertProvider>
@@ -25,5 +29,7 @@ export function AppProviders({
         </AlertProvider>
       </TimerProvider>
     </ThemeProvider>
+
+
   );
 }
