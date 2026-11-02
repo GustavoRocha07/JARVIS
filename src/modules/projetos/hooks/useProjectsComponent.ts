@@ -14,6 +14,7 @@ import type {
 } from "../types/projects.types";
 import { useProjectTasks } from "./useProjectTasks";
 import { useAlert } from "@/context/AlertContext/useAlert";
+import { useProjectQuery } from "./useProjectsQuery";
 
 export const useProjectsComponent = () => {
 
@@ -23,7 +24,7 @@ export const useProjectsComponent = () => {
 
     // Dados dos projetos
     const {
-        projects,
+        // projects,
         createProject,
         updateProject,
         archiveProject,
@@ -31,6 +32,7 @@ export const useProjectsComponent = () => {
         refreshProjects,
     } = useProjectData();
 
+    const { projects } = useProjectQuery()
     // Fonte única de tarefas
     const { tasks, refreshTasks } = useProjectTasks();
 
@@ -64,7 +66,7 @@ export const useProjectsComponent = () => {
             counts.set(task.projectId, current);
         });
 
-        return projects.map((project) => {
+        return projects?.map((project) => {
             const count = counts.get(project.id) ?? {
                 total: 0,
                 completed: 0,
@@ -86,7 +88,7 @@ export const useProjectsComponent = () => {
             .trim()
             .toLowerCase();
 
-        return projectsWithProgress.filter((project) => {
+        return projectsWithProgress?.filter((project) => {
             const matchesTab =
                 uiState.activeTab === "active"
                     ? project.archivedAt === null
@@ -107,11 +109,11 @@ export const useProjectsComponent = () => {
     // Indicadores para as abas
     const projectCounts = useMemo(() => {
         return {
-            active: projects.filter(
+            active: projects?.filter(
                 (project) => project.archivedAt === null,
             ).length,
 
-            archived: projects.filter(
+            archived: projects?.filter(
                 (project) => project.archivedAt !== null,
             ).length,
         };
@@ -185,7 +187,7 @@ export const useProjectsComponent = () => {
             allProjects: projectsWithProgress,
             projectCounts,
 
-            hasProjects: filteredProjects.length > 0,
+            hasProjects: filteredProjects,
         },
 
         actions: {

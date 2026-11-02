@@ -168,7 +168,7 @@ export const ProjectsPage = () => {
 
                 {state.hasProjects ? (
                     <Grid container spacing={3}>
-                        {state.projects.map((project) => (
+                        {state.projects?.map((project) => (
                             <Grid key={project.id} size={{ xs: 12, md: 6, lg: 4 }}>
                                 <ProjectCard
                                     project={project}
